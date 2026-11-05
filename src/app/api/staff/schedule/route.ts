@@ -30,11 +30,18 @@ export async function GET(req: NextRequest) {
         trainers: await Promise.all(
           b.trainers.map(async (t) => {
             const cal = calendarIdOf(t);
-            const events = cal ? await listEvents(cal, from, to) : [];
+            let connected = !!cal;
+            const events = cal
+              ? await listEvents(cal, from, to).catch((err) => {
+                  console.error(`calendar ${t.name}`, err);
+                  connected = false;
+                  return [];
+                })
+              : [];
             return {
               id: t.id,
               name: t.name,
-              connected: !!cal,
+              connected,
               events: events.map((e) => {
                 const s = kstHourMinute(e.start), en = kstHourMinute(e.end);
                 return {

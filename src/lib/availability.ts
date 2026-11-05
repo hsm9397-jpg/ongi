@@ -16,8 +16,14 @@ async function loadBusy(branch: Branch, from: Date, to: Date): Promise<Busy> {
         busy.set(t.id, [{ id: "no-cal", summary: "캘린더 미설정", start: from, end: to, allDay: true, blocks: true, fromWeb: false }]);
         return;
       }
-      const events = await listEvents(cal, from, to);
-      busy.set(t.id, events.filter((e) => e.blocks));
+      try {
+        const events = await listEvents(cal, from, to);
+        busy.set(t.id, events.filter((e) => e.blocks));
+      } catch (err) {
+        // 캘린더 공유가 아직 안 된 선생님은 예약을 받지 않는다 (다른 선생님 예약은 계속 받음)
+        console.error(`calendar ${t.name}`, err);
+        busy.set(t.id, [{ id: "no-access", summary: "캘린더 접근 불가", start: from, end: to, allDay: true, blocks: true, fromWeb: false }]);
+      }
     })
   );
   return busy;
@@ -89,7 +95,7 @@ export async function guessTrainer(branch: Branch, memberName: string, now = new
     branch.trainers.map(async (t) => {
       const cal = calendarIdOf(t);
       if (!cal) return;
-      const events = await listEvents(cal, from, to, memberName);
+      const events = await listEvents(cal, from, to, memberName).catch(() => []);
       for (const e of events) {
         if (!e.summary.replace(/\s/g, "").includes(memberName)) continue;
         const at = Math.min(e.start.getTime(), now.getTime());
