@@ -1,0 +1,27 @@
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "온기 예약 | Conditioning Studio 온기",
+  description: "온기 근막이완 컨디셔닝 전 지점 예약. 첫 방문 체험과 회원 예약을 한곳에서.",
+};
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ko">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        />
+      </head>
+      <body>
+        <div className="wrap">{children}</div>
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,101 @@
+import { BOOKING, Branch, Trainer, calendarIdOf } from "@/config/branches";
+import { CalEvent, listEvents } from "./google";
+import { addDays, kstDate, todayKst } from "./time";
+
+export type Slot = { hour: number; available: boolean };
+export type DaySlots = Record<string, Slot[]>; // 'YYYY-MM-DD' -> slots
+
+type Busy = Map<string, CalEvent[]>; // trainerId -> 막는 일정들
+
+async function loadBusy(branch: Branch, from: Date, to: Date): Promise<Busy> {
+  const busy: Busy = new Map();
+  await Promise.all(
+    branch.trainers.map(async (t) => {
+      const cal = calendarIdOf(t);
+      if (!cal) {
+        busy.set(t.id, [{ id: "no-cal", summary: "캘린더 미설정", start: from, end: to, allDay: true, blocks: true, fromWeb: false }]);
+        return;
+      }
+      const events = await listEvents(cal, from, to);
+      busy.set(t.id, events.filter((e) => e.blocks));
+    })
+  );
+  return busy;
+}
+
+const overlaps = (e: CalEvent, s: Date, en: Date) => e.start < en && e.end > s;
+
+function slotState(branch: Branch, busy: Busy, start: Date, onlyTrainer?: string) {
+  const end = new Date(start.getTime() + BOOKING.sessionMinutes * 60_000);
+  const busyTrainers = branch.trainers.filter((t) => (busy.get(t.id) ?? []).some((e) => overlaps(e, start, end)));
+  // 종일 휴무는 베드를 차지하지 않으므로 '시간 일정'이 있는 선생님 수만 베드 사용으로 센다
+  const bedsUsed = branch.trainers.filter((t) =>
+    (busy.get(t.id) ?? []).some((e) => !e.allDay && overlaps(e, start, end))
+  ).length;
+  const free = branch.trainers.filter((t) => !busyTrainers.includes(t));
+  const candidates = onlyTrainer ? free.filter((t) => t.id === onlyTrainer) : free;
+  return { available: bedsUsed < branch.beds && candidates.length > 0, candidates, end };
+}
+
+function bookableStart(date: string, hour: number, now: Date) {
+  const start = kstDate(date, hour);
+  return start.getTime() - now.getTime() >= BOOKING.minLeadHours * 3_600_000 ? start : null;
+}
+
+/** 오늘부터 daysAhead일 동안의 지점 빈자리 */
+export async function getAvailability(branch: Branch, trainerId?: string, now = new Date()): Promise<DaySlots> {
+  const first = todayKst(now);
+  const from = kstDate(first, 0);
+  const to = kstDate(addDays(first, BOOKING.daysAhead), 0);
+  const busy = await loadBusy(branch, from, to);
+  const out: DaySlots = {};
+  for (let i = 0; i < BOOKING.daysAhead; i++) {
+    const date = addDays(first, i);
+    const slots: Slot[] = [];
+    for (let h = branch.firstHour; h <= branch.lastHour; h++) {
+      const start = bookableStart(date, h, now);
+      slots.push({ hour: h, available: !!start && slotState(branch, busy, start, trainerId).available });
+    }
+    out[date] = slots;
+  }
+  return out;
+}
+
+/** 예약 직전 다시 확인하고, 배정할 선생님을 고른다 (체험은 그날 일정이 가장 적은 선생님) */
+export async function pickTrainer(
+  branch: Branch,
+  date: string,
+  hour: number,
+  trainerId?: string,
+  now = new Date()
+): Promise<{ trainer: Trainer; start: Date; end: Date } | null> {
+  if (hour < branch.firstHour || hour > branch.lastHour) return null;
+  const start = bookableStart(date, hour, now);
+  if (!start) return null;
+  const busy = await loadBusy(branch, kstDate(date, 0), kstDate(addDays(date, 1), 0));
+  const st = slotState(branch, busy, start, trainerId);
+  if (!st.available) return null;
+  const load = (t: Trainer) => (busy.get(t.id) ?? []).filter((e) => !e.allDay).length;
+  const trainer = [...st.candidates].sort((a, b) => load(a) - load(b))[0];
+  return { trainer, start, end: st.end };
+}
+
+/** 최근 90일 캘린더에서 이 회원 이름이 가장 최근에 들어간 선생님 = 담당 선생님으로 추정 */
+export async function guessTrainer(branch: Branch, memberName: string, now = new Date()): Promise<string | undefined> {
+  const from = new Date(now.getTime() - 90 * 86_400_000);
+  const to = new Date(now.getTime() + BOOKING.daysAhead * 86_400_000);
+  let best: { id: string; at: number } | undefined;
+  await Promise.all(
+    branch.trainers.map(async (t) => {
+      const cal = calendarIdOf(t);
+      if (!cal) return;
+      const events = await listEvents(cal, from, to, memberName);
+      for (const e of events) {
+        if (!e.summary.replace(/\s/g, "").includes(memberName)) continue;
+        const at = Math.min(e.start.getTime(), now.getTime());
+        if (!best || at > best.at) best = { id: t.id, at };
+      }
+    })
+  );
+  return best?.id;
+}
