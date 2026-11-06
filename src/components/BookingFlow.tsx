@@ -254,6 +254,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<Done | null>(null);
+  const [expiredPop, setExpiredPop] = useState(false);
 
   // 체험
   const [name, setName] = useState("");
@@ -335,14 +336,26 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     resetSlots();
   }
 
-  async function verify() {
+  async function verify(code = last4) {
+    if (busy || mName.trim().length < 2 || code.length !== 4) {
+      if (code.length === 4 && mName.trim().length < 2) setErr("이름을 먼저 입력해 주세요.");
+      return;
+    }
     setErr("");
     setBusy(true);
     try {
-      const r = await api<{ memberships: Membership[] }>("/api/member", {
+      const res = await fetch("/api/member", {
         method: "POST",
-        body: JSON.stringify({ name: mName, last4 }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: mName, last4: code }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (data.expired) {
+        setExpiredPop(true);
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+      const r = data as { memberships: Membership[] };
       setMemberships(r.memberships);
       if (r.memberships.length === 1) chooseMembership(r.memberships[0]);
     } catch (e) {
@@ -414,6 +427,16 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   return (
     <div className="book">
+      {expiredPop && (
+        <div className="pop-bg" role="dialog" aria-modal="true" aria-labelledby="exp-title" onClick={() => setExpiredPop(false)}>
+          <div className="pop" onClick={(e) => e.stopPropagation()}>
+            <h3 id="exp-title">회원권이 만료되었어요</h3>
+            <p>{mName.trim()} 회원님의 이용권 기간이 끝나 예약할 수 없어요. 재등록이나 문의는 카카오톡으로 바로 남겨 주세요.</p>
+            <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡으로 문의하기</a>
+            <button className="ghost" onClick={() => setExpiredPop(false)}>닫기</button>
+          </div>
+        </div>
+      )}
       <div className="kind kind3" role="tablist" aria-label="예약 종류">
         <button role="tab" aria-pressed={!manage && kind === "trial"} aria-selected={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
           <b>근막이완<br />체험 신청</b>
@@ -485,7 +508,17 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             </div>
             <div className="field">
               <label htmlFor="mp">연락처 뒷 4자리</label>
-              <input id="mp" inputMode="numeric" maxLength={4} value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, ""))} />
+              <input
+                id="mp"
+                inputMode="numeric"
+                maxLength={4}
+                value={last4}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                  setLast4(v);
+                  if (v.length === 4) verify(v);
+                }}
+              />
             </div>
           </div>
           {memberships && memberships.length > 1 && (
@@ -497,7 +530,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               ))}
             </div>
           )}
-          <button className="ghost" disabled={busy} onClick={verify}>
+          <button className="ghost" disabled={busy} onClick={() => verify()}>
             {busy ? "확인 중…" : "회원 정보 확인"}
           </button>
         </div>
