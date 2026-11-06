@@ -9,6 +9,16 @@ type Membership = { branch: string; branchName: string; trainerId?: string; trai
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+const CONTRA_ABS: [string, string][] = [
+  ["피부 결손", "열린 상처, 감염성 피부 질환, 급성 발진이 있는 부위"],
+  ["혈관 문제", "심부정맥 혈전증(DVT), 혈전 관련 문제"],
+  ["출혈성 질환", "혈우병, 중증 혈소판 감소증"],
+  ["급성 염증", "급성 염좌로 인해 심하게 붓고 열감이 있는 상태"],
+  ["골절", "골절 미유합 부위"],
+  ["림프 부종 환자", ""],
+  ["기타", "암 환자의 종양 부위 직접 적용 금지, 감각 저하 부위 주의"],
+];
+const CONTRA_REL = ["임산부 / 고령자", "하지정맥류 (심하면 절대 금기 대상)", "항응고제 복용 환자", "골다공증 (심하면 절대 금기 대상)"];
 export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
@@ -470,6 +480,24 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
       </button>
+
+      {!manage && kind === "trial" && (
+        <div className="contra">
+          <h3>근막이완 금기 대상자</h3>
+          <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요.</p>
+          <h4>절대 금기</h4>
+          <ul>
+            {CONTRA_ABS.map(([k, v]) => (
+              <li key={k}><b>{k}</b>{v ? `: ${v}` : ""}</li>
+            ))}
+          </ul>
+          <h4>상대적 금기</h4>
+          <ul>
+            {CONTRA_REL.map((v) => <li key={v}>{v}</li>)}
+          </ul>
+          <p className="contra-note">※ 정도에 따라 금기되거나 정상적·제한적 적용이 가능해요.</p>
+        </div>
+      )}
 
       {manage ? (
         <ManageBookings />

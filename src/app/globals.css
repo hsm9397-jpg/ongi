@@ -334,3 +334,12 @@ main{display:flex;flex-direction:column;gap:56px}
 .prof-body h4{margin:6px 0 6px;font-size:14px;color:var(--terra);letter-spacing:.02em}
 .prof-body ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 .prof-body li{font-size:13.5px;line-height:1.55;color:var(--fg)}
+/* 근막이완 금기 대상자 */
+.contra{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.contra h3{margin:0;font-size:16px;color:var(--brown)}
+.contra-sub{margin:0 0 4px;font-size:13px;color:var(--muted)}
+.contra h4{margin:8px 0 2px;font-size:13.5px;color:var(--terra)}
+.contra ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.contra li{font-size:13.5px;line-height:1.55}
+.contra li b{font-weight:600}
+.contra-note{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
