@@ -74,6 +74,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
     id: "sl",
     title: "온기 근막이완 선릉점",
     photo: `${IMG}/2026/11/4/2026-11-4-1793753416335.webp`,
+    more: ["/branches/sl/1.webp", "/branches/sl/2.webp", "/branches/sl/3.webp", "/branches/sl/4.webp", "/branches/sl/5.webp"],
     tags: ["선릉", "3룸", "동반 진행 가능"],
     points: ["가장 넓은 공간, 3룸 완비로 최대 3인 동시 진행", "남녀 테크니션 모두 상주"],
   },
