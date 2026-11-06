@@ -41,7 +41,6 @@ export const BRANCHES: Branch[] = [
     name: "온기 근막이완 더 프라이빗",
     short: "온기 근막이완(본점)",
     beds: 1,
-    womenOnly: true,
     open: true,
     trainers: [{ id: "bts", name: "배태성", calendarEnv: "CAL_BAETAESEONG" }],
     memberDbEnv: "NOTION_MEMBER_DB_PRIV",
@@ -53,6 +52,7 @@ export const BRANCHES: Branch[] = [
     name: "신반포스퀘어점",
     short: "신반포스퀘어",
     beds: 2,
+    womenOnly: true,
     open: true,
     trainers: [
       { id: "hsr", name: "황사라", calendarEnv: "CAL_HWANGSARA" },
