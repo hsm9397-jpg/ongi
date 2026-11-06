@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; bookable: boolean; desc: string; notice: string; address: string; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; name: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -14,7 +14,7 @@ const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(
 /** 지점 소개 + 위치(펼치기) */
 function BranchInfo({ b }: { b: PubBranch }) {
   const [open, setOpen] = useState(false);
-  const q = encodeURIComponent(b.address);
+  const q = encodeURIComponent(b.mapQuery || b.address);
   return (
     <div className="binfo">
       <p className="bdesc">{b.desc}</p>

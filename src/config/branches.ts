@@ -24,6 +24,8 @@ export type Branch = {
   notice?: string;
   /** 주소. 비워 두면 위치 보기 버튼이 숨겨집니다 */
   address?: string;
+  /** 지도 검색용 주소 (층·호수 제외한 도로명) */
+  mapQuery?: string;
   trainers: Trainer[];
   /** 노션 회원 DB ID를 담은 환경변수 이름 (쉼표로 여러 개 가능) */
   memberDbEnv: string;
@@ -38,7 +40,8 @@ export const BRANCHES: Branch[] = [
     desc: "본점으로 대표가 진행하며 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
     notice: "현재는 예약 불가합니다.",
     bookable: false,
-    address: "",
+    address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
+    mapQuery: "서울 서초구 신반포로33길 62",
     name: "온기 PT&근막이완",
     short: "온기PT&근막이완(본점)",
     beds: 1,
@@ -51,7 +54,8 @@ export const BRANCHES: Branch[] = [
   {
     id: "priv",
     desc: "오로지 1인을 위한 프라이빗룸으로 가장 아늑한 지점입니다.",
-    address: "",
+    address: "서울시 서초구 신반포로33길 62 한신로얄상가 지하 1층",
+    mapQuery: "서울 서초구 신반포로33길 62",
     name: "온기 근막이완 더 프라이빗",
     short: "온기 근막이완(본점)",
     beds: 1,
@@ -64,7 +68,8 @@ export const BRANCHES: Branch[] = [
   {
     id: "sbp",
     desc: "여성 전용 지점으로 분리된 2룸으로 룸 간의 독립성을 유지하였습니다.",
-    address: "",
+    address: "서울시 서초구 잠원로8길 25 신반포스퀘어 2층 213-1호",
+    mapQuery: "서울 서초구 잠원로8길 25",
     name: "신반포스퀘어점",
     short: "신반포스퀘어",
     beds: 2,
@@ -81,7 +86,8 @@ export const BRANCHES: Branch[] = [
   {
     id: "sl",
     desc: "가장 큰 지점으로 독립적으로 분리된 3룸을 갖췄으며, 각 룸은 분리되어 독립성을 가집니다. 여러 명이 동시 진행 가능합니다.",
-    address: "",
+    address: "서울시 강남구 선릉로86길 31 롯데골드로즈2차 4층 403호",
+    mapQuery: "서울 강남구 선릉로86길 31",
     name: "선릉점",
     short: "선릉",
     beds: 3,
@@ -151,6 +157,7 @@ export function publicBranches() {
     desc: b.desc,
     notice: b.notice ?? "",
     address: b.address ?? "",
+    mapQuery: b.mapQuery ?? b.address ?? "",
     trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
   }));
 }
