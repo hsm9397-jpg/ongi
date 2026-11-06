@@ -437,23 +437,16 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       <div className="kind kind3" role="tablist" aria-label="예약 종류">
         <button role="tab" aria-pressed={!manage && kind === "trial"} aria-selected={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
           <b>근막이완<br />체험 신청</b>
-          <span>{sessionMinutes}분 1:1 · {trialPrice}</span>
-          <span>네이버 예약</span>
         </button>
         {ptBranch && (
           <button role="tab" aria-pressed={!manage && kind === "pt"} aria-selected={!manage && kind === "pt"} onClick={() => switchKind("pt")}>
             <b>PT<br />상담·평가</b>
-            <span>{sessionMinutes}분</span>
-            <span>무료</span>
           </button>
         )}
         <button role="tab" aria-pressed={!manage && kind === "member"} aria-selected={!manage && kind === "member"} onClick={() => switchKind("member")}>
           <b>기존 회원<br />예약</b>
-          <span>이용권 회원님</span>
-          <span>담당 선생님 일정</span>
         </button>
       </div>
-      {!manage && kind === "trial" && <p className="kind-desc">첫 방문 체험은 네이버 예약으로 받고 있어요.</p>}
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
       </button>
@@ -466,7 +459,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       {kind === "trial" && (
         <div className="step">
           <h3>1 · 지점</h3>
-          <div className="chips">
+          <div className="chips trial-chips">
             {branches.filter((b) => !b.hidden).map((b) =>
               b.bookable && b.naverTrial ? (
                 <a key={b.id} className="chip" href={b.naverTrial} target="_blank" rel="noopener noreferrer">

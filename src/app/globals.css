@@ -314,3 +314,10 @@ main{display:flex;flex-direction:column;gap:56px}
 .bmore-grid a:first-child:nth-last-child(odd) img{aspect-ratio:4/3}
 .bmore-grid a.wide{grid-column:1/-1}.bmore-grid a.wide img{aspect-ratio:4/3}
 .bhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.bhead h3{margin:0}.bhead .loc-toggle{flex:0 0 auto}a.chip{text-decoration:none;display:inline-flex;align-items:center}
+/* 체험 지점 버튼: 크고 가지런하게 */
+.trial-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.trial-chips .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;border-radius:12px;padding:10px 8px;font-size:15.5px;font-weight:600;text-align:center;background:var(--surface);border-color:var(--line)}
+.trial-chips a.chip{border-color:var(--gold);color:var(--brown)}
+.trial-chips .chip small{margin:0;font-size:12px;font-weight:400}
+.kind3 button{justify-content:center;min-height:76px}
+.kind3 button b{margin-bottom:0}
