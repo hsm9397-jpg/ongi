@@ -45,12 +45,13 @@ export const METHOD = {
 };
 
 /** 지점 카드 (예약용 지점 설정의 id와 맞춤) */
-/** more: 카드의 '사진 더 보기'를 누르면 펼쳐지는 사진들 (public/branches/지점id/) */
+/** more: 카드의 '사진 더 보기'를 누르면 펼쳐지는 사진들 (public/branches/지점id/). 파일명이 -w로 끝나면 가로 사진이라 한 줄 전체로 보여줌 */
 export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[] }[] = [
   {
     id: "main",
     title: "온기 PT&근막이완 (본점)",
     photo: `${IMG}/2026/9/6/2026-9-6-1788738958963.webp`,
+    more: ["/branches/main/1-w.webp", "/branches/main/2-w.webp", "/branches/main/3.webp", "/branches/main/4.webp"],
     tags: ["본점 · 잠원동", "1인 공간", "성별 무관"],
     points: ["PT, 근막이완, 근막이완+PT 결합 프로그램", "대표 및 여성 트레이너가 프로그램 진행"],
   },

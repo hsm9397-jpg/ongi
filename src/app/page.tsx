@@ -100,7 +100,7 @@ export default function Home() {
                       <summary>사진 더 보기 <small>{c.more.length}장</small></summary>
                       <div className="bmore-grid">
                         {c.more.map((src, i) => (
-                          <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                          <a key={src} href={src} target="_blank" rel="noopener noreferrer" className={src.includes("-w.") ? "wide" : undefined}>
                             <img src={src} alt={`${c.title} 사진 ${i + 2}`} loading="lazy" />
                           </a>
                         ))}
