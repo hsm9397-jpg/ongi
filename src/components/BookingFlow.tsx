@@ -8,6 +8,48 @@ type Membership = { branch: string; branchName: string; name: string; trainerId?
 type Done = { kind: "trial" | "member"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
+const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+/** 한 달 달력: 예약 가능한 날만 누를 수 있음 */
+function MonthCalendar({ days, selected, onPick }: { days: Record<string, Slot[]>; selected: string | null; onPick: (d: string) => void }) {
+  const keys = Object.keys(days).sort();
+  const months = Array.from(new Set(keys.map((k) => k.slice(0, 7))));
+  const [idx, setIdx] = useState(() => Math.max(0, months.indexOf((selected ?? keys[0] ?? "").slice(0, 7))));
+  const ym = months[Math.min(idx, months.length - 1)];
+  if (!ym) return null;
+  const [y, m] = ym.split("-").map(Number);
+  const lead = new Date(y, m - 1, 1).getDay();
+  const last = new Date(y, m, 0).getDate();
+  const cells: (number | null)[] = [...Array(lead).fill(null), ...Array.from({ length: last }, (_, i) => i + 1)];
+  while (cells.length % 7) cells.push(null);
+  return (
+    <div className="cal">
+      <div className="cal-head">
+        <button className="cal-nav" aria-label="이전 달" disabled={idx <= 0} onClick={() => setIdx(idx - 1)}>‹</button>
+        <b>{y}년 {m}월</b>
+        <button className="cal-nav" aria-label="다음 달" disabled={idx >= months.length - 1} onClick={() => setIdx(idx + 1)}>›</button>
+      </div>
+      <div className="cal-grid">
+        {DOW.map((d, i) => <span key={d} className={`cal-dow${i === 0 ? " sun" : i === 6 ? " sat" : ""}`}>{d}</span>)}
+        {cells.map((d, i) => {
+          if (d == null) return <span key={`e${i}`} />;
+          const key = ymd(y, m - 1, d);
+          const slots = days[key];
+          const n = slots ? slots.filter((x) => x.available).length : 0;
+          const state = !slots ? "out" : n ? "open" : "full";
+          return (
+            <button key={key} className={`cal-day ${state}`} disabled={state !== "open"} aria-pressed={selected === key} onClick={() => onPick(key)}
+              aria-label={`${m}월 ${d}일 ${state === "open" ? `${n}자리` : state === "full" ? "마감" : "예약 불가"}`}>
+              <b>{d}</b>
+              <small>{state === "open" ? `${n}자리` : state === "full" ? "마감" : ""}</small>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 const dateObj = (d: string) => new Date(`${d}T00:00:00`);
 const fmtDay = (d: string) => {
   const x = dateObj(d);
@@ -157,7 +199,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <dt>예약자</dt>
           <dd>{done.name}</dd>
         </dl>
-        <p className="note">예약 전날 안내 메시지를 보내드려요. 변경·취소는 카카오채널 [온기pt]로 말씀해 주세요.</p>
+        <p className="note">예약 전날 안내 메시지를 보내드려요.</p>
+        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">예약 변경·취소 (카카오톡 문의)</a>
         <button className="ghost" onClick={() => { setDone(null); switchKind(kind); }}>
           처음으로
         </button>
@@ -265,19 +308,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       {days && (
         <div className="step">
           <h3>2 · 날짜</h3>
-          <div className="days">
-            {Object.entries(days).map(([d, s]) => {
-              const n = s.filter((x) => x.available).length;
-              const x = dateObj(d);
-              return (
-                <button key={d} className="day" aria-pressed={day === d} onClick={() => { setDay(d); setHour(null); }}>
-                  <small>{DOW[x.getDay()]}</small>
-                  <b>{x.getDate()}</b>
-                  <span className={`cnt ${n ? "" : "none"}`}>{n ? `${n}자리` : "마감"}</span>
-                </button>
-              );
-            })}
-          </div>
+          <MonthCalendar days={days} selected={day} onPick={(d) => { setDay(d); setHour(null); }} />
         </div>
       )}
 

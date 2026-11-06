@@ -1,5 +1,5 @@
 import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
-import BookingFlow from "@/components/BookingFlow";
+import BookingFlow, { KAKAO_CHAT_URL } from "@/components/BookingFlow";
 
 export default function Home() {
   return (
@@ -20,7 +20,9 @@ export default function Home() {
         sessionMinutes={BOOKING.sessionMinutes}
         comingSoon={BRANCHES.filter((b) => !b.open).map((b) => b.short)}
       />
-      <p className="foot">예약 변경·취소는 카카오채널 [온기pt]로 문의해 주세요.</p>
+      <div className="foot">
+        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">예약 변경·취소 (카카오톡 문의)</a>
+      </div>
     </>
   );
 }

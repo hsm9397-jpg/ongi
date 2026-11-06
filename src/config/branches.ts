@@ -94,7 +94,7 @@ export const BOOKING = {
   /** 한 타임 진행 시간(분) */
   sessionMinutes: 50,
   /** 오늘부터 며칠 앞까지 예약을 열지 */
-  daysAhead: 14,
+  daysAhead: 30,
   /** 지금부터 최소 몇 시간 뒤 타임부터 예약 가능 */
   minLeadHours: 3,
   /** 체험 안내 문구 */
