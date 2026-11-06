@@ -163,7 +163,7 @@ function ManageBookings() {
 /** 지점 소개 + 위치(펼치기) */
 // 네이버 지도 키가 있으면 네이버 지도, 없으면 구글 지도.
 // 네이버는 한글 도메인을 등록할 수 없어서 지도 화면만 vercel 주소에서 불러온다.
-const NAVER_MAP_ID = process.env.NEXT_PUBLIC_NAVER_MAP_ID || "";
+const NAVER_MAP_ID = process.env.NEXT_PUBLIC_NAVER_MAP_ID || "a120cplv6t"; // 공개용 Client ID (등록된 주소에서만 작동)
 const NAVER_MAP_HOST = "https://ongi-gray.vercel.app";
 function mapSrc(b: PubBranch, q: string) {
   if (NAVER_MAP_ID && b.lat) return `${NAVER_MAP_HOST}/naver-map.html?lat=${b.lat}&lng=${b.lng}&id=${NAVER_MAP_ID}`;
