@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBranch } from "@/config/branches";
+import { BOOKING, getBranch } from "@/config/branches";
 import { getAvailability } from "@/lib/availability";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "담당 선생님 정보가 맞지 않아요." }, { status: 400 });
   }
   try {
-    const days = await getAvailability(branch, trainer);
+    // 담당 선생님을 지정하는 건 기존 회원 예약뿐 → 2주까지만
+    const days = await getAvailability(branch, trainer, new Date(), trainer ? BOOKING.memberDaysAhead : BOOKING.daysAhead);
     // 예약 중지 지점은 달력은 보여주되 모든 시간을 마감으로
     if (branch.bookable === false) for (const k of Object.keys(days)) days[k] = days[k].map((s) => ({ ...s, available: false }));
     return NextResponse.json({ days }, { headers: { "Cache-Control": "no-store" } });

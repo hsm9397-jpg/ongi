@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     const kind = r.ev.props?.kind === "member" ? "member" : r.ev.props?.kind === "pt" ? "pt" : "trial";
     // 회원은 같은 담당 선생님으로만. 체험은 같은 선생님을 먼저, 안 되면 같은 지점의 비어 있는 선생님
     const pick =
-      (await pickTrainer(r.branch, date, hour, r.trainer.id)) ??
+      (await pickTrainer(r.branch, date, hour, r.trainer.id, new Date(), kind === "member" ? BOOKING.memberDaysAhead : BOOKING.daysAhead)) ??
       (kind === "trial" ? await pickTrainer(r.branch, date, hour) : null);
     if (!pick) return NextResponse.json({ error: "그 시간은 예약이 어려워요. 다른 시간을 골라주세요." }, { status: 409 });
     const cal = calendarIdOf(pick.trainer)!;

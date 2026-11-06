@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const pick = await pickTrainer(branch, date, hour, trainerId);
+    const pick = await pickTrainer(branch, date, hour, trainerId, new Date(), kind === "member" ? BOOKING.memberDaysAhead : BOOKING.daysAhead);
     if (!pick) return NextResponse.json({ error: "방금 다른 예약이 들어왔어요. 다른 시간을 골라주세요." }, { status: 409 });
     const cal = calendarIdOf(pick.trainer)!;
 

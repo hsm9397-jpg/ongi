@@ -49,13 +49,13 @@ function bookableStart(date: string, hour: number, now: Date) {
 }
 
 /** 오늘부터 daysAhead일 동안의 지점 빈자리 */
-export async function getAvailability(branch: Branch, trainerId?: string, now = new Date()): Promise<DaySlots> {
+export async function getAvailability(branch: Branch, trainerId?: string, now = new Date(), daysAhead = BOOKING.daysAhead): Promise<DaySlots> {
   const first = todayKst(now);
   const from = kstDate(first, 0);
-  const to = kstDate(addDays(first, BOOKING.daysAhead), 0);
+  const to = kstDate(addDays(first, daysAhead), 0);
   const busy = await loadBusy(branch, from, to);
   const out: DaySlots = {};
-  for (let i = 0; i < BOOKING.daysAhead; i++) {
+  for (let i = 0; i < daysAhead; i++) {
     const date = addDays(first, i);
     const slots: Slot[] = [];
     for (let h = branch.firstHour; h <= branch.lastHour; h++) {
@@ -73,9 +73,11 @@ export async function pickTrainer(
   date: string,
   hour: number,
   trainerId?: string,
-  now = new Date()
+  now = new Date(),
+  daysAhead = BOOKING.daysAhead
 ): Promise<{ trainer: Trainer; start: Date; end: Date } | null> {
   if (hour < branch.firstHour || hour > branch.lastHour) return null;
+  if (date >= addDays(todayKst(now), daysAhead)) return null;
   const start = bookableStart(date, hour, now);
   if (!start) return null;
   const busy = await loadBusy(branch, kstDate(date, 0), kstDate(addDays(date, 1), 0));

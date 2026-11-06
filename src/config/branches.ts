@@ -146,6 +146,8 @@ export const BOOKING = {
   sessionMinutes: 50,
   /** 오늘부터 며칠 앞까지 예약을 열지 */
   daysAhead: 30,
+  /** 기존 회원은 2주 앞까지만 예약 (2026-11-06 대표 요청) */
+  memberDaysAhead: 14,
   /** 지금부터 최소 몇 시간 뒤 타임부터 예약 가능 */
   minLeadHours: 3,
   /** 예약 시작 몇 시간 전까지 고객이 직접 변경·취소할 수 있는지 */
