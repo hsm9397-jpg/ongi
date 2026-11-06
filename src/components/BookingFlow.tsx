@@ -176,10 +176,8 @@ function BranchInfo({ b }: { b: PubBranch }) {
           {open && (
             <div className="loc">
               <p className="addr">{b.address}</p>
-              <iframe title={`${b.short} 지도`} src={`https://maps.google.com/maps?q=${q}&z=16&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
               <div className="maplinks">
-                <a href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener noreferrer">네이버 지도</a>
-                <a href={`https://map.kakao.com/link/search/${q}`} target="_blank" rel="noopener noreferrer">카카오맵</a>
+                <a className="naver-map" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener noreferrer">네이버 지도에서 보기</a>
               </div>
             </div>
           )}
