@@ -1,4 +1,4 @@
-import { BOOKING, Branch, Trainer, calendarIdOf } from "@/config/branches";
+import { BOOKING, Branch, Trainer, calendarIdOf, hoursOf } from "@/config/branches";
 import { CalEvent, listEvents } from "./google";
 import { addDays, kstDate, todayKst } from "./time";
 
@@ -58,7 +58,7 @@ export async function getAvailability(branch: Branch, trainerId?: string, now = 
   for (let i = 0; i < daysAhead; i++) {
     const date = addDays(first, i);
     const slots: Slot[] = [];
-    for (let h = branch.firstHour; h <= branch.lastHour; h++) {
+    for (const h of hoursOf(branch)) {
       const start = bookableStart(date, h, now);
       slots.push({ hour: h, available: !!start && slotState(branch, busy, start, trainerId).available });
     }
@@ -76,7 +76,7 @@ export async function pickTrainer(
   now = new Date(),
   daysAhead = BOOKING.daysAhead
 ): Promise<{ trainer: Trainer; start: Date; end: Date } | null> {
-  if (hour < branch.firstHour || hour > branch.lastHour) return null;
+  if (!hoursOf(branch).includes(hour)) return null;
   if (date >= addDays(todayKst(now), daysAhead)) return null;
   const start = bookableStart(date, hour, now);
   if (!start) return null;

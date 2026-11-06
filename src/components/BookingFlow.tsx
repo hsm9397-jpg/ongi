@@ -3,7 +3,7 @@ import { mapSrc } from "@/lib/map";
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; lat: number; lng: number; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -263,6 +263,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<Done | null>(null);
   const [expiredPop, setExpiredPop] = useState(false);
+  const [waitPop, setWaitPop] = useState<PubBranch | null>(null);
 
   // 체험
   const [name, setName] = useState("");
@@ -454,6 +455,32 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   return (
     <div className="book">
+      {waitPop && (
+        <div className="pop-bg" onClick={() => setWaitPop(null)}>
+          <div className="pop wait" role="dialog" aria-modal="true" aria-label="대기 예약 안내" onClick={(e) => e.stopPropagation()}>
+            <h3>{waitPop.short}은 대기 예약만 가능합니다</h3>
+            <ul>
+              <li>해당 지점 아무 날짜나 예약합니다.</li>
+              <li className="wait-key">해당 예약 날짜와 시간은 확정이 아닙니다.</li>
+              <li>순번이 되면 담당자가 개별 연락을 드려 일정을 조율합니다. 이때 예약 확정입니다.</li>
+              <li>예약자 정보에 가능한 시간대를 구체적으로 적어주실수록 일정을 앞당겨 연락드릴 수 있습니다.</li>
+              <li>현재 가장 빠른 일정은 선릉점입니다.</li>
+            </ul>
+            <a className="primary" href={waitPop.naverTrial} target="_blank" rel="noopener noreferrer" onClick={() => setWaitPop(null)}>
+              예약하러 가기
+            </a>
+            {(() => {
+              const f = branches.find((x) => !x.hidden && x.bookable && !x.waitlist && x.naverTrial);
+              return f ? (
+                <a className="ghost" href={f.naverTrial} target="_blank" rel="noopener noreferrer" onClick={() => setWaitPop(null)}>
+                  {f.short} 예약하러 가기
+                </a>
+              ) : null;
+            })()}
+            <button className="mp-forget" onClick={() => setWaitPop(null)}>닫기</button>
+          </div>
+        </div>
+      )}
       {expiredPop && (
         <div className="pop-bg" role="dialog" aria-modal="true" aria-labelledby="exp-title" onClick={() => setExpiredPop(false)}>
           <div className="pop" onClick={(e) => e.stopPropagation()}>
@@ -510,7 +537,18 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <div className="chips trial-chips">
             {branches.filter((b) => !b.hidden).map((b) =>
               b.bookable && b.naverTrial ? (
-                <a key={b.id} className="chip" href={b.naverTrial} target="_blank" rel="noopener noreferrer">
+                <a
+                  key={b.id}
+                  className="chip"
+                  href={b.naverTrial}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!b.waitlist) return;
+                    e.preventDefault();
+                    setWaitPop(b);
+                  }}
+                >
                   {b.short}
                   {b.womenOnly && <small>여성전용</small>}
                 </a>

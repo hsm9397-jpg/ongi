@@ -41,11 +41,20 @@ export type Branch = {
   /** 첫 타임 시작 시각, 마지막 타임 시작 시각 (24시간제) */
   firstHour: number;
   lastHour: number;
+  /** 정해진 시간만 열 때 (예: PT 상담 9~12시, 17~20시) */
+  hours?: number[];
+  /** 대기 예약만 받는 지점 (체험 누르면 안내 팝업) */
+  waitlist?: boolean;
 };
+
+/** 이 지점이 예약을 받는 시작 시각들 */
+export const hoursOf = (b: Branch): number[] =>
+  b.hours ?? Array.from({ length: b.lastHour - b.firstHour + 1 }, (_, i) => b.firstHour + i);
 
 export const BRANCHES: Branch[] = [
   {
     id: "main",
+    waitlist: true,
     desc: "본점으로 대표가 진행하며 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
     notice: "현재는 예약 불가합니다.",
     bookable: false,
@@ -65,6 +74,7 @@ export const BRANCHES: Branch[] = [
   },
   {
     id: "priv",
+    waitlist: true,
     desc: "오로지 1인을 위한 프라이빗룸으로 가장 아늑한 지점입니다.",
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 지하 1층",
     mapQuery: "서울 서초구 신반포로33길 62",
@@ -82,6 +92,7 @@ export const BRANCHES: Branch[] = [
   },
   {
     id: "sbp",
+    waitlist: true,
     desc: "여성 전용 지점으로 분리된 2룸으로 룸 간의 독립성을 유지하였습니다.",
     address: "서울시 서초구 잠원로8길 25 신반포스퀘어 2층 213-1호",
     mapQuery: "서울 서초구 잠원로8길 25",
@@ -137,8 +148,9 @@ export const BRANCHES: Branch[] = [
     only: "pt",
     trainers: [{ id: "kjh", name: "김정화", calendarEnv: "CAL_KIMJUNGHWA" }],
     memberDbEnv: "NOTION_MEMBER_DB_PT",
-    firstHour: 10,
+    firstHour: 9,
     lastHour: 20,
+    hours: [9, 10, 11, 12, 17, 18, 19, 20],
   },
   {
     id: "cd",
@@ -210,6 +222,7 @@ export function publicBranches() {
     address: b.address ?? "",
     mapQuery: b.mapQuery ?? b.address ?? "",
     naverTrial: b.naverTrial ?? "",
+    waitlist: !!b.waitlist,
     lat: b.lat ?? 0,
     lng: b.lng ?? 0,
     trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
