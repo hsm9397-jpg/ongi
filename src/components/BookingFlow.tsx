@@ -415,24 +415,26 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   return (
     <div className="book">
-      <div className="kind" role="group" aria-label="예약 종류">
-        <button aria-pressed={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
-          <b>처음이에요 <small>(체험 예약)</small></b>
-          <span>근막이완 컨디셔닝 체험</span>
-          <span>{sessionMinutes}분 1:1 {trialPrice}</span>
-        </button>
-        <button aria-pressed={!manage && kind === "member"} onClick={() => switchKind("member")}>
-          <b>기존 회원 예약</b>
-          <span>이용권이 있는 회원님</span>
-          <span>담당 선생님 일정 확인</span>
+      <div className="kind kind3" role="tablist" aria-label="예약 종류">
+        <button role="tab" aria-pressed={!manage && kind === "trial"} aria-selected={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
+          <b>근막이완<br />체험 신청</b>
+          <span>{sessionMinutes}분 1:1</span>
+          <span>{trialPrice}</span>
         </button>
         {ptBranch && (
-          <button className="kind-wide" aria-pressed={!manage && kind === "pt"} onClick={() => switchKind("pt")}>
-            <b>PT 상담·평가 <small>(무료)</small></b>
-            <span>{sessionMinutes}분 · 체성분·근력·가동성·기능 테스트 · 여성 트레이너 진행</span>
+          <button role="tab" aria-pressed={!manage && kind === "pt"} aria-selected={!manage && kind === "pt"} onClick={() => switchKind("pt")}>
+            <b>PT<br />상담·평가</b>
+            <span>{sessionMinutes}분</span>
+            <span>무료</span>
           </button>
         )}
+        <button role="tab" aria-pressed={!manage && kind === "member"} aria-selected={!manage && kind === "member"} onClick={() => switchKind("member")}>
+          <b>기존 회원<br />예약</b>
+          <span>이용권 회원님</span>
+          <span>담당 선생님 일정</span>
+        </button>
       </div>
+      {!manage && kind === "trial" && <p className="kind-desc">처음 오시는 분을 위한 근막이완 컨디셔닝 1:1 체험이에요.</p>}
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
       </button>
