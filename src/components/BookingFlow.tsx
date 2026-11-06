@@ -145,7 +145,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <h2>예약이 확정됐어요</h2>
         <dl className="summary">
           <dt>구분</dt>
-          <dd>{done.kind === "trial" ? "첫 방문 체험" : "회원 예약"}</dd>
+          <dd>{done.kind === "trial" ? "첫 방문 체험" : "기존 회원 예약"}</dd>
           <dt>지점</dt>
           <dd>{done.branchName}</dd>
           <dt>일시</dt>
@@ -172,12 +172,14 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     <div className="book">
       <div className="kind" role="group" aria-label="예약 종류">
         <button aria-pressed={kind === "trial"} onClick={() => switchKind("trial")}>
-          <b>처음 오셨어요</b>
-          <span>근막이완 컨디셔닝 체험 · {sessionMinutes}분 1:1 · {trialPrice}</span>
+          <b>처음이에요 <small>(체험 예약)</small></b>
+          <span>근막이완 컨디셔닝 체험</span>
+          <span>{sessionMinutes}분 1:1 {trialPrice}</span>
         </button>
         <button aria-pressed={kind === "member"} onClick={() => switchKind("member")}>
-          <b>회원 예약</b>
-          <span>이용권이 있는 회원님 · 담당 선생님 일정으로</span>
+          <b>기존 회원 예약</b>
+          <span>이용권이 있는 회원님</span>
+          <span>담당 선생님 일정 확인</span>
         </button>
       </div>
 

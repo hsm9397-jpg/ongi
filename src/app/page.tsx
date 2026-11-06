@@ -5,8 +5,13 @@ export default function Home() {
   return (
     <>
       <header className="brand">
+        <h1>
+          <picture>
+            <source srcSet="/logo-dark.png" media="(prefers-color-scheme: dark)" />
+            <img src="/logo.png" alt="온기 (편안할 온 · 몸 기)" width={800} height={589} />
+          </picture>
+        </h1>
         <small>Conditioning Studio</small>
-        <h1>온기</h1>
         <p>몸을 편안하게, 움직임을 자유롭게.</p>
       </header>
       <BookingFlow

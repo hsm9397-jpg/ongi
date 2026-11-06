@@ -28,7 +28,7 @@ export const BRANCHES: Branch[] = [
   {
     id: "main",
     name: "온기 PT&근막이완",
-    short: "본점",
+    short: "온기PT&근막이완(본점)",
     beds: 1,
     open: true,
     trainers: [{ id: "hsm", name: "현승민", calendarEnv: "CAL_HYUNSEUNGMIN" }],
@@ -39,7 +39,7 @@ export const BRANCHES: Branch[] = [
   {
     id: "priv",
     name: "온기 근막이완 더 프라이빗",
-    short: "더 프라이빗",
+    short: "온기 근막이완(본점)",
     beds: 1,
     womenOnly: true,
     open: true,
