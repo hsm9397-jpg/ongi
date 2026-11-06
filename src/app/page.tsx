@@ -1,4 +1,5 @@
 import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
+import TeamGrid from "@/components/TeamGrid";
 import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
@@ -135,15 +136,7 @@ export default function Home() {
         {/* 팀 */}
         <section id="team" className="sec">
           <h2>온기 컨디셔닝 팀</h2>
-          <div className="team">
-            {TEAM.map((m) => (
-              <a key={m.name} className="member" href={m.link} target="_blank" rel="noopener noreferrer">
-                <img src={m.photo} alt={m.name} loading="lazy" />
-                <b>{m.name}</b>
-                <span>{m.role}</span>
-              </a>
-            ))}
-          </div>
+          <TeamGrid team={TEAM} />
           <div className="promise">
             <p>{TEAM_PROMISE.lead}</p>
             <ul>{TEAM_PROMISE.items.map((i) => <li key={i}>{i}</li>)}</ul>
