@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       branch: r.branch.id,
     });
     await deleteEvent(r.calendarId, r.eventId);
-    await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
+    await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, team: r.branch.trainers, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
     return NextResponse.json({ ok: true, booking: { date, hour, minutes: BOOKING.sessionMinutes, trainerName: pick.trainer.name, branchName: r.branch.name } });
   } catch (e) {
     console.error("my/change", e);

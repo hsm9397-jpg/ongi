@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const r = await loadOwned(body.token, name, last4);
     if ("error" in r) return NextResponse.json({ error: r.error }, { status: r.status });
     await deleteEvent(r.calendarId, r.eventId);
-    await notify({ type: "cancel", branchName: r.branch.name, trainer: r.trainer, name: r.ev.props?.name ?? name, kind: r.ev.props?.kind ?? "", when: r.ev.start });
+    await notify({ type: "cancel", branchName: r.branch.name, trainer: r.trainer, team: r.branch.trainers, name: r.ev.props?.name ?? name, kind: r.ev.props?.kind ?? "", when: r.ev.start });
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("my/cancel", e);

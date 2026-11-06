@@ -1,4 +1,4 @@
-// 예약·변경·취소가 생기면 담당 선생님과 관리자에게 문자(솔라피)로 알린다.
+// 예약·변경·취소가 생기면 그 지점 선생님 전원과 관리자에게 문자(솔라피)로 알린다.
 // 필요한 환경변수: SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER(발신번호),
 //   NOTIFY_PHONES(항상 받을 번호, 쉼표로 여러 개), PHONE_선생님(예: PHONE_HYUNSEUNGMIN)
 // 설정이 없으면 조용히 건너뛴다 (예약 자체는 막지 않음).
@@ -21,6 +21,8 @@ export type NotifyInput = {
   trainer: Trainer;
   /** 변경 시 이전 담당 (다르면 둘 다 알림) */
   oldTrainer?: Trainer;
+  /** 같은 지점 선생님 전원 (지점 통합 알림) */
+  team?: Trainer[];
   name: string;
   kind: string;
   when: Date;
@@ -45,7 +47,7 @@ export async function notify(n: NotifyInput): Promise<void> {
   const from = (process.env.SOLAPI_SENDER || "").replace(/\D/g, "");
   const to = new Set<string>();
   for (const p of (process.env.NOTIFY_PHONES || "").split(",")) if (p.replace(/\D/g, "").length >= 10) to.add(p.replace(/\D/g, ""));
-  for (const t of [n.trainer, n.oldTrainer]) {
+  for (const t of [n.trainer, n.oldTrainer, ...(n.team ?? [])]) {
     const p = t && phoneOf(t);
     if (p) to.add(p);
   }

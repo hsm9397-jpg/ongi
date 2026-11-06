@@ -72,6 +72,7 @@ export async function POST(req: Request) {
       type: "new",
       branchName: branch.name,
       trainer: pick.trainer,
+      team: branch.trainers,
       name: memberName,
       kind,
       when: pick.start,
