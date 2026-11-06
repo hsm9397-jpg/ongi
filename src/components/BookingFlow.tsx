@@ -235,7 +235,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <dd>{done.name}</dd>
         </dl>
         <p className="note">예약 전날 안내 메시지를 보내드려요.</p>
-        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">예약 변경·취소 (카카오톡 문의)</a>
+        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
         <button className="ghost" onClick={() => { setDone(null); switchKind(kind); }}>
           처음으로
         </button>

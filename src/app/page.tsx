@@ -21,7 +21,7 @@ export default function Home() {
         comingSoon={BRANCHES.filter((b) => !b.open).map((b) => b.short)}
       />
       <div className="foot">
-        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">예약 변경·취소 (카카오톡 문의)</a>
+        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
       </div>
     </>
   );
