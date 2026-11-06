@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
 import { pickTrainer } from "@/lib/availability";
 import { createEvent } from "@/lib/google";
+import { notify } from "@/lib/notify";
 import { findMember } from "@/lib/notion";
 import { isValidDate, kstDate } from "@/lib/time";
 import { cleanMemo, cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
@@ -66,7 +67,15 @@ export async function POST(req: Request) {
       .filter(Boolean)
       .join("\n");
 
-    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone });
+    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id });
+    await notify({
+      type: "new",
+      branchName: branch.name,
+      trainer: pick.trainer,
+      name: memberName,
+      kind,
+      when: pick.start,
+    });
 
     return NextResponse.json({
       ok: true,

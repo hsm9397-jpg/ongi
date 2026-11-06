@@ -122,6 +122,8 @@ export const BOOKING = {
   daysAhead: 30,
   /** 지금부터 최소 몇 시간 뒤 타임부터 예약 가능 */
   minLeadHours: 3,
+  /** 예약 시작 몇 시간 전까지 고객이 직접 변경·취소할 수 있는지 */
+  changeCutoffHours: 24,
   /** 체험 안내 문구 */
   trialPriceText: "7만원",
   /** 이 단어가 들어간 종일 일정은 그날 전체를 막습니다 */
@@ -136,6 +138,12 @@ export function calendarIdOf(t: Trainer): string | undefined {
   if (process.env.DEMO_MODE === "1") return `demo-${t.id}`;
   const v = process.env[t.calendarEnv];
   return v && v.trim() ? v.trim() : undefined;
+}
+
+/** 알림 문자를 받을 선생님 번호 (환경변수 PHONE_이름, 예: PHONE_HYUNSEUNGMIN) */
+export function phoneOf(t: Trainer): string | undefined {
+  const v = process.env[t.calendarEnv.replace(/^CAL_/, "PHONE_")];
+  return v && v.replace(/\D/g, "").length >= 10 ? v.replace(/\D/g, "") : undefined;
 }
 
 export function memberDbIdsOf(b: Branch): string[] {

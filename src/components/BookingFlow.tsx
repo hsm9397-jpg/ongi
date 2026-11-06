@@ -11,6 +11,155 @@ const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
+type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member"; date: string; hour: number; minute: number; changeable: boolean };
+
+/** 내 예약 확인·변경·취소 */
+function ManageBookings() {
+  const [name, setName] = useState("");
+  const [last4, setLast4] = useState("");
+  const [list, setList] = useState<MyBooking[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [msg, setMsg] = useState("");
+  const [confirmCancel, setConfirmCancel] = useState<string | null>(null);
+  const [changing, setChanging] = useState<MyBooking | null>(null);
+  const [days, setDays] = useState<Record<string, Slot[]> | null>(null);
+  const [day, setDay] = useState<string | null>(null);
+  const [hour, setHour] = useState<number | null>(null);
+
+  async function lookup() {
+    setErr(""); setMsg(""); setBusy(true); setChanging(null); setConfirmCancel(null);
+    try {
+      const r = await api<{ bookings: MyBooking[] }>("/api/my/lookup", { method: "POST", body: JSON.stringify({ name, last4 }) });
+      setList(r.bookings);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function cancel(b: MyBooking) {
+    setErr(""); setBusy(true);
+    try {
+      await api("/api/my/cancel", { method: "POST", body: JSON.stringify({ token: b.token, name, last4 }) });
+      setMsg(`${fmtDay(b.date)} ${b.hour}:00 예약을 취소했어요.`);
+      setConfirmCancel(null);
+      await lookup();
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function startChange(b: MyBooking) {
+    setErr(""); setMsg(""); setChanging(b); setDays(null); setDay(null); setHour(null); setConfirmCancel(null);
+    const q = new URLSearchParams({ branch: b.branchId });
+    if (b.kind === "member") q.set("trainer", b.trainerId);
+    try {
+      const r = await api<{ days: Record<string, Slot[]> }>(`/api/availability?${q}`);
+      setDays(r.days);
+      const first = Object.entries(r.days).find(([, s]) => s.some((x) => x.available));
+      setDay(first ? first[0] : null);
+    } catch (e) {
+      setErr((e as Error).message);
+    }
+  }
+
+  async function change() {
+    if (!changing || !day || hour == null) return;
+    setErr(""); setBusy(true);
+    try {
+      await api("/api/my/change", { method: "POST", body: JSON.stringify({ token: changing.token, name, last4, date: day, hour }) });
+      setMsg(`${fmtDay(day)} ${hour}:00으로 변경했어요.`);
+      setChanging(null);
+      await lookup();
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const slots = day && days ? days[day] ?? [] : [];
+
+  return (
+    <div className="step">
+      <h3>예약 조회</h3>
+      <div className="row2">
+        <div className="field">
+          <label htmlFor="myn">예약자 이름</label>
+          <input id="myn" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="myp">연락처 뒷 4자리</label>
+          <input id="myp" inputMode="numeric" maxLength={4} value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, ""))} />
+        </div>
+      </div>
+      <button className="ghost" disabled={busy || name.trim().length < 2 || last4.length !== 4} onClick={lookup}>
+        {busy && !list ? "조회 중…" : "내 예약 조회"}
+      </button>
+      {msg && <p className="okmsg">{msg}</p>}
+      {err && <p className="err">{err}</p>}
+
+      {list && list.length === 0 && (
+        <p className="note">홈페이지로 예약하신 내역이 없어요. 다른 방법으로 예약하셨다면 카카오톡으로 문의해 주세요.</p>
+      )}
+
+      {list && list.length > 0 && (
+        <ul className="mylist">
+          {list.map((b) => (
+            <li key={b.token} className="mybook">
+              <div className="mybook-main">
+                <b>{fmtDay(b.date)} {b.hour}:{String(b.minute).padStart(2, "0")}</b>
+                <span>{b.branchName} · {b.trainerName} 선생님 · {b.kind === "trial" ? "체험" : "회원"}</span>
+              </div>
+              {b.changeable ? (
+                confirmCancel === b.token ? (
+                  <div className="mybook-actions">
+                    <span className="err">이 예약을 취소할까요?</span>
+                    <button className="ghost danger" disabled={busy} onClick={() => cancel(b)}>네, 취소</button>
+                    <button className="ghost" onClick={() => setConfirmCancel(null)}>아니요</button>
+                  </div>
+                ) : (
+                  <div className="mybook-actions">
+                    <button className="ghost" disabled={busy} onClick={() => startChange(b)}>시간 변경</button>
+                    <button className="ghost danger" disabled={busy} onClick={() => setConfirmCancel(b.token)}>취소</button>
+                  </div>
+                )
+              ) : (
+                <p className="note">예약 하루 전부터는 직접 변경·취소가 어려워요. 카카오톡으로 문의해 주세요.</p>
+              )}
+              {changing?.token === b.token && (
+                <div className="mychange">
+                  {!days && <p className="loading">예약 가능한 시간을 불러오는 중이에요…</p>}
+                  {days && <MonthCalendar days={days} selected={day} onPick={(d) => { setDay(d); setHour(null); }} />}
+                  {days && day && (
+                    <div className="times">
+                      {slots.map((s) => (
+                        <button key={s.hour} className="chip" disabled={!s.available} aria-pressed={hour === s.hour} onClick={() => setHour(s.hour)}>
+                          {s.hour}:00
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mybook-actions">
+                    <button className="primary" disabled={busy || !day || hour == null} onClick={change}>
+                      {busy ? "변경 중…" : day && hour != null ? `${fmtDay(day)} ${hour}:00으로 변경` : "새 시간을 골라주세요"}
+                    </button>
+                    <button className="ghost" onClick={() => setChanging(null)}>닫기</button>
+                  </div>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /** 지점 소개 + 위치(펼치기) */
 function BranchInfo({ b }: { b: PubBranch }) {
   const [open, setOpen] = useState(false);
@@ -98,6 +247,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
 export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: string; sessionMinutes: number; comingSoon: string[] }) {
   const { branches, trialPrice, sessionMinutes, comingSoon } = props;
   const [kind, setKind] = useState<"trial" | "member">("trial");
+  const [manage, setManage] = useState(false);
   const [branch, setBranch] = useState<string | null>(null);
   const [days, setDays] = useState<Record<string, Slot[]> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -156,6 +306,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   function switchKind(k: "trial" | "member") {
     setKind(k);
+    setManage(false);
     setBranch(null);
     setMembership(null);
     setMemberships(null);
@@ -234,7 +385,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <dt>예약자</dt>
           <dd>{done.name}</dd>
         </dl>
-        <p className="note">예약 전날 안내 메시지를 보내드려요.</p>
+        <p className="note">예약 전날 안내 메시지를 보내드려요. 변경·취소는 첫 화면의 &quot;내 예약 확인 · 변경 · 취소&quot;에서 예약 하루 전까지 직접 할 수 있어요.</p>
         <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
         <button className="ghost" onClick={() => { setDone(null); switchKind(kind); }}>
           처음으로
@@ -249,17 +400,25 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   return (
     <div className="book">
       <div className="kind" role="group" aria-label="예약 종류">
-        <button aria-pressed={kind === "trial"} onClick={() => switchKind("trial")}>
+        <button aria-pressed={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
           <b>처음이에요 <small>(체험 예약)</small></b>
           <span>근막이완 컨디셔닝 체험</span>
           <span>{sessionMinutes}분 1:1 {trialPrice}</span>
         </button>
-        <button aria-pressed={kind === "member"} onClick={() => switchKind("member")}>
+        <button aria-pressed={!manage && kind === "member"} onClick={() => switchKind("member")}>
           <b>기존 회원 예약</b>
           <span>이용권이 있는 회원님</span>
           <span>담당 선생님 일정 확인</span>
         </button>
       </div>
+      <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
+        내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
+      </button>
+
+      {manage ? (
+        <ManageBookings />
+      ) : (
+      <>
 
       {kind === "trial" && (
         <div className="step">
@@ -394,6 +553,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <button className="primary" disabled={busy} onClick={confirm}>
           {busy ? "예약하는 중…" : `${fmtDay(day)} ${hour}:00 예약하기`}
         </button>
+      )}
+      </>
       )}
     </div>
   );

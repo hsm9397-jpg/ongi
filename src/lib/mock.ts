@@ -36,8 +36,13 @@ export function demoEvents(calendarId: string, timeMin: Date, timeMax: Date): Ca
   return out.sort((a, b) => a.start.getTime() - b.start.getTime());
 }
 
-export function demoCreate(calendarId: string, summary: string, start: Date, end: Date) {
-  const ev: CalEvent = { id: `web-${Date.now()}`, summary, start, end, allDay: false, blocks: true, fromWeb: true };
+export function demoCreate(calendarId: string, summary: string, start: Date, end: Date, props?: Record<string, string>, description?: string) {
+  const ev: CalEvent = { id: `web-${Date.now()}-${created.length}`, summary, start, end, allDay: false, blocks: true, fromWeb: true, props, description };
   created.push({ calendarId, ev });
   return { id: ev.id };
+}
+
+export function demoDelete(eventId: string) {
+  const i = created.findIndex((c) => c.ev.id === eventId);
+  if (i >= 0) created.splice(i, 1);
 }

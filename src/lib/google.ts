@@ -1,7 +1,7 @@
 import { JWT } from "google-auth-library";
 import { toKstIso } from "./time";
 import { BOOKING } from "@/config/branches";
-import { demoCreate, demoEvents, demoMode } from "./mock";
+import { demoCreate, demoDelete, demoEvents, demoMode } from "./mock";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar.events"];
 const API = "https://www.googleapis.com/calendar/v3";
@@ -28,6 +28,8 @@ export type CalEvent = {
   blocks: boolean;
   description?: string;
   fromWeb: boolean;
+  /** 홈페이지 예약에 붙여 둔 정보 (이름, 뒷4자리, 종류 등) */
+  props?: Record<string, string>;
 };
 
 type RawEvent = {
@@ -42,8 +44,17 @@ type RawEvent = {
 };
 
 /** 캘린더 하나의 일정 목록 (반복 일정은 펼쳐서) */
-export async function listEvents(calendarId: string, timeMin: Date, timeMax: Date, q?: string): Promise<CalEvent[]> {
-  if (demoMode()) return demoEvents(calendarId, timeMin, timeMax).filter((e) => !q || e.summary.includes(q));
+export async function listEvents(
+  calendarId: string,
+  timeMin: Date,
+  timeMax: Date,
+  q?: string,
+  privateProps?: Record<string, string>
+): Promise<CalEvent[]> {
+  if (demoMode())
+    return demoEvents(calendarId, timeMin, timeMax).filter(
+      (e) => (!q || e.summary.includes(q)) && (!privateProps || Object.entries(privateProps).every(([k, v]) => e.props?.[k] === v))
+    );
   const c = getClient();
   const out: CalEvent[] = [];
   let pageToken: string | undefined;
@@ -56,6 +67,7 @@ export async function listEvents(calendarId: string, timeMin: Date, timeMax: Dat
       maxResults: "2500",
     });
     if (q) params.set("q", q);
+    for (const [k, v] of Object.entries(privateProps ?? {})) params.append("privateExtendedProperty", `${k}=${v}`);
     if (pageToken) params.set("pageToken", pageToken);
     const res = await c.request<{ items?: RawEvent[]; nextPageToken?: string }>({
       url: `${API}/calendars/${encodeURIComponent(calendarId)}/events?${params}`,
@@ -77,6 +89,7 @@ export async function listEvents(calendarId: string, timeMin: Date, timeMax: Dat
         blocks: allDay ? dayOff : e.transparency !== "transparent",
         description: e.description,
         fromWeb: e.extendedProperties?.private?.source === "ongi-web",
+        props: e.extendedProperties?.private,
       });
     }
     pageToken = res.data.nextPageToken;
@@ -86,9 +99,10 @@ export async function listEvents(calendarId: string, timeMin: Date, timeMax: Dat
 
 export async function createEvent(
   calendarId: string,
-  input: { summary: string; start: Date; end: Date; description: string; kind: "trial" | "member"; phone: string }
+  input: { summary: string; start: Date; end: Date; description: string; kind: "trial" | "member"; phone: string; name: string; branch: string }
 ): Promise<{ id: string; htmlLink?: string }> {
-  if (demoMode()) return demoCreate(calendarId, input.summary, input.start, input.end);
+  const props = { source: "ongi-web", kind: input.kind, phone: input.phone, last4: input.phone.slice(-4), name: input.name, branch: input.branch };
+  if (demoMode()) return demoCreate(calendarId, input.summary, input.start, input.end, props, input.description);
   const c = getClient();
   const res = await c.request<{ id: string; htmlLink?: string }>({
     url: `${API}/calendars/${encodeURIComponent(calendarId)}/events`,
@@ -98,8 +112,40 @@ export async function createEvent(
       description: input.description,
       start: { dateTime: toKstIso(input.start), timeZone: "Asia/Seoul" },
       end: { dateTime: toKstIso(input.end), timeZone: "Asia/Seoul" },
-      extendedProperties: { private: { source: "ongi-web", kind: input.kind, phone: input.phone } },
+      extendedProperties: { private: props },
     },
   });
   return res.data;
+}
+
+export async function getEvent(calendarId: string, eventId: string): Promise<CalEvent | null> {
+  if (demoMode()) {
+    const now = new Date();
+    return demoEvents(calendarId, new Date(now.getTime() - 86_400_000), new Date(now.getTime() + 60 * 86_400_000)).find((e) => e.id === eventId) ?? null;
+  }
+  const c = getClient();
+  try {
+    const res = await c.request<RawEvent>({ url: `${API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}` });
+    const e = res.data;
+    if (e.status === "cancelled" || !e.start?.dateTime) return null;
+    return {
+      id: e.id,
+      summary: e.summary ?? "",
+      start: new Date(e.start.dateTime),
+      end: new Date(e.end!.dateTime!),
+      allDay: false,
+      blocks: e.transparency !== "transparent",
+      description: e.description,
+      fromWeb: e.extendedProperties?.private?.source === "ongi-web",
+      props: e.extendedProperties?.private,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteEvent(calendarId: string, eventId: string): Promise<void> {
+  if (demoMode()) return demoDelete(eventId);
+  const c = getClient();
+  await c.request({ url: `${API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`, method: "DELETE" });
 }

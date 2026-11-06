@@ -1,0 +1,104 @@
+// 고객이 직접 예약을 확인·변경·취소할 때 쓰는 공통 로직
+import crypto from "node:crypto";
+import { BOOKING, BRANCHES, Branch, Trainer, calendarIdOf, getBranch } from "@/config/branches";
+import { CalEvent, getEvent, listEvents } from "./google";
+import { kstHourMinute } from "./time";
+
+const secret = () =>
+  crypto
+    .createHash("sha256")
+    .update(process.env.MANAGE_SECRET || process.env.GOOGLE_SERVICE_ACCOUNT_KEY || "ongi-demo")
+    .digest();
+
+const b64 = (s: string) => Buffer.from(s).toString("base64url");
+const sign = (s: string) => crypto.createHmac("sha256", secret()).update(s).digest("base64url").slice(0, 22);
+
+/** 브라우저에 넘길 예약 식별값 (위조 방지 서명 포함) */
+export function makeToken(branchId: string, trainerId: string, eventId: string) {
+  const body = `${branchId}|${trainerId}|${eventId}`;
+  return `${b64(body)}.${sign(body)}`;
+}
+
+export function readToken(token: unknown): { branch: Branch; trainer: Trainer; calendarId: string; eventId: string } | null {
+  if (typeof token !== "string" || !token.includes(".")) return null;
+  const [bodyB64, sig] = token.split(".");
+  let body = "";
+  try {
+    body = Buffer.from(bodyB64, "base64url").toString("utf8");
+  } catch {
+    return null;
+  }
+  const expected = sign(body);
+  if (sig.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  const [branchId, trainerId, eventId] = body.split("|");
+  const branch = getBranch(branchId);
+  const trainer = branch?.trainers.find((t) => t.id === trainerId);
+  const calendarId = trainer && calendarIdOf(trainer);
+  if (!branch || !trainer || !calendarId || !eventId) return null;
+  return { branch, trainer, calendarId, eventId };
+}
+
+const norm = (s: string) => s.replace(/\s/g, "");
+
+export function ownedBy(e: CalEvent, name: string, last4: string) {
+  return e.fromWeb && e.props?.last4 === last4 && norm(e.props?.name ?? "") === norm(name);
+}
+
+export function canChange(start: Date, now = new Date()) {
+  return start.getTime() - now.getTime() >= BOOKING.changeCutoffHours * 3_600_000;
+}
+
+export type MyBooking = {
+  token: string;
+  branchId: string;
+  branchName: string;
+  trainerId: string;
+  trainerName: string;
+  kind: "trial" | "member";
+  date: string;
+  hour: number;
+  minute: number;
+  changeable: boolean;
+};
+
+export async function findBookings(name: string, last4: string, now = new Date()): Promise<MyBooking[]> {
+  const to = new Date(now.getTime() + (BOOKING.daysAhead + 2) * 86_400_000);
+  const out: MyBooking[] = [];
+  await Promise.all(
+    BRANCHES.filter((b) => b.open).flatMap((b) =>
+      b.trainers.map(async (t) => {
+        const cal = calendarIdOf(t);
+        if (!cal) return;
+        const events = await listEvents(cal, now, to, undefined, { source: "ongi-web", last4 }).catch(() => [] as CalEvent[]);
+        for (const e of events) {
+          if (!ownedBy(e, name, last4) || e.props?.branch !== b.id) continue;
+          const { date, hour, minute } = kstHourMinute(e.start);
+          out.push({
+            token: makeToken(b.id, t.id, e.id),
+            branchId: b.id,
+            branchName: b.short,
+            trainerId: t.id,
+            trainerName: t.name,
+            kind: e.props?.kind === "member" ? "member" : "trial",
+            date,
+            hour,
+            minute,
+            changeable: canChange(e.start, now),
+          });
+        }
+      })
+    )
+  );
+  return out.sort((a, b) => (a.date + String(a.hour).padStart(2, "0")).localeCompare(b.date + String(b.hour).padStart(2, "0")));
+}
+
+/** 토큰 + 이름 + 뒷4자리로 실제 일정을 다시 확인 */
+export async function loadOwned(token: unknown, name: string, last4: string) {
+  const ref = readToken(token);
+  if (!ref) return { error: "예약 정보를 다시 조회해 주세요.", status: 400 } as const;
+  const ev = await getEvent(ref.calendarId, ref.eventId);
+  if (!ev || !ownedBy(ev, name, last4)) return { error: "예약을 찾지 못했어요. 이미 변경·취소되었을 수 있어요.", status: 404 } as const;
+  if (!canChange(ev.start))
+    return { error: `예약 ${BOOKING.changeCutoffHours}시간 전부터는 직접 변경·취소할 수 없어요. 카카오톡으로 문의해 주세요.`, status: 400 } as const;
+  return { ...ref, ev } as const;
+}
