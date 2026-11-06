@@ -66,6 +66,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
     id: "sbp",
     title: "온기 근막이완 신반포스퀘어점",
     photo: `${IMG}/2026/9/7/2026-9-7-1788742310631.webp`,
+    more: ["/branches/sbp/1.webp", "/branches/sbp/2.webp", "/branches/sbp/3.webp", "/branches/sbp/4.webp"],
     tags: ["잠원동 · 본점에서 도보 5분", "여성 전용", "2룸"],
     points: ["여성 전용 근막이완 센터", "여성 근막이완 테크니션이 프로그램 진행"],
   },
