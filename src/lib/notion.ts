@@ -24,7 +24,7 @@ export async function notion<T>(path: string, init?: RequestInit): Promise<T> {
 // DB마다 제목 칸 이름이 '이름' 또는 '회원명'으로 달라서 스키마를 읽어 찾는다.
 const schemaCache = new Map<string, { titleProp: string; phoneProp?: string }>();
 
-async function schemaOf(dbId: string) {
+export async function schemaOf(dbId: string) {
   const hit = schemaCache.get(dbId);
   if (hit) return hit;
   const db = await notion<{ properties: Record<string, Prop> }>(`/databases/${dbId}`);

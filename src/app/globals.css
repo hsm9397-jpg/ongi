@@ -321,3 +321,4 @@ main{display:flex;flex-direction:column;gap:56px}
 .trial-chips .chip small{margin:0;font-size:12px;font-weight:400}
 .kind3 button{justify-content:center;min-height:76px}
 .kind3 button b{margin-bottom:0}
+.book .field .mp-pin{max-width:none;width:100%}

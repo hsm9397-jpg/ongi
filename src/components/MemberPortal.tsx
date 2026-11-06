@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 
 type Group = { name: string; photo: string };
-type Item = { id: string; label: string };
+type Found = { name: string; url: string; token: string };
 const KEY = "ongi-member";
 
 function load(): { token: string; name: string } | null {
@@ -24,8 +24,7 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
   const [me, setMe] = useState<{ token: string; name: string; url?: string } | null>(null);
   const [expired, setExpired] = useState(false);
   const [group, setGroup] = useState<string | null>(null);
-  const [items, setItems] = useState<Item[] | null>(null);
-  const [pick, setPick] = useState<Item | null>(null);
+  const [found, setFound] = useState<Found[] | null>(null);
   const [last4, setLast4] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -47,33 +46,29 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
   }, []);
 
   useEffect(() => {
-    if (!group) return;
-    setItems(null);
-    setErr("");
-    fetch(`/api/members/list?group=${encodeURIComponent(group)}`)
-      .then((r) => r.json())
-      .then((d) => (d.items ? setItems(d.items) : setErr(d.error || "목록을 불러오지 못했어요.")))
-      .catch(() => setErr("목록을 불러오지 못했어요."));
+    if (group) pinRef.current?.focus();
   }, [group]);
 
-  useEffect(() => {
-    if (pick) pinRef.current?.focus();
-  }, [pick]);
+  function go(f: Found) {
+    save({ token: f.token, name: f.name });
+    setMe({ token: f.token, name: f.name, url: f.url });
+    window.location.href = f.url;
+  }
 
-  async function open(code: string) {
-    if (!pick || code.length !== 4) return;
+  async function find(code: string) {
+    if (!group || code.length !== 4) return;
     setBusy(true);
     setErr("");
+    setFound(null);
     try {
-      const r = await fetch("/api/members/open", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pick.id, last4: code }) });
+      const r = await fetch("/api/members/find", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ group, last4: code }) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "다시 시도해 주세요.");
-      save({ token: d.token, name: d.name });
-      setMe({ token: d.token, name: d.name, url: d.url });
-      window.location.href = d.url;
+      const items = d.items as Found[];
+      if (items.length === 1) return go(items[0]);
+      setFound(items);
     } catch (e) {
       setErr((e as Error).message);
-      setLast4("");
     } finally {
       setBusy(false);
     }
@@ -84,7 +79,8 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
     setMe(null);
     setExpired(false);
     setGroup(null);
-    setPick(null);
+    setFound(null);
+    setLast4("");
   }
 
   if (me) {
@@ -130,27 +126,10 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
         </>
       )}
 
-      {group && !pick && (
+      {group && (
         <>
-          <button className="mp-back" onClick={() => setGroup(null)}>‹ 선생님 다시 고르기</button>
+          <button className="mp-back" onClick={() => { setGroup(null); setFound(null); setLast4(""); setErr(""); }}>‹ 선생님 다시 고르기</button>
           <h2>{group === "금액권" ? "금액권 회원" : `${group} 선생님 회원`}</h2>
-          {!items && !err && <p className="loading">불러오는 중…</p>}
-          {items && items.length === 0 && <p className="note">등록된 회원이 없어요.</p>}
-          {items && (
-            <div className="mp-names">
-              {items.map((it) => (
-                <button key={it.id} onClick={() => { setPick(it); setLast4(""); setErr(""); }}>{it.label}</button>
-              ))}
-            </div>
-          )}
-          <p className="mp-hint">이름이 없으면 회원권이 만료되었을 수 있어요. 카카오톡으로 문의해 주세요.</p>
-        </>
-      )}
-
-      {group && pick && (
-        <>
-          <button className="mp-back" onClick={() => setPick(null)}>‹ 이름 다시 고르기</button>
-          <h2>{pick.label}님 확인</h2>
           <label className="mp-pinlabel" htmlFor="pin">휴대폰 번호 뒷 4자리</label>
           <input
             id="pin"
@@ -164,9 +143,24 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
             onChange={(e) => {
               const v = e.target.value.replace(/\D/g, "").slice(0, 4);
               setLast4(v);
-              if (v.length === 4) open(v);
+              setFound(null);
+              if (v.length === 4) find(v);
             }}
           />
+          {busy && <p className="loading" style={{ textAlign: "center" }}>찾는 중…</p>}
+          {found && found.length > 1 && (
+            <div className="mp-names">
+              {found.map((f) => (
+                <button key={f.token} onClick={() => go(f)}>{f.name}</button>
+              ))}
+            </div>
+          )}
+          {found && found.length === 0 && (
+            <>
+              <p className="note">이 번호로 등록된 회원이 없어요. 담당 선생님이 맞는지 확인하시거나, 회원권이 만료되었을 수 있어요.</p>
+              <a className="kakao" href={kakao} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
+            </>
+          )}
           <p className="mp-hint">한 번 확인하면 이 폰에서는 다음부터 바로 열려요.</p>
         </>
       )}

@@ -2,7 +2,7 @@
 // 지점별 회원현황(누적) DB에만 있는 회원은 만료 회원으로 본다. (2026-11-06 대표 결정)
 import crypto from "node:crypto";
 import { BRANCHES, memberDbIdsOf } from "@/config/branches";
-import { findMember, normName, notion, plainText } from "./notion";
+import { findMember, normName, notion, plainText, schemaOf } from "./notion";
 
 type Prop = { type: string; [k: string]: unknown };
 type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
@@ -94,4 +94,68 @@ export function readMemberToken(t: unknown): string | null {
   if (!id || !s) return null;
   const e = sig(id);
   return s.length === e.length && crypto.timingSafeEqual(Buffer.from(s), Buffer.from(e)) ? id : null;
+}
+
+// 이름을 화면에 그대로 보내지 않고 서명값으로 주고받기 위한 토큰
+export const nameToken = (name: string) => {
+  const id = Buffer.from(name, "utf8").toString("base64url");
+  return `${id}.${sig("n|" + id)}`;
+};
+export function readNameToken(t: unknown): string | null {
+  if (typeof t !== "string") return null;
+  const [id, s] = t.split(".");
+  if (!id || !s) return null;
+  const e = sig("n|" + id);
+  if (s.length !== e.length || !crypto.timingSafeEqual(Buffer.from(s), Buffer.from(e))) return null;
+  return Buffer.from(id, "base64url").toString("utf8");
+}
+
+// 지점 누적 회원 DB 전체의 '이름·연락처·DB' 목록 (5분 캐시)
+type Entry = { name: string; phone: string; dbId: string };
+let phoneCache: { at: number; list: Entry[] } | null = null;
+async function phoneBook(): Promise<Entry[]> {
+  if (process.env.DEMO_MODE === "1") return [{ name: "김온기", phone: "01012341234", dbId: "demo" }];
+  if (phoneCache && Date.now() - phoneCache.at < 5 * 60_000) return phoneCache.list;
+  const list: Entry[] = [];
+  const ids = new Set<string>();
+  for (const b of BRANCHES) for (const id of memberDbIdsOf(b)) ids.add(id);
+  for (const db of ids) {
+    const { titleProp, phoneProp } = await schemaOf(db);
+    let cursor: string | undefined;
+    do {
+      const r = await notion<{ results: Page[]; has_more: boolean; next_cursor: string | null }>(`/databases/${db}/query`, {
+        method: "POST",
+        body: JSON.stringify({ page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) }),
+      });
+      for (const p of r.results) {
+        const title = plainText(p.properties[titleProp]);
+        const phone = (phoneProp ? plainText(p.properties[phoneProp]) : "").replace(/\D/g, "") || title.replace(/\D/g, "");
+        const n = normName(title);
+        if (!n || phone.length < 4) continue;
+        list.push({ name: n, phone, dbId: db });
+      }
+      cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
+    } while (cursor);
+  }
+  phoneCache = { at: Date.now(), list };
+  return list;
+}
+
+/** 누적 회원 DB에서 뒷번호가 일치하는 회원: 이름 → 그 회원이 있는 DB들 */
+export async function namesByLast4(last4: string): Promise<Map<string, Set<string>>> {
+  const out = new Map<string, Set<string>>();
+  for (const e of await phoneBook()) {
+    if (!e.phone.endsWith(last4)) continue;
+    out.set(e.name, (out.get(e.name) ?? new Set()).add(e.dbId));
+  }
+  return out;
+}
+
+/** 담당 선생님(또는 금액권) 회원 중 뒷번호가 일치하는 회원 */
+export async function findByLast4(group: string, last4: string): Promise<ValidMember[]> {
+  const list = (await validMembers()) ?? [];
+  const inGroup = list.filter((m) => m.group === group);
+  if (process.env.DEMO_MODE === "1") return last4 === "1234" ? inGroup.slice(0, 1) : [];
+  const hits = await namesByLast4(last4);
+  return inGroup.filter((m) => hits.has(m.name));
 }

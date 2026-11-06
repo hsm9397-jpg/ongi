@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; lat: number; lng: number; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
-type Membership = { branch: string; branchName: string; name: string; trainerId?: string; trainers: { id: string; name: string }[] };
+type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -259,7 +259,9 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [phone, setPhone] = useState("");
   const [memo, setMemo] = useState("");
   // 회원
-  const [mName, setMName] = useState("");
+  const [who, setWho] = useState("");
+  const [label, setLabel] = useState("");
+  const [choices, setChoices] = useState<{ label: string; who: string }[] | null>(null);
   const [last4, setLast4] = useState("");
   const [memberships, setMemberships] = useState<Membership[] | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
@@ -333,18 +335,17 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     resetSlots();
   }
 
-  async function verify(code = last4) {
-    if (busy || mName.trim().length < 2 || code.length !== 4) {
-      if (code.length === 4 && mName.trim().length < 2) setErr("이름을 먼저 입력해 주세요.");
-      return;
-    }
+  async function verify(code = last4, pick?: string) {
+    if (busy || code.length !== 4) return;
     setErr("");
     setBusy(true);
+    setChoices(null);
+    setMemberships(null);
     try {
       const res = await fetch("/api/member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: mName, last4: code }),
+        body: JSON.stringify({ last4: code, who: pick }),
       });
       const data = await res.json().catch(() => ({}));
       if (data.expired) {
@@ -352,7 +353,13 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         return;
       }
       if (!res.ok) throw new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
-      const r = data as { memberships: Membership[] };
+      if (data.choices) {
+        setChoices(data.choices);
+        return;
+      }
+      const r = data as { who: string; label: string; memberships: Membership[] };
+      setWho(r.who);
+      setLabel(r.label);
       setMemberships(r.memberships);
       if (r.memberships.length === 1) chooseMembership(r.memberships[0]);
     } catch (e) {
@@ -376,7 +383,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         body: JSON.stringify(
           kind !== "member"
             ? { kind, branch: activeBranch, date: day, hour, name, phone, memo }
-            : { kind, branch: activeBranch, date: day, hour, name: mName, last4, trainer }
+            : { kind, branch: activeBranch, date: day, hour, who, last4, trainer }
         ),
       });
       setDone(r.booking);
@@ -428,7 +435,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <div className="pop-bg" role="dialog" aria-modal="true" aria-labelledby="exp-title" onClick={() => setExpiredPop(false)}>
           <div className="pop" onClick={(e) => e.stopPropagation()}>
             <h3 id="exp-title">회원권이 만료되었어요</h3>
-            <p>{mName.trim()} 회원님의 이용권 기간이 끝나 예약할 수 없어요. 재등록이나 문의는 카카오톡으로 바로 남겨 주세요.</p>
+            <p>회원님의 이용권 기간이 끝나 예약할 수 없어요. 재등록이나 문의는 카카오톡으로 바로 남겨 주세요.</p>
             <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡으로 문의하기</a>
             <button className="ghost" onClick={() => setExpiredPop(false)}>닫기</button>
           </div>
@@ -492,26 +499,37 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       {kind === "member" && !membership && (
         <div className="step">
           <h3>1 · 회원 확인</h3>
-          <div className="row2">
-            <div className="field">
-              <label htmlFor="mn">이름</label>
-              <input id="mn" autoComplete="name" value={mName} onChange={(e) => setMName(e.target.value)} />
-            </div>
-            <div className="field">
-              <label htmlFor="mp">연락처 뒷 4자리</label>
-              <input
-                id="mp"
-                inputMode="numeric"
-                maxLength={4}
-                value={last4}
-                onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, "").slice(0, 4);
-                  setLast4(v);
-                  if (v.length === 4) verify(v);
-                }}
-              />
-            </div>
+          <div className="field">
+            <label htmlFor="mp">연락처 뒷 4자리</label>
+            <input
+              id="mp"
+              className="mp-pin"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={4}
+              value={last4}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                setLast4(v);
+                setChoices(null);
+                setMemberships(null);
+                if (v.length === 4) verify(v);
+              }}
+            />
           </div>
+          {busy && <p className="loading" style={{ textAlign: "center" }}>확인 중…</p>}
+          {choices && (
+            <>
+              <p className="kind-desc">같은 번호의 회원이 여러 명이에요. 본인 이름을 눌러 주세요.</p>
+              <div className="chips">
+                {choices.map((c) => (
+                  <button key={c.who} className="chip" onClick={() => verify(last4, c.who)}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           {memberships && memberships.length > 1 && (
             <div className="chips">
               {memberships.map((m) => (
@@ -521,9 +539,6 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               ))}
             </div>
           )}
-          <button className="ghost" disabled={busy} onClick={() => verify()}>
-            {busy ? "확인 중…" : "회원 정보 확인"}
-          </button>
         </div>
       )}
 
@@ -531,7 +546,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <>
           <div className="member-card">
             <div>
-              <b>{membership.name} 회원님</b>
+              <b>{label} 회원님</b>
               <br />
               <span>
                 {membership.branchName}

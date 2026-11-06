@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
-import { isValidName } from "@/lib/members";
+import { isValidName, readNameToken } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
@@ -21,7 +21,8 @@ export async function POST(req: Request) {
   const branch = getBranch(String(body.branch ?? ""));
   const date = body.date;
   const hour = Number(body.hour);
-  const name = cleanName(body.name);
+  // 회원 예약은 이름 대신 /api/member가 준 서명값(who)으로 온다
+  const name = body.kind === "member" && body.who ? cleanName(readNameToken(body.who) ?? "") : cleanName(body.name);
   if (!kind || !branch || !branch.open || branch.bookable === false || (kind === "pt") !== (branch.only === "pt") || !isValidDate(date) || !Number.isInteger(hour) || name.length < 2) {
     return NextResponse.json({ error: "예약 정보가 올바르지 않아요." }, { status: 400 });
   }
