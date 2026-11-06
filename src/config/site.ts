@@ -83,7 +83,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
 
 export const GUIDE = [
   { q: "여자 선생님을 원해요", a: "신반포스퀘어점 (여성만 신청 가능)" },
-  { q: "더 프라이빗하고 아늑한 공간이 좋아요", a: "온기 근막이완 (본점)" },
+  { q: "1인 전용 공간을 원해요", a: "온기 근막이완 (본점)" },
   { q: "여러 명이 함께 받고 싶어요", a: "선릉점 (3룸)" },
   { q: "대표에게 받고 싶어요", a: "온기 PT&근막이완 (본점, 현재 예약 불가)" },
 ];
