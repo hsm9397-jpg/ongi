@@ -99,7 +99,7 @@ export async function listEvents(
 
 export async function createEvent(
   calendarId: string,
-  input: { summary: string; start: Date; end: Date; description: string; kind: "trial" | "member"; phone: string; name: string; branch: string }
+  input: { summary: string; start: Date; end: Date; description: string; kind: "trial" | "member" | "pt"; phone: string; name: string; branch: string }
 ): Promise<{ id: string; htmlLink?: string }> {
   const props = { source: "ongi-web", kind: input.kind, phone: input.phone, last4: input.phone.slice(-4), name: input.name, branch: input.branch };
   if (demoMode()) return demoCreate(calendarId, input.summary, input.start, input.end, props, input.description);

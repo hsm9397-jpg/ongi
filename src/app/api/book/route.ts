@@ -16,12 +16,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "요청이 너무 많아요. 잠시 후 다시 시도해 주세요." }, { status: 429 });
   }
   const body = await req.json().catch(() => ({}));
-  const kind = body.kind === "member" ? "member" : body.kind === "trial" ? "trial" : null;
+  const kind = body.kind === "member" ? "member" : body.kind === "trial" ? "trial" : body.kind === "pt" ? "pt" : null;
   const branch = getBranch(String(body.branch ?? ""));
   const date = body.date;
   const hour = Number(body.hour);
   const name = cleanName(body.name);
-  if (!kind || !branch || !branch.open || branch.bookable === false || !isValidDate(date) || !Number.isInteger(hour) || name.length < 2) {
+  if (!kind || !branch || !branch.open || branch.bookable === false || (kind === "pt") !== (branch.only === "pt") || !isValidDate(date) || !Number.isInteger(hour) || name.length < 2) {
     return NextResponse.json({ error: "예약 정보가 올바르지 않아요." }, { status: 400 });
   }
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   let phone = "";
   let trainerId: string | undefined;
   let memberName = name;
-  if (kind === "trial") {
+  if (kind === "trial" || kind === "pt") {
     phone = digitsOnly(body.phone);
     if (phone.length < 10 || phone.length > 11) {
       return NextResponse.json({ error: "연락처를 정확히 입력해 주세요." }, { status: 400 });
@@ -56,12 +56,12 @@ export async function POST(req: Request) {
     const cal = calendarIdOf(pick.trainer)!;
 
     // 일정 제목은 기존 노션 '예약 분석' 집계 규칙과 같게: 체험='이름+뒷4자리 체험', 회원='이름' (회차는 담당자가 붙임)
-    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : memberName;
+    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : memberName;
     const memo = cleanMemo(body.memo);
     const description = [
-      `[홈페이지 예약] ${kind === "trial" ? "첫 방문 체험" : "회원 예약"}`,
+      `[홈페이지 예약] ${kind === "trial" ? "첫 방문 체험" : kind === "pt" ? "PT 상담·평가(무료)" : "회원 예약"}`,
       `지점: ${branch.name}`,
-      kind === "trial" ? `연락처: ${fmtPhone(phone)}` : `연락처 뒷자리: ${phone}`,
+      kind !== "member" ? `연락처: ${fmtPhone(phone)}` : `연락처 뒷자리: ${phone}`,
       memo ? `요청사항: ${memo}` : "",
     ]
       .filter(Boolean)

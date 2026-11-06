@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const r = await loadOwned(body.token, name, last4);
     if ("error" in r) return NextResponse.json({ error: r.error }, { status: r.status });
     if (r.branch.bookable === false) return NextResponse.json({ error: "이 지점은 현재 온라인 예약을 받지 않아요. 카카오톡으로 문의해 주세요." }, { status: 400 });
-    const kind = r.ev.props?.kind === "member" ? "member" : "trial";
+    const kind = r.ev.props?.kind === "member" ? "member" : r.ev.props?.kind === "pt" ? "pt" : "trial";
     // 회원은 같은 담당 선생님으로만. 체험은 같은 선생님을 먼저, 안 되면 같은 지점의 비어 있는 선생님
     const pick =
       (await pickTrainer(r.branch, date, hour, r.trainer.id)) ??

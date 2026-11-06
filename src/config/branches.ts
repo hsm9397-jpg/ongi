@@ -16,6 +16,10 @@ export type Branch = {
   womenOnly?: boolean;
   /** 고객 예약 화면에 노출할지 (오픈 예정 지점은 false) */
   open: boolean;
+  /** 지점 목록 칩에서는 숨김 (PT 상담처럼 별도 버튼으로 들어가는 예약) */
+  hidden?: boolean;
+  /** 이 '지점'으로 받는 예약 종류. 기본은 체험·회원, PT 상담 전용이면 "pt" */
+  only?: "pt";
   /** 온라인 예약을 받을지 (false면 지점 안내만 보이고 날짜 선택이 막힘) */
   bookable?: boolean;
   /** 지점을 눌렀을 때 보이는 소개 문구 */
@@ -102,6 +106,22 @@ export const BRANCHES: Branch[] = [
     lastHour: 20,
   },
   {
+    id: "pt",
+    desc: "운동 목적이나 몸 상태에 따라 필요한 체성분, 근력, 가동성, 기능 테스트를 진행하고 운동의 방향을 설정하는 시간입니다. 여성 트레이너가 진행합니다.",
+    address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
+    mapQuery: "서울 서초구 신반포로33길 62",
+    name: "온기 PT&근막이완 · PT 상담·평가",
+    short: "온기PT&근막이완(본점)",
+    beds: 1,
+    open: true,
+    hidden: true,
+    only: "pt",
+    trainers: [{ id: "kjh", name: "김정화", calendarEnv: "CAL_KIMJUNGHWA" }],
+    memberDbEnv: "NOTION_MEMBER_DB_PT",
+    firstHour: 10,
+    lastHour: 20,
+  },
+  {
     id: "cd",
     desc: "오픈 예정입니다.",
     name: "청담점",
@@ -161,6 +181,8 @@ export function publicBranches() {
     name: b.name,
     short: b.short,
     womenOnly: !!b.womenOnly,
+    hidden: !!b.hidden,
+    only: b.only,
     bookable: b.bookable !== false,
     desc: b.desc,
     notice: b.notice ?? "",

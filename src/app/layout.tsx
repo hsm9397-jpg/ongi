@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "온기 예약 | Conditioning Studio 온기",
-  description: "온기 근막이완 컨디셔닝 전 지점 예약. 첫 방문 체험과 회원 예약을 한곳에서.",
+  title: "온기 | Conditioning Studio 온기 근막이완 컨디셔닝",
+  description: "몸을 편안하게, 움직임을 자유롭게. 온기 근막이완 컨디셔닝 소개, 지점 안내, 체험·회원·PT 상담 예약을 한곳에서.",
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };

@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; name: string; trainerId?: string; trainers: { id: string; name: string }[] };
-type Done = { kind: "trial" | "member"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
+type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
-type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member"; date: string; hour: number; minute: number; changeable: boolean };
+type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean };
 
 /** 내 예약 확인·변경·취소 */
 function ManageBookings() {
@@ -113,7 +113,7 @@ function ManageBookings() {
             <li key={b.token} className="mybook">
               <div className="mybook-main">
                 <b>{fmtDay(b.date)} {b.hour}:{String(b.minute).padStart(2, "0")}</b>
-                <span>{b.branchName} · {b.trainerName} 선생님 · {b.kind === "trial" ? "체험" : "회원"}</span>
+                <span>{b.branchName} · {b.trainerName} 선생님 · {b.kind === "trial" ? "체험" : b.kind === "pt" ? "PT 상담·평가" : "회원"}</span>
               </div>
               {b.changeable ? (
                 confirmCancel === b.token ? (
@@ -246,7 +246,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
 
 export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: string; sessionMinutes: number; comingSoon: string[] }) {
   const { branches, trialPrice, sessionMinutes, comingSoon } = props;
-  const [kind, setKind] = useState<"trial" | "member">("trial");
+  const [kind, setKind] = useState<"trial" | "member" | "pt">("trial");
   const [manage, setManage] = useState(false);
   const [branch, setBranch] = useState<string | null>(null);
   const [days, setDays] = useState<Record<string, Slot[]> | null>(null);
@@ -268,7 +268,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [membership, setMembership] = useState<Membership | null>(null);
   const [trainer, setTrainer] = useState<string | null>(null);
 
-  const activeBranch = kind === "member" ? membership?.branch ?? null : branch;
+  const ptBranch = branches.find((b) => b.only === "pt");
+  const activeBranch = kind === "member" ? membership?.branch ?? null : kind === "pt" ? ptBranch?.id ?? null : branch;
   const needTrainer = kind === "member";
 
   function resetSlots() {
@@ -304,7 +305,22 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     };
   }, [activeBranch, trainer, needTrainer]);
 
-  function switchKind(k: "trial" | "member") {
+  // 홈페이지의 버튼(#trial, #member, #pt, #my)으로 예약 종류를 바로 열기
+  useEffect(() => {
+    const apply = () => {
+      const h = window.location.hash.replace("#", "");
+      if (h === "my") setManage(true);
+      else if (h === "trial" || h === "member" || h === "pt") switchKind(h);
+      else return;
+      document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+    };
+    apply();
+    window.addEventListener("hashchange", apply);
+    return () => window.removeEventListener("hashchange", apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function switchKind(k: "trial" | "member" | "pt") {
     setKind(k);
     setManage(false);
     setBranch(null);
@@ -340,7 +356,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   async function confirm() {
     if (!activeBranch || !day || hour == null) return;
     setErr("");
-    if (kind === "trial" && (name.trim().length < 2 || phone.replace(/\D/g, "").length < 10)) {
+    if (kind !== "member" && (name.trim().length < 2 || phone.replace(/\D/g, "").length < 10)) {
       setErr("이름과 연락처를 입력해 주세요.");
       return;
     }
@@ -349,7 +365,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       const r = await api<{ booking: Done }>("/api/book", {
         method: "POST",
         body: JSON.stringify(
-          kind === "trial"
+          kind !== "member"
             ? { kind, branch: activeBranch, date: day, hour, name, phone, memo }
             : { kind, branch: activeBranch, date: day, hour, name: mName, last4, trainer }
         ),
@@ -373,7 +389,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <h2>예약이 확정됐어요</h2>
         <dl className="summary">
           <dt>구분</dt>
-          <dd>{done.kind === "trial" ? "첫 방문 체험" : "기존 회원 예약"}</dd>
+          <dd>{done.kind === "trial" ? "첫 방문 체험" : done.kind === "pt" ? "PT 상담·평가 (무료)" : "기존 회원 예약"}</dd>
           <dt>지점</dt>
           <dd>{done.branchName}</dd>
           <dt>일시</dt>
@@ -410,6 +426,12 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <span>이용권이 있는 회원님</span>
           <span>담당 선생님 일정 확인</span>
         </button>
+        {ptBranch && (
+          <button className="kind-wide" aria-pressed={!manage && kind === "pt"} onClick={() => switchKind("pt")}>
+            <b>PT 상담·평가 <small>(무료)</small></b>
+            <span>{sessionMinutes}분 · 체성분·근력·가동성·기능 테스트 · 여성 트레이너 진행</span>
+          </button>
+        )}
       </div>
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
@@ -424,7 +446,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <div className="step">
           <h3>1 · 지점</h3>
           <div className="chips">
-            {branches.map((b) => (
+            {branches.filter((b) => !b.hidden).map((b) => (
               <button key={b.id} className="chip" aria-pressed={branch === b.id} onClick={() => { setBranch(b.id); resetSlots(); }}>
                 {b.short}
                 {b.womenOnly && <small>여성전용</small>}
@@ -437,6 +459,13 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             ))}
           </div>
           {activeInfo && <BranchInfo key={activeInfo.id} b={activeInfo} />}
+        </div>
+      )}
+
+      {kind === "pt" && ptBranch && (
+        <div className="step">
+          <h3>1 · 장소</h3>
+          <BranchInfo key={ptBranch.id} b={ptBranch} />
         </div>
       )}
 
@@ -524,7 +553,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         </div>
       )}
 
-      {days && day && hour != null && kind === "trial" && (
+      {days && day && hour != null && kind !== "member" && (
         <div className="step">
           <h3>4 · 예약자 정보</h3>
           <div className="row2">
@@ -541,9 +570,13 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             <label htmlFor="tm">불편한 부위나 요청사항 (선택)</label>
             <textarea id="tm" rows={2} maxLength={300} value={memo} onChange={(e) => setMemo(e.target.value)} />
           </div>
-          <div className="note">
-            체험가 <b>{trialPrice}</b>은 방문 당일 결제해요. 관리 후 붉은 자국이 생길 수 있고 보통 3~4일 이내 옅어져요.
-          </div>
+          {kind === "trial" ? (
+            <div className="note">
+              체험가 <b>{trialPrice}</b>은 방문 당일 결제해요. 관리 후 붉은 자국이 생길 수 있고 보통 3~4일 이내 옅어져요.
+            </div>
+          ) : (
+            <div className="note">PT 상담·평가는 무료예요. 운동복은 준비되어 있어요.</div>
+          )}
         </div>
       )}
 

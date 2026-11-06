@@ -29,7 +29,7 @@ export type NotifyInput = {
 
 export function notifyText(n: NotifyInput): string {
   const head = { new: "[온기 새 예약]", change: "[온기 예약 변경]", cancel: "[온기 예약 취소]" }[n.type];
-  const kind = n.kind === "trial" ? "체험" : "회원";
+  const kind = n.kind === "trial" ? "체험" : n.kind === "pt" ? "PT 상담" : "회원";
   const lines = [head, `${n.branchName} · ${n.trainer.name} 선생님`, `${n.name} (${kind})`];
   if (n.type === "change" && n.oldWhen) lines.push(`${fmtWhen(n.oldWhen)} → ${fmtWhen(n.when)}`);
   else lines.push(fmtWhen(n.when));

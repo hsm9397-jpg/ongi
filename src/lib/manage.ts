@@ -54,7 +54,7 @@ export type MyBooking = {
   branchName: string;
   trainerId: string;
   trainerName: string;
-  kind: "trial" | "member";
+  kind: "trial" | "member" | "pt";
   date: string;
   hour: number;
   minute: number;
@@ -79,7 +79,7 @@ export async function findBookings(name: string, last4: string, now = new Date()
             branchName: b.short,
             trainerId: t.id,
             trainerName: t.name,
-            kind: e.props?.kind === "member" ? "member" : "trial",
+            kind: e.props?.kind === "member" ? "member" : e.props?.kind === "pt" ? "pt" : "trial",
             date,
             hour,
             minute,
