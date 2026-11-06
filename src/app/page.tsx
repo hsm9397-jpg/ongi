@@ -1,6 +1,8 @@
 import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
+import BranchHead from "@/components/BranchHead";
+import { mapSrc } from "@/lib/map";
 
 const NAV = [
   ["about", "소개"],
@@ -108,7 +110,7 @@ export default function Home() {
                     </details>
                   )}
                   <div className="bcard-body">
-                    <h3>{c.title}</h3>
+                    <BranchHead title={c.title} address={b?.address} src={b?.address ? mapSrc(b.lat, b.lng, b.mapQuery || b.address) : undefined} />
                     <div className="tags">{c.tags.map((t) => <span key={t}>{t}</span>)}</div>
                     <ul>{c.points.map((p) => <li key={p}>{p}</li>)}</ul>
                     {b?.address && (

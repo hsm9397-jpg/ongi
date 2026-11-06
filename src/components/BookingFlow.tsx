@@ -1,4 +1,5 @@
 "use client";
+import { mapSrc } from "@/lib/map";
 
 import { useEffect, useState } from "react";
 
@@ -161,18 +162,8 @@ function ManageBookings() {
 }
 
 /** 지점 소개 + 위치(펼치기) */
-// 네이버 지도 키가 있으면 네이버 지도, 없으면 구글 지도.
-// 네이버는 한글 도메인을 등록할 수 없어서 지도 화면만 vercel 주소에서 불러온다.
-const NAVER_MAP_ID = process.env.NEXT_PUBLIC_NAVER_MAP_ID || "a120cplv6t"; // 공개용 Client ID (등록된 주소에서만 작동)
-const NAVER_MAP_HOST = "https://ongi-gray.vercel.app";
-function mapSrc(b: PubBranch, q: string) {
-  if (NAVER_MAP_ID && b.lat) return `${NAVER_MAP_HOST}/naver-map.html?lat=${b.lat}&lng=${b.lng}&id=${NAVER_MAP_ID}`;
-  return `https://maps.google.com/maps?q=${q}&z=16&output=embed`;
-}
-
 function BranchInfo({ b }: { b: PubBranch }) {
   const [open, setOpen] = useState(false);
-  const q = encodeURIComponent(b.mapQuery || b.address);
   return (
     <div className="binfo">
       <p className="bdesc">{b.desc}</p>
@@ -185,7 +176,7 @@ function BranchInfo({ b }: { b: PubBranch }) {
           {open && (
             <div className="loc">
               <p className="addr">{b.address}</p>
-              <iframe title={`${b.short} 지도`} src={mapSrc(b, q)} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              <iframe title={`${b.short} 지도`} src={mapSrc(b.lat, b.lng, b.mapQuery || b.address)} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             </div>
           )}
         </>
@@ -276,7 +267,6 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   const ptBranch = branches.find((b) => b.only === "pt");
   const activeBranch = kind === "member" ? membership?.branch ?? null : kind === "pt" ? ptBranch?.id ?? null : null;
-  const trialInfo = kind === "trial" ? branches.find((b) => b.id === branch) : undefined;
   const needTrainer = kind === "member";
 
   function resetSlots() {
@@ -463,7 +453,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <span>담당 선생님 일정</span>
         </button>
       </div>
-      {!manage && kind === "trial" && <p className="kind-desc">첫 방문 체험은 네이버 예약으로 받고 있어요. 지점을 고르면 예약 화면으로 이동할 수 있어요.</p>}
+      {!manage && kind === "trial" && <p className="kind-desc">첫 방문 체험은 네이버 예약으로 받고 있어요.</p>}
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
       </button>
@@ -477,24 +467,25 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         <div className="step">
           <h3>1 · 지점</h3>
           <div className="chips">
-            {branches.filter((b) => !b.hidden).map((b) => (
-              <button key={b.id} className="chip" aria-pressed={branch === b.id} onClick={() => { setBranch(b.id); resetSlots(); }}>
-                {b.short}
-                {b.womenOnly && <small>여성전용</small>}
-              </button>
-            ))}
+            {branches.filter((b) => !b.hidden).map((b) =>
+              b.bookable && b.naverTrial ? (
+                <a key={b.id} className="chip" href={b.naverTrial} target="_blank" rel="noopener noreferrer">
+                  {b.short}
+                  {b.womenOnly && <small>여성전용</small>}
+                </a>
+              ) : (
+                <button key={b.id} className="chip" disabled>
+                  {b.short} <small>예약 불가</small>
+                </button>
+              )
+            )}
             {comingSoon.map((s) => (
               <button key={s} className="chip" disabled>
                 {s} <small>오픈 예정</small>
               </button>
             ))}
           </div>
-          {trialInfo && <BranchInfo key={trialInfo.id} b={trialInfo} />}
-          {trialInfo?.bookable && trialInfo.naverTrial && (
-            <a className="naver-btn" href={trialInfo.naverTrial} target="_blank" rel="noopener noreferrer">
-              네이버로 {trialInfo.short} 체험 예약하기
-            </a>
-          )}
+          <p className="kind-desc">지점을 누르면 네이버 예약 화면으로 바로 이동해요.</p>
         </div>
       )}
 

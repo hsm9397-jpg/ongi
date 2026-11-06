@@ -313,3 +313,4 @@ main{display:flex;flex-direction:column;gap:56px}
 .bmore-grid img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px}
 .bmore-grid a:first-child:nth-last-child(odd) img{aspect-ratio:4/3}
 .bmore-grid a.wide{grid-column:1/-1}.bmore-grid a.wide img{aspect-ratio:4/3}
+.bhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.bhead h3{margin:0}.bhead .loc-toggle{flex:0 0 auto}a.chip{text-decoration:none;display:inline-flex;align-items:center}
