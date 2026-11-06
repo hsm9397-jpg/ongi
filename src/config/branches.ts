@@ -30,6 +30,8 @@ export type Branch = {
   address?: string;
   /** 지도 검색용 주소 (층·호수 제외한 도로명) */
   mapQuery?: string;
+  /** 첫 방문 체험은 네이버 예약으로 받는다 (플레이스 순위 유지, 2026-11-06 결정) */
+  naverTrial?: string;
   trainers: Trainer[];
   /** 노션 회원 DB ID를 담은 환경변수 이름 (쉼표로 여러 개 가능) */
   memberDbEnv: string;
@@ -46,6 +48,7 @@ export const BRANCHES: Branch[] = [
     bookable: false,
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
     mapQuery: "서울 서초구 신반포로33길 62",
+    naverTrial: "https://m.booking.naver.com/booking/13/bizes/1538431/items/7200334",
     name: "온기 PT&근막이완",
     short: "온기PT&근막이완(본점)",
     beds: 1,
@@ -60,6 +63,7 @@ export const BRANCHES: Branch[] = [
     desc: "오로지 1인을 위한 프라이빗룸으로 가장 아늑한 지점입니다.",
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 지하 1층",
     mapQuery: "서울 서초구 신반포로33길 62",
+    naverTrial: "https://m.booking.naver.com/booking/13/bizes/1646425/items/7655040",
     name: "온기 근막이완 더 프라이빗",
     short: "온기 근막이완(본점)",
     beds: 1,
@@ -74,6 +78,7 @@ export const BRANCHES: Branch[] = [
     desc: "여성 전용 지점으로 분리된 2룸으로 룸 간의 독립성을 유지하였습니다.",
     address: "서울시 서초구 잠원로8길 25 신반포스퀘어 2층 213-1호",
     mapQuery: "서울 서초구 잠원로8길 25",
+    naverTrial: "https://m.booking.naver.com/booking/13/bizes/1727252/items/8012950",
     name: "신반포스퀘어점",
     short: "신반포스퀘어",
     beds: 2,
@@ -92,6 +97,7 @@ export const BRANCHES: Branch[] = [
     desc: "가장 큰 지점으로 독립적으로 분리된 3룸을 갖췄으며, 각 룸은 분리되어 독립성을 가집니다. 여러 명이 동시 진행 가능합니다.",
     address: "서울시 강남구 선릉로86길 31 롯데골드로즈2차 4층 403호",
     mapQuery: "서울 강남구 선릉로86길 31",
+    naverTrial: "https://m.booking.naver.com/booking/13/bizes/1759220/items/8143892",
     name: "선릉점",
     short: "선릉",
     beds: 3,
@@ -188,6 +194,7 @@ export function publicBranches() {
     notice: b.notice ?? "",
     address: b.address ?? "",
     mapQuery: b.mapQuery ?? b.address ?? "",
+    naverTrial: b.naverTrial ?? "",
     trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
   }));
 }

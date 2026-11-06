@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; name: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -269,7 +269,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [trainer, setTrainer] = useState<string | null>(null);
 
   const ptBranch = branches.find((b) => b.only === "pt");
-  const activeBranch = kind === "member" ? membership?.branch ?? null : kind === "pt" ? ptBranch?.id ?? null : branch;
+  const activeBranch = kind === "member" ? membership?.branch ?? null : kind === "pt" ? ptBranch?.id ?? null : null;
+  const trialInfo = kind === "trial" ? branches.find((b) => b.id === branch) : undefined;
   const needTrainer = kind === "member";
 
   function resetSlots() {
@@ -418,8 +419,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       <div className="kind kind3" role="tablist" aria-label="예약 종류">
         <button role="tab" aria-pressed={!manage && kind === "trial"} aria-selected={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
           <b>근막이완<br />체험 신청</b>
-          <span>{sessionMinutes}분 1:1</span>
-          <span>{trialPrice}</span>
+          <span>{sessionMinutes}분 1:1 · {trialPrice}</span>
+          <span>네이버 예약</span>
         </button>
         {ptBranch && (
           <button role="tab" aria-pressed={!manage && kind === "pt"} aria-selected={!manage && kind === "pt"} onClick={() => switchKind("pt")}>
@@ -434,7 +435,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <span>담당 선생님 일정</span>
         </button>
       </div>
-      {!manage && kind === "trial" && <p className="kind-desc">처음 오시는 분을 위한 근막이완 컨디셔닝 1:1 체험이에요.</p>}
+      {!manage && kind === "trial" && <p className="kind-desc">첫 방문 체험은 네이버 예약으로 받고 있어요. 지점을 고르면 예약 화면으로 이동할 수 있어요.</p>}
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
       </button>
@@ -460,7 +461,12 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               </button>
             ))}
           </div>
-          {activeInfo && <BranchInfo key={activeInfo.id} b={activeInfo} />}
+          {trialInfo && <BranchInfo key={trialInfo.id} b={trialInfo} />}
+          {trialInfo?.bookable && trialInfo.naverTrial && (
+            <a className="naver-btn" href={trialInfo.naverTrial} target="_blank" rel="noopener noreferrer">
+              네이버로 {trialInfo.short} 체험 예약하기
+            </a>
+          )}
         </div>
       )}
 

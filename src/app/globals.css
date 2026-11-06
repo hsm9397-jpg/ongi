@@ -250,3 +250,4 @@ main{display:flex;flex-direction:column;gap:56px}
 .kind3 button b{font-size:15.5px;line-height:1.3;margin-bottom:4px}
 .kind3 button span{font-size:12px}
 .kind-desc{margin:-8px 0 0;font-size:13.5px;color:var(--muted);text-align:center}
+.naver-btn{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;background:#03c75a;color:#fff;font-weight:700;font-size:15.5px;text-decoration:none;padding:12px}
