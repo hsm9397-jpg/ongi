@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; bookable: boolean; desc: string; notice: string; address: string; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; name: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -10,6 +10,38 @@ type Done = { kind: "trial" | "member"; branchName: string; date: string; hour: 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+/** 지점 소개 + 위치(펼치기) */
+function BranchInfo({ b }: { b: PubBranch }) {
+  const [open, setOpen] = useState(false);
+  const q = encodeURIComponent(b.address);
+  return (
+    <div className="binfo">
+      <p className="bdesc">{b.desc}</p>
+      {b.notice && <p className="bnotice">{b.notice}</p>}
+      {b.address && (
+        <>
+          <button className="loc-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>
+            위치 보기 <span aria-hidden>{open ? "▴" : "▾"}</span>
+          </button>
+          {open && (
+            <div className="loc">
+              <p className="addr">{b.address}</p>
+              <iframe title={`${b.short} 지도`} src={`https://maps.google.com/maps?q=${q}&z=16&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              <div className="maplinks">
+                <a href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener noreferrer">네이버 지도</a>
+                <a href={`https://map.kakao.com/link/search/${q}`} target="_blank" rel="noopener noreferrer">카카오맵</a>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      {!b.bookable && (
+        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡으로 문의하기</a>
+      )}
+    </div>
+  );
+}
 
 /** 한 달 달력: 예약 가능한 날만 누를 수 있음 */
 function MonthCalendar({ days, selected, onPick }: { days: Record<string, Slot[]>; selected: string | null; onPick: (d: string) => void }) {
@@ -95,8 +127,11 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     setErr("");
   }
 
+  const activeInfo = branches.find((b) => b.id === activeBranch);
+  const activeBookable = activeInfo ? activeInfo.bookable : true;
+
   useEffect(() => {
-    if (!activeBranch || (needTrainer && !trainer)) {
+    if (!activeBranch || !activeBookable || (needTrainer && !trainer)) {
       setDays(null);
       return;
     }
@@ -117,7 +152,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     return () => {
       cancelled = true;
     };
-  }, [activeBranch, trainer, needTrainer]);
+  }, [activeBranch, activeBookable, trainer, needTrainer]);
 
   function switchKind(k: "trial" | "member") {
     setKind(k);
@@ -242,6 +277,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               </button>
             ))}
           </div>
+          {activeInfo && <BranchInfo key={activeInfo.id} b={activeInfo} />}
         </div>
       )}
 
@@ -288,7 +324,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               다른 회원
             </button>
           </div>
-          {(!trainer || membership.trainers.length > 1) && (
+          {activeInfo && <BranchInfo key={activeInfo.id} b={activeInfo} />}
+          {activeBookable && (!trainer || membership.trainers.length > 1) && (
             <div className="step">
               <h3>담당 선생님</h3>
               <div className="chips">

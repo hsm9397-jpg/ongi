@@ -113,3 +113,15 @@ table.grid{border-collapse:separate;border-spacing:4px;width:100%;min-width:420p
 .login{max-width:360px;margin:40px auto;display:flex;flex-direction:column;gap:12px}
 @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.book{padding:16px}}
 @media (prefers-reduced-motion:no-preference){.chip,.day,.kind button{transition:background .15s,border-color .15s}}
+
+/* 지점 안내 */
+.binfo{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.bdesc{margin:0;font-size:14px;line-height:1.6}
+.bnotice{margin:0;font-size:13.5px;font-weight:600;color:var(--terra)}
+.loc-toggle{align-self:flex-start;min-height:36px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:13.5px;cursor:pointer}
+.loc{display:flex;flex-direction:column;gap:8px}
+.addr{margin:0;font-size:13.5px;color:var(--muted)}
+.loc iframe{width:100%;height:220px;border:0;border-radius:8px;background:var(--off)}
+.maplinks{display:flex;gap:8px;flex-wrap:wrap}
+.maplinks a{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;background:var(--surface)}
+.binfo .kakao{align-self:flex-start}

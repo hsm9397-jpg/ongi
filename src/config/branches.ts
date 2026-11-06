@@ -16,6 +16,14 @@ export type Branch = {
   womenOnly?: boolean;
   /** 고객 예약 화면에 노출할지 (오픈 예정 지점은 false) */
   open: boolean;
+  /** 온라인 예약을 받을지 (false면 지점 안내만 보이고 날짜 선택이 막힘) */
+  bookable?: boolean;
+  /** 지점을 눌렀을 때 보이는 소개 문구 */
+  desc: string;
+  /** 지점 아래 안내 한 줄 (예: 예약 불가 사유) */
+  notice?: string;
+  /** 주소. 비워 두면 위치 보기 버튼이 숨겨집니다 */
+  address?: string;
   trainers: Trainer[];
   /** 노션 회원 DB ID를 담은 환경변수 이름 (쉼표로 여러 개 가능) */
   memberDbEnv: string;
@@ -27,6 +35,10 @@ export type Branch = {
 export const BRANCHES: Branch[] = [
   {
     id: "main",
+    desc: "본점으로 대표가 진행하며 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
+    notice: "현재는 예약 불가합니다.",
+    bookable: false,
+    address: "",
     name: "온기 PT&근막이완",
     short: "온기PT&근막이완(본점)",
     beds: 1,
@@ -38,6 +50,8 @@ export const BRANCHES: Branch[] = [
   },
   {
     id: "priv",
+    desc: "오로지 1인을 위한 프라이빗룸으로 가장 아늑한 지점입니다.",
+    address: "",
     name: "온기 근막이완 더 프라이빗",
     short: "온기 근막이완(본점)",
     beds: 1,
@@ -49,6 +63,8 @@ export const BRANCHES: Branch[] = [
   },
   {
     id: "sbp",
+    desc: "여성 전용 지점으로 분리된 2룸으로 룸 간의 독립성을 유지하였습니다.",
+    address: "",
     name: "신반포스퀘어점",
     short: "신반포스퀘어",
     beds: 2,
@@ -64,6 +80,8 @@ export const BRANCHES: Branch[] = [
   },
   {
     id: "sl",
+    desc: "가장 큰 지점으로 독립적으로 분리된 3룸을 갖췄으며, 각 룸은 분리되어 독립성을 가집니다. 여러 명이 동시 진행 가능합니다.",
+    address: "",
     name: "선릉점",
     short: "선릉",
     beds: 3,
@@ -79,6 +97,7 @@ export const BRANCHES: Branch[] = [
   },
   {
     id: "cd",
+    desc: "오픈 예정입니다.",
     name: "청담점",
     short: "청담",
     beds: 2,
@@ -128,6 +147,10 @@ export function publicBranches() {
     name: b.name,
     short: b.short,
     womenOnly: !!b.womenOnly,
+    bookable: b.bookable !== false,
+    desc: b.desc,
+    notice: b.notice ?? "",
+    address: b.address ?? "",
     trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
   }));
 }

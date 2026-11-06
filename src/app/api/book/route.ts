@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const date = body.date;
   const hour = Number(body.hour);
   const name = cleanName(body.name);
-  if (!kind || !branch || !branch.open || !isValidDate(date) || !Number.isInteger(hour) || name.length < 2) {
+  if (!kind || !branch || !branch.open || branch.bookable === false || !isValidDate(date) || !Number.isInteger(hour) || name.length < 2) {
     return NextResponse.json({ error: "예약 정보가 올바르지 않아요." }, { status: 400 });
   }
 
