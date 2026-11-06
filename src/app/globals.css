@@ -1,12 +1,13 @@
 /* 온기 브랜드: 크림 바탕 + 브라운/테라코타 포인트 */
 :root{
-  --bg:#f6f0e6; --surface:#fffaf2; --line:#e3d6c3; --fg:#3b2a1e; --muted:#8a7461;
-  --brown:#6b4429; --terra:#c0623b; --terra-soft:#f3dccf; --brown-soft:#eadccb; --ok:#4f7a4a; --off:#efe7da;
+  --bg:#faf6ef; --surface:#fffdf9; --line:#e9e0d2; --fg:#2b211a; --muted:#8c7a69;
+  --brown:#5a3a24; --terra:#b5573a; --terra-soft:#f5e3d8; --brown-soft:#f0e6d8; --ok:#4f7a4a; --off:#f3ece1;
+  --gold:#a8865a;
   --display:"Gowun Batang",Georgia,serif; --body:"Noto Sans KR",system-ui,sans-serif;
+  color-scheme:only light;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#1f1914; --surface:#2a221b; --line:#45382c; --fg:#f1e6d6; --muted:#b29c86;
-  --brown:#d8b08c; --terra:#e3845c; --terra-soft:#4a2e22; --brown-soft:#3c3027; --ok:#8fbf86; --off:#251e18; color-scheme:dark}}
+/* 항상 밝은 화면 (삼성 인터넷·크롬 자동 다크모드에서도 색이 뒤집히지 않게) */
+html{color-scheme:only light;background:var(--bg)}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere;
@@ -282,3 +283,17 @@ main{display:flex;flex-direction:column;gap:56px}
 .pop h3{margin:0;font-family:var(--display);color:var(--brown);font-size:20px}
 .pop p{margin:0;font-size:14.5px;color:var(--fg)}
 .pop .kakao{min-height:50px;border-radius:12px;font-size:15.5px}
+
+/* 밝고 고급스러운 톤 */
+.hero{padding:48px 0 16px}
+.hero small{color:var(--gold)}
+.hero .slogan{letter-spacing:-.01em}
+.sec>h2{font-weight:700;letter-spacing:-.01em;border-bottom-color:var(--gold);border-bottom-width:1px;width:100%}
+.sec>h2::before{content:"";display:block;width:28px;height:2px;background:var(--gold);margin-bottom:12px}
+.btn-primary{background:var(--brown);box-shadow:0 6px 18px rgba(90,58,36,.18)}
+.btn-ghost{border-color:var(--gold);color:var(--brown)}
+.stats3 div,.bcard,.price,.steps li,.faq details,.guide,.book,.mp-card{box-shadow:0 2px 14px rgba(60,40,20,.05)}
+.stats3 b{color:var(--brown)}
+.topnav-links a.nav-member{background:var(--brown);color:#fffdf9}
+.dock-book{background:var(--brown)}
+.primary{background:var(--brown)}

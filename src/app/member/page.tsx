@@ -12,7 +12,6 @@ export default function MemberPage() {
       <header className="mp-head">
         <a href="/" aria-label="온기 홈">
           <picture>
-            <source srcSet="/logo-dark.png" media="(prefers-color-scheme: dark)" />
             <img src="/logo.png" alt="온기" width={800} height={589} style={{ width: 96, height: "auto" }} />
           </picture>
         </a>
