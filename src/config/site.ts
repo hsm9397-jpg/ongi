@@ -115,6 +115,5 @@ export const FAQ = [
 export const FOOTER = {
   name: "컨디셔닝 스튜디오 온기 (ONGI)",
   ceo: "대표 현승민",
-  // 사업자등록번호·통신판매업 번호 등은 확인 후 채워 넣기
-  bizLines: [] as string[],
+  bizLines: ["상호 온기PT&근막이완 · 사업자등록번호 863-01-03953", "서울시 서초구 신반포로33길 62 한신로얄상가 2층"] as string[],
 };
