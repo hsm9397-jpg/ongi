@@ -95,6 +95,18 @@ export default function Home() {
               return (
                 <article key={c.id} className="bcard">
                   <img src={c.photo} alt={c.title} loading="lazy" />
+                  {c.more && c.more.length > 0 && (
+                    <details className="bmore">
+                      <summary>사진 더 보기 <small>{c.more.length}장</small></summary>
+                      <div className="bmore-grid">
+                        {c.more.map((src, i) => (
+                          <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                            <img src={src} alt={`${c.title} 사진 ${i + 2}`} loading="lazy" />
+                          </a>
+                        ))}
+                      </div>
+                    </details>
+                  )}
                   <div className="bcard-body">
                     <h3>{c.title}</h3>
                     <div className="tags">{c.tags.map((t) => <span key={t}>{t}</span>)}</div>

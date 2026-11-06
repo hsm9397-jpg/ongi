@@ -300,3 +300,15 @@ main{display:flex;flex-direction:column;gap:56px}
 /* 로고 글자 폭(이미지의 88.5%)에 맞춘 CONDITIONING STUDIO */
 .hero .eyebrow{display:block;width:min(212px,54.9vw);height:auto;overflow:visible}
 .hero .eyebrow text{font-family:var(--body);font-size:58px;font-weight:500;fill:var(--gold)}
+.bmore{border-bottom:1px solid var(--line)}
+.bmore summary{list-style:none;cursor:pointer;padding:10px 14px;font-size:14px;font-weight:600;color:var(--brown);display:flex;justify-content:space-between;align-items:center}
+.bmore summary::-webkit-details-marker{display:none}
+.bmore summary small{color:var(--muted);font-weight:400}
+.bmore summary::after{content:"▾";margin-left:auto;padding-left:8px;color:var(--gold)}
+.bmore[open] summary::after{content:"▴"}
+.bmore[open] summary small{display:none}
+.bmore-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:0 4px 4px}
+.bmore-grid a{line-height:0}
+.bmore-grid a:first-child:nth-last-child(odd){grid-column:1/-1}
+.bmore-grid img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px}
+.bmore-grid a:first-child:nth-last-child(odd) img{aspect-ratio:4/3}

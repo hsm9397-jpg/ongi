@@ -45,7 +45,8 @@ export const METHOD = {
 };
 
 /** 지점 카드 (예약용 지점 설정의 id와 맞춤) */
-export const BRANCH_CARDS: { id: string; title: string; photo: string; tags: string[]; points: string[] }[] = [
+/** more: 카드의 '사진 더 보기'를 누르면 펼쳐지는 사진들 (public/branches/지점id/) */
+export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[] }[] = [
   {
     id: "main",
     title: "온기 PT&근막이완 (본점)",
@@ -57,6 +58,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; tags: str
     id: "priv",
     title: "온기 근막이완 (본점)",
     photo: `${IMG}/2026/9/6/2026-9-6-1788739013282.webp`,
+    more: ["/branches/priv/2.webp", "/branches/priv/3.webp", "/branches/priv/1.webp"],
     tags: ["잠원동 · 본점과 같은 건물", "1인 공간", "성별 무관"],
     points: ["프리미엄 근막이완 전용 1인 공간", "남성 근막이완 테크니션이 프로그램 진행"],
   },

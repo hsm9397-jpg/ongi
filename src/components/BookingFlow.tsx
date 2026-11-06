@@ -186,9 +186,6 @@ function BranchInfo({ b }: { b: PubBranch }) {
             <div className="loc">
               <p className="addr">{b.address}</p>
               <iframe title={`${b.short} 지도`} src={mapSrc(b, q)} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-              <div className="maplinks">
-                <a className="naver-map" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener noreferrer">네이버 지도에서 보기</a>
-              </div>
             </div>
           )}
         </>
