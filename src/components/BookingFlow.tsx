@@ -131,7 +131,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const activeBookable = activeInfo ? activeInfo.bookable : true;
 
   useEffect(() => {
-    if (!activeBranch || !activeBookable || (needTrainer && !trainer)) {
+    if (!activeBranch || (needTrainer && !trainer)) {
       setDays(null);
       return;
     }
@@ -152,7 +152,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     return () => {
       cancelled = true;
     };
-  }, [activeBranch, activeBookable, trainer, needTrainer]);
+  }, [activeBranch, trainer, needTrainer]);
 
   function switchKind(k: "trial" | "member") {
     setKind(k);
@@ -325,7 +325,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             </button>
           </div>
           {activeInfo && <BranchInfo key={activeInfo.id} b={activeInfo} />}
-          {activeBookable && (!trainer || membership.trainers.length > 1) && (
+          {(!trainer || membership.trainers.length > 1) && (
             <div className="step">
               <h3>담당 선생님</h3>
               <div className="chips">

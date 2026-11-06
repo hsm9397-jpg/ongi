@@ -9,12 +9,13 @@ export async function GET(req: NextRequest) {
   const trainer = req.nextUrl.searchParams.get("trainer") ?? undefined;
   const branch = getBranch(branchId);
   if (!branch || !branch.open) return NextResponse.json({ error: "지점을 찾을 수 없어요." }, { status: 400 });
-  if (branch.bookable === false) return NextResponse.json({ error: "이 지점은 현재 온라인 예약을 받지 않아요." }, { status: 400 });
   if (trainer && !branch.trainers.some((t) => t.id === trainer)) {
     return NextResponse.json({ error: "담당 선생님 정보가 맞지 않아요." }, { status: 400 });
   }
   try {
     const days = await getAvailability(branch, trainer);
+    // 예약 중지 지점은 달력은 보여주되 모든 시간을 마감으로
+    if (branch.bookable === false) for (const k of Object.keys(days)) days[k] = days[k].map((s) => ({ ...s, available: false }));
     return NextResponse.json({ days }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("availability", e);
