@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { BRANCHES, memberDbIdsOf } from "@/config/branches";
 import { findMember } from "@/lib/notion";
+import { isValidName } from "@/lib/members";
 import { guessTrainer } from "@/lib/availability";
 import { cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
@@ -36,6 +37,12 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "회원 정보를 찾지 못했어요. 이름과 연락처 뒷자리를 다시 확인하시거나 카카오채널 [온기pt]로 문의해 주세요." },
         { status: 404 }
+      );
+    }
+    if (!(await isValidName(found[0].name))) {
+      return NextResponse.json(
+        { error: "회원권이 만료되어 예약할 수 없어요. 재등록은 카카오톡 [온기pt]로 문의해 주세요.", expired: true },
+        { status: 403 }
       );
     }
     return NextResponse.json({ memberships: found });

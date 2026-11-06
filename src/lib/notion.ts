@@ -4,7 +4,7 @@ const NOTION_VERSION = "2022-06-28";
 
 type Prop = { type: string; [k: string]: unknown };
 
-async function notion<T>(path: string, init?: RequestInit): Promise<T> {
+export async function notion<T>(path: string, init?: RequestInit): Promise<T> {
   const token = process.env.NOTION_TOKEN;
   if (!token) throw new Error("NOTION_TOKEN 환경변수가 없습니다.");
   const res = await fetch(`${NOTION_API}${path}`, {
@@ -38,7 +38,7 @@ async function schemaOf(dbId: string) {
   return s;
 }
 
-function plainText(p: Prop | undefined): string {
+export function plainText(p: Prop | undefined): string {
   if (!p) return "";
   if (p.type === "phone_number") return (p.phone_number as string | null) ?? "";
   if (p.type === "rich_text" || p.type === "title") {
@@ -48,7 +48,9 @@ function plainText(p: Prop | undefined): string {
 }
 
 const digits = (s: string) => s.replace(/\D/g, "");
-const normName = (s: string) => s.replace(/\s+/g, "").replace(/회원님?$/, "");
+/** "이경신 회원님", "윤유진님", "홍길동6135" → "이경신" */
+export const normName = (s: string) =>
+  s.replace(/\(.*?\)/g, "").replace(/\d/g, "").replace(/\s+/g, "").replace(/(회원님|회원|님)$/, "");
 
 export type MemberMatch = { dbId: string; pageId: string; name: string };
 

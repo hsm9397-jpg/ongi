@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
+import { isValidName } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
@@ -43,6 +44,9 @@ export async function POST(req: Request) {
     const m = last4.length === 4 ? await findMember(memberDbIdsOf(branch), name, last4) : [];
     if (!m.length) return NextResponse.json({ error: "회원 확인이 필요해요. 처음부터 다시 시도해 주세요." }, { status: 403 });
     memberName = m[0].name;
+    if (!(await isValidName(memberName))) {
+      return NextResponse.json({ error: "회원권이 만료되어 예약할 수 없어요. 재등록은 카카오톡 [온기pt]로 문의해 주세요." }, { status: 403 });
+    }
     phone = last4;
     trainerId = typeof body.trainer === "string" ? body.trainer : undefined;
     if (!trainerId || !branch.trainers.some((t) => t.id === trainerId)) {

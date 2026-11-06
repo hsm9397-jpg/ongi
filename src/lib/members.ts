@@ -1,0 +1,97 @@
+// 유효 회원 = '근막이완 회원 통합 리스트'와 '금액권(멤버쉽) 회원 리스트'에 있는 회원.
+// 지점별 회원현황(누적) DB에만 있는 회원은 만료 회원으로 본다. (2026-11-06 대표 결정)
+import crypto from "node:crypto";
+import { BRANCHES, memberDbIdsOf } from "@/config/branches";
+import { findMember, normName, notion, plainText } from "./notion";
+
+type Prop = { type: string; [k: string]: unknown };
+type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
+
+export type ValidMember = { id: string; name: string; group: string; url: string };
+
+const VALID_DBS = () =>
+  (process.env.NOTION_VALID_DBS || "fcb46121f765830ea8d501a3a6eb51ee,32946121f765801a8bf9c58f847716c9")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+const PUBLIC_SITE = () => process.env.NOTION_PUBLIC_SITE || "https://tabby-character-dd3.notion.site";
+
+const DEMO: ValidMember[] = [
+  { id: "demo1", name: "김온기", group: "현승민", url: "https://www.notion.so" },
+  { id: "demo2", name: "이경신", group: "현승민", url: "https://www.notion.so" },
+  { id: "demo3", name: "박선영", group: "황사라", url: "https://www.notion.so" },
+  { id: "demo4", name: "조은비", group: "금액권", url: "https://www.notion.so" },
+];
+
+let cache: { at: number; list: ValidMember[] } | null = null;
+
+/** 유효 회원 전체 (5분 캐시). 노션 연결이 안 돼 있으면 null */
+export async function validMembers(): Promise<ValidMember[] | null> {
+  if (process.env.DEMO_MODE === "1") return DEMO;
+  if (cache && Date.now() - cache.at < 5 * 60_000) return cache.list;
+  try {
+    const list: ValidMember[] = [];
+    for (const db of VALID_DBS()) {
+      let cursor: string | undefined;
+      do {
+        const r = await notion<{ results: Page[]; has_more: boolean; next_cursor: string | null }>(`/databases/${db}/query`, {
+          method: "POST",
+          body: JSON.stringify({ page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) }),
+        });
+        for (const p of r.results) {
+          const title = Object.values(p.properties).find((x) => x.type === "title");
+          const name = normName(plainText(title));
+          if (!name) continue;
+          const sel = Object.entries(p.properties).find(([k, x]) => k.includes("담당") && x.type === "select")?.[1];
+          const group = sel ? ((sel.select as { name?: string } | null)?.name ?? "") : "금액권";
+          const id = p.id.replace(/-/g, "");
+          list.push({ id, name, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}` });
+        }
+        cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
+      } while (cursor);
+    }
+    cache = { at: Date.now(), list };
+    return list;
+  } catch (e) {
+    console.error("validMembers", e);
+    return null;
+  }
+}
+
+/** 예약할 때: 유효 회원인지. 확인할 수 없으면(노션 연결 전) 막지 않는다. */
+export async function isValidName(name: string): Promise<boolean> {
+  const list = await validMembers();
+  if (!list) return true;
+  const n = normName(name);
+  return list.some((m) => m.name === n);
+}
+
+/** 이 이름 + 뒷번호가 지점 누적 회원 DB에 있는지 */
+export async function phoneMatches(name: string, last4: string): Promise<boolean> {
+  if (process.env.DEMO_MODE === "1") return last4 === "1234";
+  for (const b of BRANCHES.filter((b) => b.open || b.hidden)) {
+    const ids = memberDbIdsOf(b);
+    if (ids.length && (await findMember(ids, name, last4)).length) return true;
+  }
+  return false;
+}
+
+export function mask(name: string): string {
+  const c = [...name];
+  if (c.length <= 1) return name;
+  if (c.length === 2) return c[0] + "*";
+  return c[0] + "*".repeat(c.length - 2) + c[c.length - 1];
+}
+
+// 한 번 확인한 기기를 기억하기 위한 서명값
+const key = () =>
+  crypto.createHash("sha256").update("member|" + (process.env.MANAGE_SECRET || process.env.GOOGLE_SERVICE_ACCOUNT_KEY || "ongi-demo")).digest();
+const sig = (s: string) => crypto.createHmac("sha256", key()).update(s).digest("base64url").slice(0, 22);
+export const memberToken = (id: string) => `${id}.${sig(id)}`;
+export function readMemberToken(t: unknown): string | null {
+  if (typeof t !== "string") return null;
+  const [id, s] = t.split(".");
+  if (!id || !s) return null;
+  const e = sig(id);
+  return s.length === e.length && crypto.timingSafeEqual(Buffer.from(s), Buffer.from(e)) ? id : null;
+}

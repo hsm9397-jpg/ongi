@@ -252,3 +252,28 @@ main{display:flex;flex-direction:column;gap:56px}
 .kind-desc{margin:-8px 0 0;font-size:13.5px;color:var(--muted);text-align:center}
 .naver-btn{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;background:#03c75a;color:#fff;font-weight:700;font-size:15.5px;text-decoration:none;padding:12px}
 .maplinks a.naver-map{flex:1;text-align:center;background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700;font-size:14px;padding:10px 12px;border-radius:10px}
+
+/* ===== 회원 페이지 ===== */
+.mp{max-width:520px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.mp-head{display:flex;flex-direction:column;align-items:center;gap:6px}
+.mp-head a{line-height:0}
+.mp-head h1{margin:0;font-family:var(--display);color:var(--brown);font-size:22px}
+.mp-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.mp-card h2{margin:0;font-size:17px;text-align:center}
+.mp-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mp-groups button{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;padding:0;color:var(--fg);cursor:pointer}
+.mp-groups img,.mp-ph{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;object-position:top;background:var(--off);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--brown)}
+.mp-groups b{font-size:13.5px;font-weight:600}
+.mp-names{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mp-names button{min-height:48px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;font-size:16px;cursor:pointer}
+.mp-back{align-self:flex-start;background:none;border:0;color:var(--muted);font-size:14px;padding:4px 0;cursor:pointer}
+.mp-hint{margin:0;font-size:12.5px;color:var(--muted);text-align:center}
+.mp-pinlabel{text-align:center;font-size:14px;color:var(--muted)}
+.mp-pin{font-size:30px;letter-spacing:.5em;text-align:center;padding:12px 0 12px .5em;max-width:220px;align-self:center;font-variant-numeric:tabular-nums}
+.mp-me{align-items:stretch;text-align:center}
+.mp-big{margin:0;font-family:var(--display);font-size:22px;color:var(--brown)}
+.mp-open{display:flex;align-items:center;justify-content:center;text-decoration:none;min-height:54px}
+.mp-book{text-align:center;text-decoration:none;padding:12px}
+.mp-forget{background:none;border:0;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer}
+@media (max-width:380px){.mp-groups{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.topnav-links a.nav-member{background:var(--brown);color:var(--surface);font-weight:600}

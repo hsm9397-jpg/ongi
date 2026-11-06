@@ -31,6 +31,7 @@ export default function Home() {
           <Logo width={52} />
         </a>
         <div className="topnav-links">
+          <a href="/member" className="nav-member">회원 페이지</a>
           {NAV.map(([id, label]) => (
             <a key={id} href={`#${id}`}>{label}</a>
           ))}
@@ -46,7 +47,7 @@ export default function Home() {
           <p className="lead">{HERO.lead}</p>
           <div className="hero-cta">
             <a className="btn-primary" href="#trial">체험 예약하기</a>
-            <a className="btn-ghost" href="#my">내 예약 확인</a>
+            <a className="btn-ghost" href="/member">회원 페이지</a>
           </div>
           <p className="badge">100% 예약제 · 50분 1:1 · 개인 맞춤 컨디셔닝</p>
         </header>
