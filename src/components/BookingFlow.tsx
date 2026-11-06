@@ -313,9 +313,22 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       else return;
       document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
     };
+    // 같은 버튼을 두 번 눌러 주소(#trial)가 그대로면 hashchange가 안 생기므로 클릭도 직접 처리
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest?.("a[href^='#']") as HTMLAnchorElement | null;
+      const h = a?.getAttribute("href");
+      if (h !== "#trial" && h !== "#member" && h !== "#pt" && h !== "#my") return;
+      e.preventDefault();
+      history.replaceState(null, "", h);
+      apply();
+    };
     apply();
     window.addEventListener("hashchange", apply);
-    return () => window.removeEventListener("hashchange", apply);
+    document.addEventListener("click", onClick);
+    return () => {
+      window.removeEventListener("hashchange", apply);
+      document.removeEventListener("click", onClick);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
