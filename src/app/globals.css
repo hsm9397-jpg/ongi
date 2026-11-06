@@ -297,3 +297,6 @@ main{display:flex;flex-direction:column;gap:56px}
 .topnav-links a.nav-member{background:var(--brown);color:#fffdf9}
 .dock-book{background:var(--brown)}
 .primary{background:var(--brown)}
+/* 로고 글자 폭(이미지의 88.5%)에 맞춘 CONDITIONING STUDIO */
+.hero .eyebrow{display:block;width:min(212px,54.9vw);height:auto;overflow:visible}
+.hero .eyebrow text{font-family:var(--body);font-size:58px;font-weight:500;fill:var(--gold)}

@@ -41,7 +41,9 @@ export default function Home() {
         {/* 첫 화면 */}
         <header className="hero">
           <h1><Logo width={220} /></h1>
-          <small>{HERO.eyebrow}</small>
+          <svg className="eyebrow" viewBox="0 0 1000 64" role="img" aria-label={HERO.eyebrow}>
+            <text x="0" y="50" textLength="1000" lengthAdjust="spacing">{HERO.eyebrow.toUpperCase()}</text>
+          </svg>
           <p className="slogan">{HERO.slogan}</p>
           <p className="lead">{HERO.lead}</p>
           <div className="hero-cta">
