@@ -32,6 +32,9 @@ export type Branch = {
   mapQuery?: string;
   /** 첫 방문 체험은 네이버 예약으로 받는다 (플레이스 순위 유지, 2026-11-06 결정) */
   naverTrial?: string;
+  /** 지도 핀 위치 (구글 지도 plus code에서 변환) */
+  lat?: number;
+  lng?: number;
   trainers: Trainer[];
   /** 노션 회원 DB ID를 담은 환경변수 이름 (쉼표로 여러 개 가능) */
   memberDbEnv: string;
@@ -48,6 +51,8 @@ export const BRANCHES: Branch[] = [
     bookable: false,
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
     mapQuery: "서울 서초구 신반포로33길 62",
+    lat: 37.513587,
+    lng: 127.009328,
     naverTrial: "https://m.booking.naver.com/booking/13/bizes/1538431/items/7200334",
     name: "온기 PT&근막이완",
     short: "온기PT&근막이완(본점)",
@@ -63,6 +68,8 @@ export const BRANCHES: Branch[] = [
     desc: "오로지 1인을 위한 프라이빗룸으로 가장 아늑한 지점입니다.",
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 지하 1층",
     mapQuery: "서울 서초구 신반포로33길 62",
+    lat: 37.513587,
+    lng: 127.009328,
     naverTrial: "https://m.booking.naver.com/booking/13/bizes/1646425/items/7655040",
     name: "온기 근막이완 더 프라이빗",
     short: "온기 근막이완(본점)",
@@ -78,6 +85,8 @@ export const BRANCHES: Branch[] = [
     desc: "여성 전용 지점으로 분리된 2룸으로 룸 간의 독립성을 유지하였습니다.",
     address: "서울시 서초구 잠원로8길 25 신반포스퀘어 2층 213-1호",
     mapQuery: "서울 서초구 잠원로8길 25",
+    lat: 37.514363,
+    lng: 127.011641,
     naverTrial: "https://m.booking.naver.com/booking/13/bizes/1727252/items/8012950",
     name: "신반포스퀘어점",
     short: "신반포스퀘어점",
@@ -97,6 +106,8 @@ export const BRANCHES: Branch[] = [
     desc: "가장 큰 지점으로 독립적으로 분리된 3룸을 갖췄으며, 각 룸은 분리되어 독립성을 가집니다. 여러 명이 동시 진행 가능합니다.",
     address: "서울시 강남구 선릉로86길 31 롯데골드로즈2차 4층 403호",
     mapQuery: "서울 강남구 선릉로86길 31",
+    lat: 37.504162,
+    lng: 127.052109,
     naverTrial: "https://m.booking.naver.com/booking/13/bizes/1759220/items/8143892",
     name: "선릉점",
     short: "선릉점",
@@ -116,6 +127,8 @@ export const BRANCHES: Branch[] = [
     desc: "운동 목적이나 몸 상태에 따라 필요한 체성분, 근력, 가동성, 기능 테스트를 진행하고 운동의 방향을 설정하는 시간입니다. 여성 트레이너가 진행합니다.",
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
     mapQuery: "서울 서초구 신반포로33길 62",
+    lat: 37.513587,
+    lng: 127.009328,
     name: "온기 PT&근막이완 · PT 상담·평가",
     short: "온기PT&근막이완(본점)",
     beds: 1,
@@ -197,6 +210,8 @@ export function publicBranches() {
     address: b.address ?? "",
     mapQuery: b.mapQuery ?? b.address ?? "",
     naverTrial: b.naverTrial ?? "",
+    lat: b.lat ?? 0,
+    lng: b.lng ?? 0,
     trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
   }));
 }

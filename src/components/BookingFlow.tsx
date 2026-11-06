@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; lat: number; lng: number; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; name: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -161,6 +161,15 @@ function ManageBookings() {
 }
 
 /** 지점 소개 + 위치(펼치기) */
+// 네이버 지도 키가 있으면 네이버 지도, 없으면 구글 지도.
+// 네이버는 한글 도메인을 등록할 수 없어서 지도 화면만 vercel 주소에서 불러온다.
+const NAVER_MAP_ID = process.env.NEXT_PUBLIC_NAVER_MAP_ID || "";
+const NAVER_MAP_HOST = "https://ongi-gray.vercel.app";
+function mapSrc(b: PubBranch, q: string) {
+  if (NAVER_MAP_ID && b.lat) return `${NAVER_MAP_HOST}/naver-map.html?lat=${b.lat}&lng=${b.lng}&id=${NAVER_MAP_ID}`;
+  return `https://maps.google.com/maps?q=${q}&z=16&output=embed`;
+}
+
 function BranchInfo({ b }: { b: PubBranch }) {
   const [open, setOpen] = useState(false);
   const q = encodeURIComponent(b.mapQuery || b.address);
@@ -176,7 +185,7 @@ function BranchInfo({ b }: { b: PubBranch }) {
           {open && (
             <div className="loc">
               <p className="addr">{b.address}</p>
-              <iframe title={`${b.short} 지도`} src={`https://maps.google.com/maps?q=${q}&z=16&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              <iframe title={`${b.short} 지도`} src={mapSrc(b, q)} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
               <div className="maplinks">
                 <a className="naver-map" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener noreferrer">네이버 지도에서 보기</a>
               </div>
