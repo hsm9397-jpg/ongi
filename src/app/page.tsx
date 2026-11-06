@@ -15,7 +15,7 @@ const NAV = [
 function Logo({ width }: { width: number }) {
   return (
     <picture>
-      <img src="/logo.png" alt="온기 (편안할 온 · 몸 기)" width={800} height={589} style={{ width, height: "auto" }} />
+      <img src="/logo-solid.png" alt="온기 (편안할 온 · 몸 기)" width={880} height={669} style={{ width: Math.round(width * 1.1), height: "auto", borderRadius: 12 }} />
     </picture>
   );
 }

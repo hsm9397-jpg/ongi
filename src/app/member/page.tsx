@@ -12,7 +12,7 @@ export default function MemberPage() {
       <header className="mp-head">
         <a href="/" aria-label="온기 홈">
           <picture>
-            <img src="/logo.png" alt="온기" width={800} height={589} style={{ width: 96, height: "auto" }} />
+            <img src="/logo-solid.png" alt="온기" width={880} height={669} style={{ width: 106, height: "auto", borderRadius: 10 }} />
           </picture>
         </a>
         <h1>회원 페이지</h1>
