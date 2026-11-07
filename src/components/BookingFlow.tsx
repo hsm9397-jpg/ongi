@@ -320,22 +320,34 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   // 홈페이지의 버튼(#trial, #member, #pt, #my)으로 예약 종류를 바로 열기
   useEffect(() => {
     const apply = () => {
-      const h = window.location.hash.replace("#", "");
+      const h = decodeURIComponent(window.location.hash.replace("#", ""));
       if (h === "my") setManage(true);
       else if (h === "trial" || h === "member" || h === "pt") switchKind(h);
       else return;
       document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+      history.replaceState(null, "", window.location.pathname + window.location.search);
     };
-    // 같은 버튼을 두 번 눌러 주소(#trial)가 그대로면 hashchange가 안 생기므로 클릭도 직접 처리
+    // 주소에 #이 남으면 새로고침할 때마다 그 위치로 튀므로, 페이지 안 이동은 주소를 바꾸지 않고 직접 스크롤한다
+    const clearHash = () => {
+      if (window.location.hash) history.replaceState(null, "", window.location.pathname + window.location.search);
+    };
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest?.("a[href^='#']") as HTMLAnchorElement | null;
       const h = a?.getAttribute("href");
-      if (h !== "#trial" && h !== "#member" && h !== "#pt" && h !== "#my") return;
+      if (!h || h === "#") return;
       e.preventDefault();
-      history.replaceState(null, "", h);
-      apply();
+      if (h === "#trial" || h === "#member" || h === "#pt" || h === "#my") {
+        history.replaceState(null, "", h);
+        apply();
+      } else {
+        const el = document.getElementById(h.slice(1));
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+        else window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      clearHash();
     };
     apply();
+    clearHash();
     window.addEventListener("hashchange", apply);
     document.addEventListener("click", onClick);
     return () => {
