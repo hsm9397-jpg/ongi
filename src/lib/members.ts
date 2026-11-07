@@ -83,6 +83,12 @@ export function mask(name: string): string {
   return c[0] + "*".repeat(c.length - 2) + c[c.length - 1];
 }
 
+/** 여러 명을 가린 이름으로 보여줄 때, 가린 결과가 겹치면 겹치는 사람만 가운데 글자를 보여준다 */
+export function maskAll(names: string[]): string[] {
+  const m = names.map(mask);
+  return names.map((n, i) => (m.filter((x) => x === m[i]).length > 1 ? n : m[i]));
+}
+
 // 한 번 확인한 기기를 기억하기 위한 서명값
 const key = () =>
   crypto.createHash("sha256").update("member|" + (process.env.MANAGE_SECRET || process.env.GOOGLE_SERVICE_ACCOUNT_KEY || "ongi-demo")).digest();

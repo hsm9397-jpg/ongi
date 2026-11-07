@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findByLast4, mask, memberToken } from "@/lib/members";
+import { findByLast4, maskAll, memberToken } from "@/lib/members";
 import { clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,8 @@ export async function POST(req: Request) {
   if (!group || last4.length !== 4) return NextResponse.json({ error: "뒷번호 4자리를 입력해 주세요." }, { status: 400 });
   try {
     const found = await findByLast4(group, last4);
-    return NextResponse.json({ items: found.map((m) => ({ name: mask(m.name), url: m.url, token: memberToken(m.id) })) });
+    const labels = maskAll(found.map((m) => m.name));
+    return NextResponse.json({ items: found.map((m, i) => ({ name: labels[i], url: m.url, token: memberToken(m.id) })) });
   } catch (e) {
     console.error("members/find", e);
     return NextResponse.json({ error: "잠시 후 다시 시도해 주세요." }, { status: 502 });

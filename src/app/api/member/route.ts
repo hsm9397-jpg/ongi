@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { BRANCHES, memberDbIdsOf } from "@/config/branches";
-import { isValidName, mask, namesByLast4, nameToken, readNameToken } from "@/lib/members";
+import { isValidName, mask, maskAll, namesByLast4, nameToken, readNameToken } from "@/lib/members";
 import { guessTrainer } from "@/lib/availability";
 import { clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
       );
     }
     if (valid.length > 1) {
-      return NextResponse.json({ choices: valid.map((n) => ({ label: mask(n), who: nameToken(n) })) });
+      const labels = maskAll(valid);
+      return NextResponse.json({ choices: valid.map((n, i) => ({ label: labels[i], who: nameToken(n) })) });
     }
     const name = valid[0];
     const dbs = hits.get(name)!;
