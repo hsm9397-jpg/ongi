@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf } from "@/config/branches";
 import { pickTrainer } from "@/lib/availability";
-import { createEvent, deleteEvent } from "@/lib/google";
+import { carveOpen, createEvent, deleteEvent } from "@/lib/google";
 import { loadOwned } from "@/lib/manage";
 import { notify } from "@/lib/notify";
 import { isValidDate } from "@/lib/time";
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       name: props.name ?? name,
       branch: r.branch.id,
     });
+    await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await deleteEvent(r.calendarId, r.eventId);
     await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, team: r.branch.trainers, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
     return NextResponse.json({ ok: true, booking: { date, hour, minutes: BOOKING.sessionMinutes, trainerName: pick.trainer.name, branchName: r.branch.name } });

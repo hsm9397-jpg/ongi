@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { BOOKING, calendarIdOf, getBranch, hoursOf, memberDbIdsOf } from "@/config/branches";
+import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
 import { isValidName, readNameToken } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
-import { createEvent } from "@/lib/google";
+import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
 import { findMember } from "@/lib/notion";
 import { isValidDate, kstDate } from "@/lib/time";
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "예약 정보가 올바르지 않아요." }, { status: 400 });
   }
 
-  if (!hoursOf(branch).includes(hour) || kstDate(date, hour).getTime() - Date.now() < BOOKING.minLeadHours * 3_600_000) {
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23 || kstDate(date, hour).getTime() - Date.now() < BOOKING.minLeadHours * 3_600_000) {
     return NextResponse.json({ error: `예약은 ${BOOKING.minLeadHours}시간 이후 운영 시간 안에서만 할 수 있어요.` }, { status: 400 });
   }
 
@@ -73,6 +73,7 @@ export async function POST(req: Request) {
       .join("\n");
 
     await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id });
+    await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await notify({
       type: "new",
       branchName: branch.name,

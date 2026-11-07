@@ -46,3 +46,12 @@ export function demoDelete(eventId: string) {
   const i = created.findIndex((c) => c.ev.id === eventId);
   if (i >= 0) created.splice(i, 1);
 }
+
+export function demoOpen(calendarId: string, start: Date, end: Date) {
+  created.push({ calendarId, ev: { id: `open-${Date.now()}-${created.length}`, summary: "오픈", start, end, allDay: false, blocks: false, open: true, fromWeb: false } });
+}
+
+export function demoMove(eventId: string, start: Date, end: Date) {
+  const c = created.find((x) => x.ev.id === eventId);
+  if (c) Object.assign(c.ev, { start, end });
+}
