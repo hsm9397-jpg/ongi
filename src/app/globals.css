@@ -365,3 +365,11 @@ main{display:flex;flex-direction:column;gap:56px}
 .method-video{background:#000}
 .method-video video{width:100%;aspect-ratio:9/16;max-height:80vh;object-fit:contain;display:block;background:#000}
 .method-video .play{border:0;cursor:pointer;left:50%;bottom:18px;transform:translateX(-50%);font-size:15px;padding:12px 18px}
+/* 넓은 화면: 오른쪽 설명을 왼쪽 영상 높이에 맞춰 위아래로 고르게 */
+@media (min-width:641px){
+  .method{align-items:stretch}
+  .method-body{justify-content:space-between}
+  .method-body .steps{flex:1;justify-content:space-between}
+  .method-body .steps li{flex:1;justify-content:center}
+  .method-video video{max-height:none}
+}
