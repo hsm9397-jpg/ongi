@@ -92,7 +92,7 @@ export const GUIDE = [
 ];
 
 export const TEAM: { name: string; role: string; photo: string; link?: string }[] = [
-  { name: "현승민", role: "온기 PT&근막이완, 온기 근막이완 대표", photo: `${IMG}/2026/9/13/2026-9-13-1789340340521.webp`, link: "https://app.notion.com/p/39a46121f765802fbd62e8ca745d8883" },
+  { name: "현승민", role: "온기 PT&근막이완, 온기 근막이완 대표", photo: "/team/hsm.webp", link: "https://app.notion.com/p/39a46121f765802fbd62e8ca745d8883" },
   { name: "김정화", role: "온기 PT&근막이완 트레이너", photo: `${IMG}/2026/7/10/2026-7-10-1783665483032.webp`, link: "https://app.notion.com/p/39a46121f76580e9890ccb7dd39be1d2" },
   { name: "황사라", role: "온기 근막이완 스튜디오 디렉터, 신반포스퀘어점 관리실장", photo: `${IMG}/2026/7/10/2026-7-10-1783665387178.webp`, link: "https://tabby-character-dd3.notion.site/39a46121f76580af9154ed74ee4f0ba5" },
   { name: "송효재", role: "온기 근막이완 선릉점 지점장", photo: `${IMG}/2026/8/19/2026-8-19-1787118438111.webp`, link: "https://app.notion.com/p/3c146121f76580488d83e0d43cef1785" },
