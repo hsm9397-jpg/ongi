@@ -38,26 +38,31 @@ async function programTitle(pageId: string): Promise<string> {
   return t;
 }
 
-async function registrations(name: string): Promise<Reg[]> {
+async function registrationsIn(db: string, name: string): Promise<Reg[]> {
   const out: Reg[] = [];
-  for (const db of SALES_DBS()) {
-    const { titleProp } = await schemaOf(db);
-    const r = await notion<{ results: Row[] }>(`/databases/${db}/query`, {
-      method: "POST",
-      body: JSON.stringify({ filter: { property: titleProp, title: { contains: name.slice(0, 10) } }, page_size: 100 }),
-    });
-    for (const row of r.results) {
-      if (normName(plainText(row.properties[titleProp])) !== name) continue;
+  const { titleProp } = await schemaOf(db);
+  const r = await notion<{ results: Row[] }>(`/databases/${db}/query`, {
+    method: "POST",
+    body: JSON.stringify({ filter: { property: titleProp, title: { contains: name.slice(0, 10) } }, page_size: 100 }),
+  });
+  await Promise.all(
+    r.results.map(async (row) => {
+      if (normName(plainText(row.properties[titleProp])) !== name) return;
       const props = Object.entries(row.properties);
       const date = dateOf(props.find(([, p]) => p.type === "date")?.[1]);
       const rel = props.find(([n, p]) => p.type === "relation" && (n.includes("서비스") || n.includes("프로그램")))?.[1];
       const ids = ((rel?.relation as { id: string }[]) ?? []).map((x) => x.id);
-      if (!date || !ids.length) continue;
+      if (!date || !ids.length) return;
       const total = totalOf(await programTitle(ids[0]));
       if (total) out.push({ date, total });
-    }
-  }
-  return out.sort((a, b) => a.date.localeCompare(b.date));
+    })
+  );
+  return out;
+}
+
+async function registrations(name: string): Promise<Reg[]> {
+  const all = (await Promise.all(SALES_DBS().map((db) => registrationsIn(db, name)))).flat();
+  return all.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /** 회원 페이지 안의 '방문 기록' DB (최상위 또는 칸 나누기 안) */
