@@ -1,6 +1,7 @@
 import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
 import FaqAnswer from "@/components/FaqAnswer";
+import MethodVideo from "@/components/MethodVideo";
 import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
@@ -74,10 +75,7 @@ export default function Home() {
         <section id="method" className="sec">
           <h2>{METHOD.title}</h2>
           <div className="method">
-            <a className="method-media" href={LINKS.reel} target="_blank" rel="noopener noreferrer">
-              <img src={METHOD.image} alt="온기 근막이완 영상" loading="lazy" />
-              <span className="play">▶ 영상 보기</span>
-            </a>
+            <MethodVideo src="/video/ongi-method.mp4" poster="/video/ongi-method.jpg" />
             <div className="method-body">
               <p>{METHOD.intro}</p>
               <ol className="steps">

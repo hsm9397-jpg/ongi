@@ -362,3 +362,6 @@ main{display:flex;flex-direction:column;gap:56px}
 .member-card em.left{margin-left:8px;font-style:normal;font-size:13px;font-weight:700;color:#fff;background:var(--brown);padding:2px 9px;border-radius:999px;vertical-align:1px}
 .mp-left{margin:0;text-align:center;font-size:15px;color:var(--muted)}
 .mp-left b{color:var(--brown);font-size:20px}
+.method-video{background:#000}
+.method-video video{width:100%;aspect-ratio:9/16;max-height:80vh;object-fit:contain;display:block;background:#000}
+.method-video .play{border:0;cursor:pointer;left:50%;bottom:18px;transform:translateX(-50%);font-size:15px;padding:12px 18px}
