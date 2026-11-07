@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import MemberInfo from "./MemberInfo";
 
 type Group = { name: string; photo: string };
 type Found = { name: string; url: string; token: string };
@@ -100,6 +101,7 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
               {me.url ? "내 페이지 열기" : "불러오는 중…"}
             </a>
             <a className="ghost mp-book" href="/#member">예약하기</a>
+            <MemberInfo token={me.token} />
           </>
         )}
         <button className="mp-forget" onClick={forget}>다른 회원으로 보기</button>

@@ -38,8 +38,17 @@ async function programTitle(pageId: string): Promise<string> {
   return t;
 }
 
-async function registrationsIn(db: string, name: string): Promise<Reg[]> {
-  const out: Reg[] = [];
+export type HistoryRow = { date: string; program: string; branch: string; total: number | null };
+
+const BRANCH_OF: Record<string, string> = {
+  "28346121f7658009936ef563ffe67ab9": "온기PT&근막이완(본점)",
+  "3c646121f76580a4a078fe1e650b3b7b": "온기 근막이완(본점)",
+  "34f46121f76580889991f2be9c2e1b95": "신반포스퀘어점",
+  "25c1832e36d34eb0800f3a5e3d61e521": "선릉점",
+};
+
+async function historyIn(db: string, name: string): Promise<HistoryRow[]> {
+  const out: HistoryRow[] = [];
   const { titleProp } = await schemaOf(db);
   const r = await notion<{ results: Row[] }>(`/databases/${db}/query`, {
     method: "POST",
@@ -53,16 +62,22 @@ async function registrationsIn(db: string, name: string): Promise<Reg[]> {
       const rel = props.find(([n, p]) => p.type === "relation" && (n.includes("서비스") || n.includes("프로그램")))?.[1];
       const ids = ((rel?.relation as { id: string }[]) ?? []).map((x) => x.id);
       if (!date || !ids.length) return;
-      const total = totalOf(await programTitle(ids[0]));
-      if (total) out.push({ date, total });
+      const program = await programTitle(ids[0]);
+      out.push({ date, program, branch: BRANCH_OF[db] ?? "", total: totalOf(program) });
     })
   );
   return out;
 }
 
-async function registrations(name: string): Promise<Reg[]> {
-  const all = (await Promise.all(SALES_DBS().map((db) => registrationsIn(db, name)))).flat();
+/** 등록 이력 전체 (체험·PT 포함, 날짜순) */
+export async function historyOf(name: string): Promise<HistoryRow[]> {
+  if (process.env.DEMO_MODE === "1") return [{ date: "2026-07-10", program: "체험(7)", branch: "신반포스퀘어점", total: null }, { date: "2026-07-10", program: "10회", branch: "신반포스퀘어점", total: 10 }];
+  const all = (await Promise.all(SALES_DBS().map((db) => historyIn(db, name)))).flat();
   return all.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function registrations(name: string): Promise<Reg[]> {
+  return (await historyOf(name)).filter((h) => h.total).map((h) => ({ date: h.date, total: h.total! }));
 }
 
 /** 회원 페이지 안의 '방문 기록' DB (최상위 또는 칸 나누기 안) */
@@ -134,4 +149,39 @@ export async function remainingOf(name: string, pageId: string): Promise<{ remai
     console.error("remainingOf", e);
     return null;
   }
+}
+
+// ---- 금액권: 회원 페이지 안 '멤버쉽 현황' DB의 총금액·잔액·잔여기간(노션 수식) 읽기 ----
+function valueOf(p?: Prop): string | number | null {
+  if (!p) return null;
+  if (p.type === "number") return (p.number as number | null) ?? null;
+  if (p.type === "formula" || p.type === "rollup") {
+    const f = p[p.type] as { type: string; number?: number | null; string?: string | null; date?: { start?: string } | null };
+    if (f.type === "number") return f.number ?? null;
+    if (f.type === "string") return f.string ?? null;
+    if (f.type === "date") return f.date?.start?.slice(0, 10) ?? null;
+  }
+  if (p.type === "date") return dateOf(p) || null;
+  return plainText(p) || null;
+}
+
+export type Wallet = { user: string; total: number | null; balance: string | number | null; days: string | number | null; registered: string | null; expires: string | number | null };
+
+export async function walletOf(pageId: string): Promise<Wallet[]> {
+  if (process.env.DEMO_MODE === "1") return [{ user: "김온기", total: 1000000, balance: 320000, days: 40, registered: "2026-09-01", expires: "2026-12-17" }];
+  const kids = async (id: string) => (await notion<{ results: Block[] }>(`/blocks/${id}/children?page_size=100`)).results;
+  const db = (await kids(pageId)).find((b) => b.type === "child_database" && (b.child_database?.title ?? "").includes("멤버쉽"));
+  if (!db) return [];
+  const r = await notion<{ results: Row[] }>(`/databases/${db.id}/query`, { method: "POST", body: JSON.stringify({ page_size: 20 }) });
+  return r.results.map((row) => {
+    const p = row.properties;
+    return {
+      user: plainText(Object.values(p).find((x) => x.type === "title")),
+      total: (valueOf(p["총금액"]) as number | null) ?? null,
+      balance: valueOf(p["잔액"]),
+      days: valueOf(p["잔여기간"]),
+      registered: (valueOf(p["등록일"]) as string | null) ?? null,
+      expires: valueOf(p["만료일"]),
+    };
+  });
 }
