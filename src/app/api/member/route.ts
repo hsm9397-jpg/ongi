@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { BRANCHES, memberDbIdsOf } from "@/config/branches";
-import { isValidName, mask, maskAll, namesByLast4, nameToken, readNameToken, validMembers } from "@/lib/members";
+import { isValidName, mask, maskAll, namesByLast4, nameToken, readNameToken } from "@/lib/members";
 import { guessTrainer } from "@/lib/availability";
-import { remainingOf } from "@/lib/sessions";
 import { clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
 export const dynamic = "force-dynamic";
@@ -55,10 +54,7 @@ export async function POST(req: Request) {
     if (!memberships.length) {
       return NextResponse.json({ error: "예약할 수 있는 지점을 찾지 못했어요. 카카오채널 [온기pt]로 문의해 주세요." }, { status: 404 });
     }
-    // 회차권 잔여 (금액권 회원은 제외, 확인 못 하면 표시 안 함)
-    const vm = (await validMembers())?.find((m) => m.name === name && m.group !== "금액권");
-    const left = vm ? await remainingOf(name, vm.id) : null;
-    return NextResponse.json({ who: nameToken(name), label: mask(name), memberships, remaining: left?.remaining ?? null, total: left?.total ?? null });
+    return NextResponse.json({ who: nameToken(name), label: mask(name), memberships });
   } catch (e) {
     console.error("member", e);
     return NextResponse.json({ error: "회원 확인 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요." }, { status: 502 });

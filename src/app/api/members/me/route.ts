@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { readMemberToken, validMembers } from "@/lib/members";
-import { remainingOf } from "@/lib/sessions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +12,5 @@ export async function POST(req: Request) {
   if (!list) return NextResponse.json({ error: "잠시 후 다시 시도해 주세요." }, { status: 502 });
   const m = list.find((x) => x.id === id);
   if (!m) return NextResponse.json({ expired: true });
-  const left = m.group === "금액권" ? null : await remainingOf(m.name, m.id);
-  return NextResponse.json({ name: m.name, url: m.url, remaining: left?.remaining ?? null });
+  return NextResponse.json({ name: m.name, url: m.url });
 }

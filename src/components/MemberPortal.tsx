@@ -40,7 +40,7 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
       .then((r) => r.json())
       .then((d) => {
         if (d.expired) setExpired(true);
-        else if (d.url) setMe({ ...saved, name: d.name, url: d.url, remaining: d.remaining });
+        else if (d.url) setMe({ ...saved, name: d.name, url: d.url });
         else if (d.error === "invalid") { save(null); setMe(null); }
       })
       .catch(() => {});
@@ -96,7 +96,6 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
         ) : (
           <>
             <p className="mp-big">{me.name}님, 안녕하세요</p>
-            {me.remaining != null && <p className="mp-left">잔여 <b>{me.remaining}회</b></p>}
             <a className="primary mp-open" href={me.url ?? "#"} aria-disabled={!me.url}>
               {me.url ? "내 페이지 열기" : "불러오는 중…"}
             </a>

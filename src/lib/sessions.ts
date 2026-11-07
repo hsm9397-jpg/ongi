@@ -139,7 +139,7 @@ export async function remainingOf(name: string, pageId: string): Promise<{ remai
   if (process.env.DEMO_MODE === "1") return { remaining: 3, total: 10 };
   const key = `${name}|${pageId}`;
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < 60_000) return hit.v;
+  if (hit && Date.now() - hit.at < 5 * 60_000) return hit.v;
   try {
     const [regs, vs] = await Promise.all([registrations(name), visits(pageId)]);
     const v = computeRemaining(regs, vs);

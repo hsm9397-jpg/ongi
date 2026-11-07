@@ -383,10 +383,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         setChoices(data.choices);
         return;
       }
-      const r = data as { who: string; label: string; memberships: Membership[]; remaining: number | null; total: number | null };
+      const r = data as { who: string; label: string; memberships: Membership[] };
       setWho(r.who);
       setLabel(r.label);
-      setLeft(r.remaining != null && r.total != null ? { remaining: r.remaining, total: r.total } : null);
+      setLeft(null);
+      // 잔여 회차는 예약 진행을 막지 않도록 뒤에서 따로 불러온다
+      fetch("/api/member/remaining", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ who: r.who }) })
+        .then((x) => x.json())
+        .then((x) => x.remaining != null && setLeft({ remaining: x.remaining, total: x.total }))
+        .catch(() => {});
       setMemberships(r.memberships);
       if (r.memberships.length === 1) chooseMembership(r.memberships[0]);
     } catch (e) {
