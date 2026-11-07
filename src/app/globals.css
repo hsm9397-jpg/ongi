@@ -386,3 +386,8 @@ main{display:flex;flex-direction:column;gap:56px}
 .mp-info li{display:grid;grid-template-columns:62px 1fr;gap:0 8px;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .mp-info li span{color:var(--muted);font-variant-numeric:tabular-nums;grid-row:span 2}
 .mp-info li small{color:var(--muted);font-size:12px}
+
+.pt-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 4px 0 12px; }
+.pt-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; }
+.pt-photos img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
+a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-decoration: none; }

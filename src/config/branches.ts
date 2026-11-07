@@ -32,6 +32,10 @@ export type Branch = {
   mapQuery?: string;
   /** 첫 방문 체험은 네이버 예약으로 받는다 (플레이스 순위 유지, 2026-11-06 결정) */
   naverTrial?: string;
+  /** PT 상담·평가 네이버 예약 링크 */
+  naverPt?: string;
+  /** 예약 화면 장소 칸에 바로 보여줄 사진 */
+  photos?: string[];
   /** 지도 핀 위치 (구글 지도 plus code에서 변환) */
   lat?: number;
   lng?: number;
@@ -146,6 +150,8 @@ export const BRANCHES: Branch[] = [
     open: true,
     hidden: true,
     only: "pt",
+    naverPt: "https://m.booking.naver.com/booking/13/bizes/1538431",
+    photos: ["/branches/pt/1.webp", "/branches/pt/2.webp", "/branches/pt/3.webp", "/branches/pt/4.webp"],
     trainers: [{ id: "kjh", name: "김정화", calendarEnv: "CAL_KIMJUNGHWA" }],
     memberDbEnv: "NOTION_MEMBER_DB_PT",
     firstHour: 9,
@@ -222,6 +228,8 @@ export function publicBranches() {
     address: b.address ?? "",
     mapQuery: b.mapQuery ?? b.address ?? "",
     naverTrial: b.naverTrial ?? "",
+    naverPt: b.naverPt ?? "",
+    photos: b.photos ?? [],
     waitlist: !!b.waitlist,
     lat: b.lat ?? 0,
     lng: b.lng ?? 0,

@@ -3,7 +3,7 @@ import { mapSrc } from "@/lib/map";
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; naverPt: string; photos: string[]; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -281,7 +281,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [trainer, setTrainer] = useState<string | null>(null);
 
   const ptBranch = branches.find((b) => b.only === "pt");
-  const activeBranch = kind === "member" ? membership?.branch ?? null : kind === "pt" ? ptBranch?.id ?? null : null;
+  const activeBranch = kind === "member" ? membership?.branch ?? null : null;
   const needTrainer = kind === "member";
 
   function resetSlots() {
@@ -595,8 +595,21 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
       {kind === "pt" && ptBranch && (
         <div className="step">
-          <h3>1 · 장소</h3>
+          <h3>장소</h3>
+          {ptBranch.photos.length > 0 && (
+            <div className="pt-photos">
+              {ptBranch.photos.map((src, i) => (
+                <img key={src} src={src} alt={`PT 공간 사진 ${i + 1}`} loading={i < 2 ? "eager" : "lazy"} />
+              ))}
+            </div>
+          )}
           <BranchInfo key={ptBranch.id} b={ptBranch} />
+          {ptBranch.naverPt && (
+            <a className="primary pt-book" href={ptBranch.naverPt} target="_blank" rel="noopener noreferrer">
+              예약하기
+            </a>
+          )}
+          <p className="kind-desc">네이버 예약 화면으로 이동해요.</p>
         </div>
       )}
 
