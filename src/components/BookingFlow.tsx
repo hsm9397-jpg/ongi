@@ -510,7 +510,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
       {!manage && kind === "trial" && (
         <div className="contra">
-          <h3>근막이완 금기 대상자</h3>
+          <h3>근막이완 금기 대상자 <span className="must">필수 확인</span></h3>
           <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요.</p>
           <h4>절대 금기</h4>
           <ul>
