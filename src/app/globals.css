@@ -359,3 +359,6 @@ main{display:flex;flex-direction:column;gap:56px}
 .faq details .faq-a p{margin:0;color:var(--fg);font-size:14.5px}
 .faq-a ul{margin:0;padding:10px 12px 10px 28px;background:var(--off);border-radius:10px;display:flex;flex-direction:column;gap:6px}
 .faq-a li b{color:var(--brown)}
+.member-card em.left{margin-left:8px;font-style:normal;font-size:13px;font-weight:700;color:#fff;background:var(--brown);padding:2px 9px;border-radius:999px;vertical-align:1px}
+.mp-left{margin:0;text-align:center;font-size:15px;color:var(--muted)}
+.mp-left b{color:var(--brown);font-size:20px}

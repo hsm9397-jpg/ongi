@@ -272,6 +272,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   // 회원
   const [who, setWho] = useState("");
   const [label, setLabel] = useState("");
+  const [left, setLeft] = useState<{ remaining: number; total: number } | null>(null);
   const [choices, setChoices] = useState<{ label: string; who: string }[] | null>(null);
   const [last4, setLast4] = useState("");
   const [memberships, setMemberships] = useState<Membership[] | null>(null);
@@ -381,9 +382,10 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         setChoices(data.choices);
         return;
       }
-      const r = data as { who: string; label: string; memberships: Membership[] };
+      const r = data as { who: string; label: string; memberships: Membership[]; remaining: number | null; total: number | null };
       setWho(r.who);
       setLabel(r.label);
+      setLeft(r.remaining != null && r.total != null ? { remaining: r.remaining, total: r.total } : null);
       setMemberships(r.memberships);
       if (r.memberships.length === 1) chooseMembership(r.memberships[0]);
     } catch (e) {
@@ -626,6 +628,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <div className="member-card">
             <div>
               <b>{label} 회원님</b>
+              {left && <em className="left">잔여 {left.remaining}회</em>}
               <br />
               <span>
                 {membership.branchName}
