@@ -22,6 +22,8 @@ export type Branch = {
   only?: "pt";
   /** 온라인 예약을 받을지 (false면 지점 안내만 보이고 날짜 선택이 막힘) */
   bookable?: boolean;
+  /** 신규 체험만 막기 (기존 회원 예약은 그대로 받음) */
+  trialClosed?: boolean;
   /** 지점을 눌렀을 때 보이는 소개 문구 */
   desc: string;
   /** 지점 아래 안내 한 줄 (예: 예약 불가 사유) */
@@ -60,8 +62,7 @@ export const BRANCHES: Branch[] = [
     id: "main",
     waitlist: true,
     desc: "본점으로 대표가 진행하며 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
-    notice: "현재는 예약 불가합니다.",
-    bookable: false,
+    trialClosed: true,
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
     mapQuery: "서울 서초구 신반포로33길 62",
     lat: 37.513587,
@@ -223,6 +224,7 @@ export function publicBranches() {
     hidden: !!b.hidden,
     only: b.only,
     bookable: b.bookable !== false,
+    trialClosed: !!b.trialClosed,
     desc: b.desc,
     notice: b.notice ?? "",
     address: b.address ?? "",

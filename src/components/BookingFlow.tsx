@@ -3,7 +3,7 @@ import { mapSrc } from "@/lib/map";
 
 import { useEffect, useState } from "react";
 
-type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; naverPt: string; photos: string[]; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
+type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; trialClosed: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; naverPt: string; photos: string[]; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
@@ -469,7 +469,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             <h3>현재 예약이 어렵습니다</h3>
             <p>현재 가장 빠른 선릉점을 이용해 주세요.</p>
             {(() => {
-              const f = branches.find((x) => !x.hidden && x.bookable && !x.waitlist && x.naverTrial);
+              const f = branches.find((x) => !x.hidden && x.bookable && !x.trialClosed && !x.waitlist && x.naverTrial);
               return f ? (
                 <a className="primary" href={f.naverTrial} target="_blank" rel="noopener noreferrer" onClick={() => setClosedPop(false)}>
                   {f.short} 예약하러 가기
@@ -495,7 +495,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               예약하러 가기
             </a>
             {(() => {
-              const f = branches.find((x) => !x.hidden && x.bookable && !x.waitlist && x.naverTrial);
+              const f = branches.find((x) => !x.hidden && x.bookable && !x.trialClosed && !x.waitlist && x.naverTrial);
               return f ? (
                 <a className="ghost" href={f.naverTrial} target="_blank" rel="noopener noreferrer" onClick={() => setWaitPop(null)}>
                   {f.short} 예약하러 가기
@@ -561,7 +561,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <h3>1 · 지점</h3>
           <div className="chips trial-chips">
             {branches.filter((b) => !b.hidden).map((b) =>
-              b.bookable && b.naverTrial ? (
+              b.bookable && !b.trialClosed && b.naverTrial ? (
                 <a
                   key={b.id}
                   className="chip"

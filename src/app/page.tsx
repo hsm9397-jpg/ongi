@@ -118,7 +118,7 @@ export default function Home() {
                         {b.address}
                       </a>
                     )}
-                    {b?.bookable === false && <p className="bnotice">현재 예약 불가</p>}
+                    {b?.bookable === false ? <p className="bnotice">현재 예약 불가</p> : b?.trialClosed ? <p className="bnotice">신규 체험 예약 불가 · 기존 회원 예약 가능</p> : null}
                   </div>
                 </article>
               );
