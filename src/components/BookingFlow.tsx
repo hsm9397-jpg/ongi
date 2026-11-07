@@ -264,6 +264,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [done, setDone] = useState<Done | null>(null);
   const [expiredPop, setExpiredPop] = useState(false);
   const [waitPop, setWaitPop] = useState<PubBranch | null>(null);
+  const [closedPop, setClosedPop] = useState(false);
 
   // 체험
   const [name, setName] = useState("");
@@ -457,6 +458,23 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   return (
     <div className="book">
+      {closedPop && (
+        <div className="pop-bg" onClick={() => setClosedPop(false)}>
+          <div className="pop wait" role="dialog" aria-modal="true" aria-label="예약 안내" onClick={(e) => e.stopPropagation()}>
+            <h3>현재 예약이 어렵습니다</h3>
+            <p>현재 가장 빠른 선릉점을 이용해 주세요.</p>
+            {(() => {
+              const f = branches.find((x) => !x.hidden && x.bookable && !x.waitlist && x.naverTrial);
+              return f ? (
+                <a className="primary" href={f.naverTrial} target="_blank" rel="noopener noreferrer" onClick={() => setClosedPop(false)}>
+                  {f.short} 예약하러 가기
+                </a>
+              ) : null;
+            })()}
+            <button className="mp-forget" onClick={() => setClosedPop(false)}>닫기</button>
+          </div>
+        </div>
+      )}
       {waitPop && (
         <div className="pop-bg" onClick={() => setWaitPop(null)}>
           <div className="pop wait" role="dialog" aria-modal="true" aria-label="대기 예약 안내" onClick={(e) => e.stopPropagation()}>
@@ -555,15 +573,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
                   {b.womenOnly && <small>여성전용</small>}
                 </a>
               ) : (
-                <button key={b.id} className="chip" disabled>
+                <button key={b.id} type="button" className="chip" onClick={() => setClosedPop(true)}>
                   {b.short} <small>예약 불가</small>
                 </button>
               )
             )}
             {comingSoon.map((s) => (
-              <button key={s} className="chip" disabled>
+              <span key={s} className="chip chip-soon" aria-disabled="true">
                 {s} <small>오픈 예정</small>
-              </button>
+              </span>
             ))}
           </div>
           <p className="kind-desc">지점을 누르면 네이버 예약 화면으로 바로 이동해요.</p>
