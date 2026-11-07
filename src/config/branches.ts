@@ -63,6 +63,7 @@ export const BRANCHES: Branch[] = [
     waitlist: true,
     desc: "본점으로 대표가 진행하며 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
     trialClosed: true,
+    notice: "현재 신규 예약은 불가합니다.",
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",
     mapQuery: "서울 서초구 신반포로33길 62",
     lat: 37.513587,

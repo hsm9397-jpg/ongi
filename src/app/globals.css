@@ -391,3 +391,5 @@ main{display:flex;flex-direction:column;gap:56px}
 .pt-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; }
 .pt-photos img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
 a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-decoration: none; }
+
+.story-quote { font-family: "Gowun Batang", serif; font-weight: 700; font-size: 1.08em; color: var(--brown); border-left: 3px solid var(--terra); padding-left: 12px; }

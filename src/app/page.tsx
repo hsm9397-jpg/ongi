@@ -61,7 +61,7 @@ export default function Home() {
         {/* 온기 이야기 */}
         <section id="about" className="sec">
           <h2>{STORY.title}</h2>
-          {STORY.paragraphs.map((p) => <p key={p}>{p}</p>)}
+          {STORY.paragraphs.map((p) => <p key={p} className={p.startsWith("'") ? "story-quote" : undefined}>{p}</p>)}
           <div className="stats3">
             {STORY.stats.map((s) => (
               <div key={s.big}><b>{s.big}</b><span>{s.small}</span></div>
