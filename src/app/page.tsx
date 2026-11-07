@@ -1,5 +1,6 @@
 import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
+import FaqAnswer from "@/components/FaqAnswer";
 import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
@@ -176,7 +177,7 @@ export default function Home() {
             {FAQ.map((f) => (
               <details key={f.q}>
                 <summary>{f.q}</summary>
-                <p>{f.a}</p>
+                <FaqAnswer a={f.a} />
               </details>
             ))}
           </div>
