@@ -9,6 +9,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.5.0",
     "google-auth-library": "11.3.3",
     "next": "16.4.5",
     "react": "19.3.1",

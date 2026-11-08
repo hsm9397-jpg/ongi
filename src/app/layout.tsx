@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { GOOGLE_SITE_VERIFICATION, NAVER_SITE_VERIFICATION, SITE_URL } from "@/config/site";
 
 const TITLE = "온기 | Conditioning Studio 온기 근막이완 컨디셔닝";
@@ -35,6 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <div className="wrap">{children}</div>
+        {/* 방문자 통계: Vercel 대시보드 Analytics 탭에서 대표만 확인 */}
+        <Analytics />
       </body>
     </html>
   );
