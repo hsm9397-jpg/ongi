@@ -154,7 +154,7 @@ export default function Home() {
         {/* 고객 후기 */}
         <section id="reviews" className="sec reviews">
           <h2>고객 후기</h2>
-          <p className="rv-lead">네이버 예약 고객님들이 남겨주신 후기 중 일부를 그대로 옮겼어요.</p>
+          <p className="rv-lead">네이버·당근에 고객님들이 남겨주신 후기 중 일부를 그대로 옮겼어요.</p>
           <Reviews />
           <p className="rv-hint">옆으로 넘겨서 더 보기 →</p>
           <a className="btn-ghost rv-more" href={LINKS.naverReview} target="_blank" rel="noopener noreferrer">네이버 리뷰 더 보기</a>

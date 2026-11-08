@@ -22,7 +22,7 @@ export default function Reviews() {
           <figure key={tab + i} className="rv-card">
             <span className="rv-q" aria-hidden="true">“</span>
             <blockquote>{r.text}</blockquote>
-            <figcaption><b>{r.who}</b><span>{r.menu}</span></figcaption>
+            <figcaption><b>{r.who}</b><span>{r.menu} · {r.src ?? "네이버"} 후기</span></figcaption>
           </figure>
         ))}
       </div>
