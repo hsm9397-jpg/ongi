@@ -393,3 +393,6 @@ main{display:flex;flex-direction:column;gap:56px}
 a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-decoration: none; }
 
 .story-quote { font-family: "Gowun Batang", serif; font-weight: 700; font-size: 1.08em; color: var(--brown); border-left: 3px solid var(--terra); padding-left: 12px; }
+.hero-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:380px;margin-left:auto;margin-right:auto}
+.hero-cta .btn-primary{grid-column:1/-1}
+.hero-cta .btn-ghost{padding:10px 8px;white-space:nowrap}

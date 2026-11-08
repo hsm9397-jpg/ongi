@@ -325,6 +325,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       else if (h === "trial" || h === "member" || h === "pt") switchKind(h);
       else return;
       document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+      // 기존 회원 예약은 바로 뒷 4자리를 입력할 수 있게 입력칸에 커서를 둔다
+      if (h === "member") setTimeout(() => (document.getElementById("mp") as HTMLInputElement | null)?.focus({ preventScroll: true }), 400);
       history.replaceState(null, "", window.location.pathname + window.location.search);
     };
     // 주소에 #이 남으면 새로고침할 때마다 그 위치로 튀므로, 페이지 안 이동은 주소를 바꾸지 않고 직접 스크롤한다
