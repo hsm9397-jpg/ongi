@@ -132,7 +132,7 @@ export const PRICES = {
 export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[] }[] = [
   {
     id: "main",
-    title: "온기 PT&근막이완 잠원동 1호점",
+    title: "온기 PT&근막이완 (잠원동 1호점)",
     photo: `${IMG}/2026/9/6/2026-9-6-1788738958963.webp`,
     more: ["/branches/main/1-w.webp", "/branches/main/2-w.webp", "/branches/main/3.webp", "/branches/main/4.webp"],
     tags: ["잠원동 1호점", "본점", "1인 공간", "성별 무관"],
@@ -140,7 +140,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
   },
   {
     id: "priv",
-    title: "온기 근막이완 잠원동 2호점",
+    title: "온기 근막이완 (잠원동 2호점)",
     photo: `${IMG}/2026/9/6/2026-9-6-1788739013282.webp`,
     more: ["/branches/priv/2.webp", "/branches/priv/3.webp", "/branches/priv/1.webp"],
     tags: ["잠원동 2호점 · 1호점과 같은 건물", "1인 공간", "성별 무관"],
@@ -166,9 +166,9 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
 
 export const GUIDE = [
   { q: "여자 선생님을 원해요", a: "신반포스퀘어점 (여성만 신청 가능)" },
-  { q: "1인 전용 공간을 원해요", a: "온기 근막이완 잠원동 2호점" },
+  { q: "1인 전용 공간을 원해요", a: "온기 근막이완 (잠원동 2호점)" },
   { q: "여러 명이 함께 받고 싶어요", a: "선릉점 (3룸)" },
-  { q: "대표에게 받고 싶어요", a: "온기 PT&근막이완 잠원동 1호점 (현재 신규 체험 불가)" },
+  { q: "대표에게 받고 싶어요", a: "온기 PT&근막이완 (잠원동 1호점, 현재 신규 체험 불가)" },
 ];
 
 export const TEAM: { name: string; role: string; photo: string; link?: string }[] = [
