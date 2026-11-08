@@ -396,3 +396,28 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .hero-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:380px;margin-left:auto;margin-right:auto}
 .hero-cta .btn-primary{grid-column:1/-1}
 .hero-cta .btn-ghost{padding:10px 8px;white-space:nowrap}
+
+/* 첫 방문 과정 */
+.journey .j-lead{margin:0;line-height:1.7}
+.j-why{background:var(--off,#f3ece2);border-radius:14px;padding:18px 16px;text-align:center}
+.j-why p{margin:0;line-height:1.7;color:var(--muted,#7a6a5c)}
+.j-why .j-why-a{margin-top:10px;color:var(--brown);font-weight:600}
+.j-steps{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;position:relative}
+.j-steps li{display:grid;grid-template-columns:52px 1fr;gap:12px;padding:0 0 18px;position:relative}
+.j-steps li:not(:last-child)::before{content:"";position:absolute;left:25px;top:44px;bottom:0;border-left:1.5px dashed var(--gold,#b08a5a)}
+.j-n{width:46px;height:46px;border-radius:50%;background:var(--brown);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;margin-left:3px}
+.j-edge .j-n{background:transparent;color:var(--brown);border:1.5px solid var(--brown);font-size:13px}
+.j-steps b{display:block;font-size:16.5px;color:var(--brown);margin:2px 0 4px}
+.j-steps p{margin:0;line-height:1.65;font-size:14.5px}
+.j-tag{display:inline-block;font-size:11.5px;letter-spacing:.04em;color:var(--terra);border:1px solid var(--terra);border-radius:999px;padding:1px 8px;margin-top:2px}
+.j-sub{margin:10px 0 0;font-size:18px;color:var(--brown)}
+.j-expect{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.j-expect div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;gap:4px}
+.j-expect b{color:var(--brown);font-size:15px}
+.j-expect span{font-size:13.5px;line-height:1.55;color:var(--muted,#7a6a5c)}
+.j-note{margin:0;font-size:12.5px;color:var(--muted,#7a6a5c)}
+.j-rec{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.j-rec li{position:relative;padding:12px 14px 12px 40px;background:#fff;border:1px solid var(--line);border-radius:12px;line-height:1.5}
+.j-rec li::before{content:"✓";position:absolute;left:14px;top:11px;color:var(--terra);font-weight:700}
+.j-cta{align-self:center;margin-top:6px;min-width:240px}
+@media (min-width:641px){.j-expect{grid-template-columns:repeat(4,1fr)}}

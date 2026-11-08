@@ -2,7 +2,7 @@ import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
 import FaqAnswer from "@/components/FaqAnswer";
 import MethodVideo from "@/components/MethodVideo";
-import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
+import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, JOURNEY, LINKS, METHOD, PRICING, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
 import { mapSrc } from "@/lib/map";
@@ -10,6 +10,7 @@ import { mapSrc } from "@/lib/map";
 const NAV = [
   ["about", "소개"],
   ["method", "근막이완"],
+  ["process", "진행 과정"],
   ["branches", "지점"],
   ["team", "팀"],
   ["info", "이용 안내"],
@@ -105,6 +106,40 @@ export default function Home() {
               <p className="note">{METHOD.note}</p>
             </div>
           </div>
+        </section>
+
+        {/* 첫 방문부터 이후까지 */}
+        <section id="process" className="sec journey">
+          <h2>{JOURNEY.title}</h2>
+          <p className="j-lead">{JOURNEY.lead}</p>
+          <div className="j-why">
+            {JOURNEY.why.lines.map((l) => <p key={l}>{l}</p>)}
+            <p className="j-why-a">{JOURNEY.why.answer}</p>
+          </div>
+          <ol className="j-steps">
+            {JOURNEY.steps.map((s) => (
+              <li key={s.t} className={/^\d/.test(s.n) ? undefined : "j-edge"}>
+                <span className="j-n">{s.n}</span>
+                <div>
+                  {s.tag && <small className="j-tag">{s.tag}</small>}
+                  <b>{s.t}</b>
+                  <p>{s.d}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <h3 className="j-sub">기대할 수 있는 변화</h3>
+          <div className="j-expect">
+            {JOURNEY.expect.map((e) => (
+              <div key={e.t}><b>{e.t}</b><span>{e.d}</span></div>
+            ))}
+          </div>
+          <p className="j-note">{JOURNEY.expectNote}</p>
+          <h3 className="j-sub">이런 분께 추천해요</h3>
+          <ul className="j-rec">
+            {JOURNEY.recommend.map((r) => <li key={r}>{r}</li>)}
+          </ul>
+          <a className="btn-primary j-cta" href="#trial">근막이완 체험 예약하기</a>
         </section>
 
         {/* 지점 */}
