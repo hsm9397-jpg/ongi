@@ -6,6 +6,8 @@ export type Trainer = {
   name: string;
   /** 구글 캘린더 ID를 담은 환경변수 이름 */
   calendarEnv: string;
+  /** 선생님이 직접 일정을 잡음: 사이트 예약을 받지 않고 '직접 문의' 안내만 띄운다 */
+  selfBook?: boolean;
 };
 
 export type Branch = {
@@ -132,7 +134,7 @@ export const BRANCHES: Branch[] = [
     open: true,
     trainers: [
       { id: "shj", name: "송효재", calendarEnv: "CAL_SONGHYOJAE" },
-      { id: "ljm", name: "이정민", calendarEnv: "CAL_LEEJUNGMIN" },
+      { id: "ljm", name: "이정민", calendarEnv: "CAL_LEEJUNGMIN", selfBook: true },
       { id: "hjs", name: "허재성", calendarEnv: "CAL_HEOJAESEONG" },
     ],
     memberDbEnv: "NOTION_MEMBER_DB_SL",
@@ -236,6 +238,6 @@ export function publicBranches() {
     waitlist: !!b.waitlist,
     lat: b.lat ?? 0,
     lng: b.lng ?? 0,
-    trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
+    trainers: b.trainers.map((t) => ({ id: t.id, name: t.name, selfBook: !!t.selfBook })),
   }));
 }

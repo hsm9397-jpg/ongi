@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; trialClosed: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; naverPt: string; photos: string[]; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
 type Slot = { hour: number; available: boolean };
-type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string }[] };
+type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string; selfBook?: boolean }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -283,6 +283,10 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const ptBranch = branches.find((b) => b.only === "pt");
   const activeBranch = kind === "member" ? membership?.branch ?? null : null;
   const needTrainer = kind === "member";
+  // 직접 일정을 잡는 선생님이면 날짜를 불러오지 않고 '직접 문의' 안내를 띄운다
+  const selfBook = needTrainer && !!membership?.trainers.find((t) => t.id === trainer)?.selfBook;
+  const [selfPop, setSelfPop] = useState(false);
+  useEffect(() => setSelfPop(selfBook), [selfBook, trainer]);
 
   function resetSlots() {
     setDay(null);
@@ -294,7 +298,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const activeBookable = activeInfo ? activeInfo.bookable : true;
 
   useEffect(() => {
-    if (!activeBranch || (needTrainer && !trainer)) {
+    if (!activeBranch || (needTrainer && !trainer) || selfBook) {
       setDays(null);
       return;
     }
@@ -315,7 +319,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     return () => {
       cancelled = true;
     };
-  }, [activeBranch, trainer, needTrainer]);
+  }, [activeBranch, trainer, needTrainer, selfBook]);
 
   // 홈페이지의 버튼(#trial, #member, #pt, #my)으로 예약 종류를 바로 열기
   useEffect(() => {
@@ -477,6 +481,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   return (
     <div className="book">
+      {selfPop && (
+        <div className="pop-bg" onClick={() => setSelfPop(false)}>
+          <div className="pop wait" role="dialog" aria-modal="true" aria-label="예약 안내" onClick={(e) => e.stopPropagation()}>
+            <h3>담당 선생님께 직접 문의해 주세요</h3>
+            <p>{trainerName ? `${trainerName} 선생님은 ` : ""}회원님과 직접 일정을 잡고 있어요.</p>
+            <button className="mp-forget" onClick={() => setSelfPop(false)}>닫기</button>
+          </div>
+        </div>
+      )}
       {closedPop && (
         <div className="pop-bg" onClick={() => setClosedPop(false)}>
           <div className="pop wait" role="dialog" aria-modal="true" aria-label="예약 안내" onClick={(e) => e.stopPropagation()}>
@@ -705,6 +718,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         </>
       )}
 
+      {selfBook && <p className="bnotice" style={{ textAlign: "center" }}>{trainerName} 선생님 일정은 담당 선생님께 직접 문의해 주세요.</p>}
       {loading && <p className="loading">예약 가능한 시간을 불러오는 중이에요…</p>}
 
       {days && (

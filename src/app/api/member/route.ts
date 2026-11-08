@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         branch: b.id,
         branchName: b.name,
         trainerId: await guessTrainer(b, name).catch(() => undefined),
-        trainers: b.trainers.map((t) => ({ id: t.id, name: t.name })),
+        trainers: b.trainers.map((t) => ({ id: t.id, name: t.name, selfBook: !!t.selfBook })),
       });
     }
     if (!memberships.length) {

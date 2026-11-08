@@ -59,7 +59,7 @@ function slotState(branch: Branch, busy: Busy, opens: Opens, hour: number, start
   const bedsUsed = branch.trainers.filter((t) =>
     (busy.get(t.id) ?? []).some((e) => !e.allDay && overlaps(e, start, end))
   ).length;
-  const free = branch.trainers.filter((t) => !busyTrainers.includes(t) && works(branch, opens, t, hour, start, end));
+  const free = branch.trainers.filter((t) => !t.selfBook && !busyTrainers.includes(t) && works(branch, opens, t, hour, start, end));
   const candidates = onlyTrainer ? free.filter((t) => t.id === onlyTrainer) : free;
   return { available: bedsUsed < branch.beds && candidates.length > 0, candidates, end };
 }
