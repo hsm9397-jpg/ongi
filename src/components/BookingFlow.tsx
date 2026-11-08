@@ -20,6 +20,8 @@ const CONTRA_ABS: [string, string][] = [
 ];
 const CONTRA_REL = ["임산부 / 고령자", "하지정맥류 (심하면 절대 금기 대상)", "항응고제 복용 환자", "골다공증 (심하면 절대 금기 대상)"];
 export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
+/** 기존 회원 예약을 열지 여부. 세팅(선생님 캘린더 공유 등)이 끝나면 true로 바꾸면 됨 */
+const MEMBER_BOOKING_READY = false;
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
 type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean };
@@ -286,6 +288,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   // 직접 일정을 잡는 선생님이면 날짜를 불러오지 않고 '직접 문의' 안내를 띄운다
   const selfBook = needTrainer && !!membership?.trainers.find((t) => t.id === trainer)?.selfBook;
   const [selfPop, setSelfPop] = useState(false);
+  const [prepPop, setPrepPop] = useState(false);
   useEffect(() => setSelfPop(selfBook), [selfBook, trainer]);
 
   function resetSlots() {
@@ -330,7 +333,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       else return;
       document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
       // 기존 회원 예약은 바로 뒷 4자리를 입력할 수 있게 입력칸에 커서를 둔다
-      if (h === "member") setTimeout(() => (document.getElementById("mp") as HTMLInputElement | null)?.focus({ preventScroll: true }), 400);
+      if (h === "member" && MEMBER_BOOKING_READY) setTimeout(() => (document.getElementById("mp") as HTMLInputElement | null)?.focus({ preventScroll: true }), 400);
       history.replaceState(null, "", window.location.pathname + window.location.search);
     };
     // 주소에 #이 남으면 새로고침할 때마다 그 위치로 튀므로, 페이지 안 이동은 주소를 바꾸지 않고 직접 스크롤한다
@@ -364,6 +367,10 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   }, []);
 
   function switchKind(k: "trial" | "member" | "pt") {
+    if (k === "member" && !MEMBER_BOOKING_READY) {
+      setPrepPop(true);
+      return;
+    }
     setKind(k);
     setManage(false);
     setBranch(null);
@@ -481,6 +488,16 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
   return (
     <div className="book">
+      {prepPop && (
+        <div className="pop-bg" onClick={() => setPrepPop(false)}>
+          <div className="pop wait" role="dialog" aria-modal="true" aria-label="기존 회원 예약 안내" onClick={(e) => e.stopPropagation()}>
+            <h3>준비중입니다.</h3>
+            <p>기존 회원 예약은 지금처럼 담당 선생님 또는 카카오톡으로 문의해 주세요.</p>
+            <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡으로 문의하기</a>
+            <button className="mp-forget" onClick={() => setPrepPop(false)}>닫기</button>
+          </div>
+        </div>
+      )}
       {selfPop && (
         <div className="pop-bg" onClick={() => setSelfPop(false)}>
           <div className="pop wait" role="dialog" aria-modal="true" aria-label="예약 안내" onClick={(e) => e.stopPropagation()}>
