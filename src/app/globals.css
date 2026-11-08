@@ -421,3 +421,10 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .j-rec li::before{content:"✓";position:absolute;left:14px;top:11px;color:var(--terra);font-weight:700}
 .j-cta{align-self:center;margin-top:6px;min-width:240px}
 @media (min-width:641px){.j-expect{grid-template-columns:repeat(4,1fr)}}
+
+.j-photo{width:100%;border-radius:14px;aspect-ratio:380/251;object-fit:cover;display:block}
+.j-imgs{display:grid;gap:6px;margin-top:10px}
+.j-imgs.n2{grid-template-columns:1fr 1fr}
+.j-imgs img{width:100%;border-radius:10px;display:block;object-fit:cover}
+.j-imgs.n2 img{aspect-ratio:3/4}
+.j-imgs.n1 img{max-width:420px}

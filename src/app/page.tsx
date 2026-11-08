@@ -111,6 +111,7 @@ export default function Home() {
         {/* 첫 방문부터 이후까지 */}
         <section id="process" className="sec journey">
           <h2>{JOURNEY.title}</h2>
+          <img className="j-photo" src={JOURNEY.photo} alt="온기 근막이완 컨디셔닝 진행 모습" loading="lazy" />
           <p className="j-lead">{JOURNEY.lead}</p>
           <div className="j-why">
             {JOURNEY.why.lines.map((l) => <p key={l}>{l}</p>)}
@@ -124,6 +125,11 @@ export default function Home() {
                   {s.tag && <small className="j-tag">{s.tag}</small>}
                   <b>{s.t}</b>
                   <p>{s.d}</p>
+                  {"img" in s && s.img && (
+                    <div className={`j-imgs n${s.img.length}`}>
+                      {s.img.map((src) => <img key={src} src={src} alt="" loading="lazy" />)}
+                    </div>
+                  )}
                 </div>
               </li>
             ))}
