@@ -221,11 +221,16 @@ export default function Home() {
         {/* 서비스 금액: 버튼을 누르면 금액 페이지(/price)로 */}
         <section id="price" className="sec">
           <h2>서비스 금액</h2>
-          <div className="pr-teaser">
-            <div><b>패키지권</b><span>횟수 방식 · 근막이완 / PT</span></div>
-            <div><b>금액권</b><span>차감 방식 · 가족·지인 공유</span></div>
+          <div className="pricing">
+            <div className="price">
+              <h3>근막이완 · PT 회원권</h3>
+              <dl>
+                <div><dt>패키지권</dt><dd>횟수 방식</dd></div>
+                <div><dt>금액권</dt><dd>차감 방식</dd></div>
+              </dl>
+              <a className="btn-ghost" href="/price">서비스 금액 보기</a>
+            </div>
           </div>
-          <a className="btn-primary pr-link" href="/price">서비스 금액 보기</a>
         </section>
 
         {/* 예약 */}
