@@ -154,7 +154,7 @@ export const BRANCHES: Branch[] = [
     open: true,
     hidden: true,
     only: "pt",
-    naverPt: "https://m.booking.naver.com/booking/13/bizes/1538431",
+    naverPt: "https://m.booking.naver.com/booking/13/bizes/1538431/items/7200124",
     photos: ["/branches/pt/1.webp", "/branches/pt/2.webp", "/branches/pt/3.webp", "/branches/pt/4.webp"],
     trainers: [{ id: "kjh", name: "김정화", calendarEnv: "CAL_KIMJUNGHWA" }],
     memberDbEnv: "NOTION_MEMBER_DB_PT",
