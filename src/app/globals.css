@@ -461,7 +461,9 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .pr-wallet dd{margin:2px 0 0;font-weight:700}
 .pr-perks{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .pr-perks li{border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:4px 12px;font-size:13px}
-.pr-vat{margin:0;text-align:center;color:var(--muted);font-size:13px}
+.pr-vat{margin:0;text-align:center;color:var(--brown);font-size:16px;font-weight:700;background:var(--brown-soft);border-radius:10px;padding:12px 14px}
+.pr-terms{list-style:none;margin:0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.2);display:flex;flex-direction:column;gap:4px;text-align:center;font-size:14px}
+.pr-terms li::before{content:"· ";opacity:.7}
 .pr-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (min-width:641px){.pr-cards{grid-template-columns:1fr 1fr}}
 

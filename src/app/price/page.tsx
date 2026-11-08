@@ -55,6 +55,7 @@ export default function PricePage() {
             {w.deduct.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
           <ul className="pr-perks">{w.perks.map((x) => <li key={x}>{x}</li>)}</ul>
+          <ul className="pr-terms">{w.terms.map((x) => <li key={x}>{x}</li>)}</ul>
         </div>
       </section>
 
