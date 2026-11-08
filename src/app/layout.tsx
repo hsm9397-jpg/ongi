@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <div className="wrap">{children}</div>
-        {/* 방문자 통계: Vercel 대시보드 Analytics 탭에서 대표만 확인 */}
+        {/* 방문자 통계: vercel.com/ongi4/ongi/analytics 에서 대표만 확인 */}
         <Analytics />
       </body>
     </html>
