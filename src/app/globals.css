@@ -485,3 +485,8 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .rv-more{align-self:center;min-width:220px}
 @media (min-width:860px){.rv-hint{display:none}}
 .sec>h2 .h2-note{display:inline-block;margin-left:10px;font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0;vertical-align:middle}
+.rv-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rv-tabs button{border:1px solid var(--line);background:var(--surface);color:var(--brown);border-radius:999px;padding:10px 12px;font-size:14.5px;font-weight:600;cursor:pointer}
+.rv-tabs button small{font-weight:500;color:var(--muted);margin-left:2px}
+.rv-tabs button[aria-selected="true"]{background:var(--brown);border-color:var(--brown);color:#fff}
+.rv-tabs button[aria-selected="true"] small{color:rgba(255,255,255,.75)}

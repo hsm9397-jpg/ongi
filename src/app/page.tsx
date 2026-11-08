@@ -2,10 +2,11 @@ import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
 import FaqAnswer from "@/components/FaqAnswer";
 import MethodVideo from "@/components/MethodVideo";
-import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, JOURNEY, LINKS, METHOD, PRICING, REVIEWS, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
+import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, JOURNEY, LINKS, METHOD, PRICING, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
 import { mapSrc } from "@/lib/map";
+import Reviews from "@/components/Reviews";
 
 const NAV = [
   ["about", "소개"],
@@ -154,15 +155,7 @@ export default function Home() {
         <section id="reviews" className="sec reviews">
           <h2>고객 후기</h2>
           <p className="rv-lead">네이버 예약 고객님들이 남겨주신 후기 중 일부를 그대로 옮겼어요.</p>
-          <div className="rv-track">
-            {REVIEWS.map((r, i) => (
-              <figure key={i} className="rv-card">
-                <span className="rv-q" aria-hidden="true">“</span>
-                <blockquote>{r.text}</blockquote>
-                <figcaption><b>{r.who}</b><span>{r.menu}</span></figcaption>
-              </figure>
-            ))}
-          </div>
+          <Reviews />
           <p className="rv-hint">옆으로 넘겨서 더 보기 →</p>
           <a className="btn-ghost rv-more" href={LINKS.naverReview} target="_blank" rel="noopener noreferrer">네이버 리뷰 더 보기</a>
         </section>
