@@ -13,7 +13,7 @@ export default function Reviews() {
       <div className="rv-tabs" role="tablist">
         {TABS.map((t) => (
           <button key={t} role="tab" aria-selected={tab === t} onClick={() => { setTab(t); track.current?.scrollTo({ left: 0 }); }}>
-            {t} <small>{REVIEWS.filter((r) => r.menu === t).length}</small>
+            {t}
           </button>
         ))}
       </div>
