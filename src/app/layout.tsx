@@ -1,9 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { GOOGLE_SITE_VERIFICATION, NAVER_SITE_VERIFICATION, SITE_URL } from "@/config/site";
+
+const TITLE = "온기 | Conditioning Studio 온기 근막이완 컨디셔닝";
+const DESC = "몸을 편안하게, 움직임을 자유롭게. 온기 근막이완 컨디셔닝 소개, 지점 안내(잠원 본점·신반포스퀘어점·선릉점), 체험·회원·PT 상담 예약을 한곳에서.";
 
 export const metadata: Metadata = {
-  title: "온기 | Conditioning Studio 온기 근막이완 컨디셔닝",
-  description: "몸을 편안하게, 움직임을 자유롭게. 온기 근막이완 컨디셔닝 소개, 지점 안내, 체험·회원·PT 상담 예약을 한곳에서.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESC,
+  keywords: ["온기", "온기 근막이완", "온기PT", "근막이완", "IASTM", "스포츠 컨디셔닝", "잠원 근막이완", "신반포 근막이완", "선릉 근막이완"],
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", locale: "ko_KR", url: "/", siteName: "온기", title: TITLE, description: DESC, images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "온기" }] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESC, images: ["/og.jpg"] },
+  verification: {
+    ...(GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : {}),
+    ...(NAVER_SITE_VERIFICATION ? { other: { "naver-site-verification": NAVER_SITE_VERIFICATION } } : {}),
+  },
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", colorScheme: "only light", themeColor: "#faf6ef" };

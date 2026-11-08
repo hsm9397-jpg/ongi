@@ -1,5 +1,12 @@
 // 홈페이지 문구·사진·링크. 문구를 바꿀 때는 이 파일만 고치면 됩니다.
 // 사진은 현재 인포크링크에 올라가 있는 이미지를 그대로 씁니다.
+/** 검색엔진에 알려줄 대표 주소 (한글 도메인 온기.com의 영문 표기) */
+export const SITE_URL = "https://www.xn--ok0bn86b.com";
+/** 네이버 서치어드바이저 사이트 소유확인 코드 (meta 태그의 content 값) */
+export const NAVER_SITE_VERIFICATION = "";
+/** 구글 서치 콘솔 소유확인 코드 */
+export const GOOGLE_SITE_VERIFICATION = "";
+
 const IMG = "https://d13k46lqgoj3d6.cloudfront.net";
 
 export const LINKS = {

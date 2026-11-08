@@ -2,7 +2,7 @@ import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
 import FaqAnswer from "@/components/FaqAnswer";
 import MethodVideo from "@/components/MethodVideo";
-import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
+import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, LINKS, METHOD, PRICING, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
 import { mapSrc } from "@/lib/map";
@@ -28,8 +28,26 @@ function Logo({ width }: { width: number }) {
 export default function Home() {
   const branches = publicBranches();
   const branchById = Object.fromEntries(BRANCHES.map((b) => [b.id, b]));
+  // 검색엔진이 읽는 업체 정보 (이름·지점·주소·연락 채널)
+  const seo = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "온기",
+    alternateName: ["온기 근막이완", "온기 PT&근막이완", "ONGI", "Conditioning Studio 온기"],
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo-solid.png`,
+    sameAs: [LINKS.instagram, LINKS.naverPlace],
+    department: BRANCHES.filter((b) => b.open && !b.hidden && b.address).map((b) => ({
+      "@type": "HealthClub",
+      name: b.name.startsWith("온기") ? b.name : `온기 근막이완 ${b.name}`,
+      url: SITE_URL,
+      address: { "@type": "PostalAddress", streetAddress: b.address, addressCountry: "KR" },
+      ...(b.lat ? { geo: { "@type": "GeoCoordinates", latitude: b.lat, longitude: b.lng } } : {}),
+    })),
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(seo).replace(/</g, "\\u003c") }} />
       <nav className="topnav" aria-label="바로가기">
         <a href="#top" className="topnav-logo" aria-label="맨 위로">
           <Logo width={52} />
