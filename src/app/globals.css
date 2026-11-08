@@ -492,3 +492,11 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .rv-tabs button[aria-selected="true"] small{color:rgba(255,255,255,.75)}
 .nl,.j-why p,.j-steps p{white-space:pre-line}
 .chip .nl{display:block}
+/* 기간 한정 이벤트 */
+.ev-img{display:block;width:100%;max-width:560px;margin:4px auto 0;border-radius:14px;border:1px solid var(--line)}
+.ev-banner{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;max-width:420px;margin:0 auto 8px;padding:10px 16px;border-radius:14px;border:1px solid var(--gold);background:var(--surface);color:var(--brown);cursor:pointer;font-family:var(--body)}
+.ev-tag{font-size:11px;letter-spacing:.18em;color:var(--gold);font-weight:700}
+.ev-banner b{font-family:var(--display);font-size:18px}
+.ev-sub{font-size:13px;color:var(--muted)}
+.ev-pop{width:min(92vw,480px);max-height:90vh;overflow:auto;background:var(--surface);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.ev-pop img{width:100%;height:auto;border-radius:10px;display:block}
