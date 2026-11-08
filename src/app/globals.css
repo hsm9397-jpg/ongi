@@ -428,3 +428,39 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .j-imgs img{width:100%;border-radius:10px;display:block;object-fit:cover}
 .j-imgs.n2 img{aspect-ratio:3/4}
 .j-imgs.n1 img{max-width:420px}
+
+/* 서비스 금액 페이지 */
+.pr-link{align-self:center;min-width:240px;margin-top:4px}
+.pr{max-width:720px;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:22px}
+.pr-head{display:flex;flex-direction:column;align-items:center;gap:10px;position:relative}
+.pr-head h1{margin:0;font-family:var(--display);color:var(--brown);font-size:26px}
+.pr-back{position:absolute;left:0;top:0;color:var(--muted);text-decoration:none;font-size:14px}
+.pr-sec{display:flex;flex-direction:column;gap:12px}
+.pr-sec h2{margin:0;font-family:var(--display);color:var(--brown);font-size:21px;border-bottom:1px solid var(--gold);padding-bottom:8px}
+.pr-sec h2 small{font-family:var(--body);font-size:13px;color:var(--muted);font-weight:500;margin-left:6px}
+.pr-cards{display:grid;gap:12px}
+.pr-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.pr-card h3{margin:0 0 8px;font-size:16px;color:var(--brown)}
+.pr-card ul{list-style:none;margin:0;padding:0}
+.pr-card li{display:flex;align-items:baseline;gap:8px;padding:11px 0;border-top:1px dashed var(--line)}
+.pr-card li:first-child{border-top:0}
+.pr-name{font-weight:600}
+.pr-card li small{color:var(--muted);font-size:12.5px}
+.pr-card li b{margin-left:auto;font-size:17px;color:var(--brown)}
+.pr-note{background:var(--off);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.6}
+.pr-note b{color:var(--brown)}
+.pr-note ul{margin:6px 0 0;padding-left:18px}
+.pr-wallet{background:var(--brown);color:#fff;border-radius:16px;padding:20px 18px;display:flex;flex-direction:column;gap:14px}
+.pr-wallet-top{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.pr-wallet-top span{font-size:15px;opacity:.85}
+.pr-wallet-top em{font-style:normal;font-size:12.5px;background:var(--terra);padding:3px 10px;border-radius:999px}
+.pr-wallet-top b{font-family:var(--display);font-size:28px}
+.pr-wallet dl{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pr-wallet dl div{background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center}
+.pr-wallet dt{font-size:13px;opacity:.8}
+.pr-wallet dd{margin:2px 0 0;font-weight:700}
+.pr-perks{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.pr-perks li{border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:4px 12px;font-size:13px}
+.pr-vat{margin:0;text-align:center;color:var(--muted);font-size:13px}
+.pr-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:641px){.pr-cards{grid-template-columns:1fr 1fr}}

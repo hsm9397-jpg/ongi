@@ -87,6 +87,44 @@ export const JOURNEY = {
   ],
 };
 
+/** 서비스 금액 페이지 (/price, /금액) — 대표가 준 금액 그대로 */
+export const PRICES = {
+  packages: [
+    {
+      title: "근막이완 컨디셔닝",
+      items: [
+        { name: "체험", price: "7만원", note: "첫 방문 1회" },
+        { name: "1회", price: "10만원" },
+        { name: "5회", price: "45만원", note: "회당 9만원" },
+        { name: "10회", price: "80만원", note: "회당 8만원" },
+      ],
+    },
+    {
+      title: "퍼스널 트레이닝 (PT)",
+      items: [
+        { name: "체험", price: "무료", note: "PT 상담·평가" },
+        { name: "1회", price: "8만원" },
+        { name: "10회", price: "70만원", note: "회당 7만원" },
+        { name: "20회", price: "120만원", note: "회당 6만원" },
+      ],
+    },
+  ],
+  packageNote: ["1회당 1주의 환불 가능 기한이 주어집니다. (예: 10회 → 10주)", "사용 기한이 없으며, 비용 없이 양도할 수 있습니다."],
+  wallet: {
+    title: "금액권",
+    sub: "차감 방식",
+    pay: "300만원",
+    total: "315만원",
+    bonus: "5% 추가 혜택",
+    deduct: [
+      ["근막이완", "회당 8만원 차감"],
+      ["PT", "회당 6만원 차감"],
+    ],
+    perks: ["가족·지인과 함께 사용 가능", "스케줄 고정 가능"],
+  },
+  vat: "모든 금액은 부가세 별도입니다.",
+};
+
 /** 지점 카드 (예약용 지점 설정의 id와 맞춤) */
 /** more: 카드의 '사진 더 보기'를 누르면 펼쳐지는 사진들 (public/branches/지점id/). 파일명이 -w로 끝나면 가로 사진이라 한 줄 전체로 보여줌 */
 export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[] }[] = [

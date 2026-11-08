@@ -55,6 +55,7 @@ export default function Home() {
         </a>
         <div className="topnav-links">
           <a href="/member" className="nav-member">회원 페이지</a>
+          <a href="/price">서비스 금액</a>
           {NAV.map(([id, label]) => (
             <a key={id} href={`#${id}`}>{label}</a>
           ))}
@@ -215,6 +216,7 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <a className="btn-primary pr-link" href="/price">전체 서비스 금액 보기</a>
         </section>
 
         {/* 예약 */}
