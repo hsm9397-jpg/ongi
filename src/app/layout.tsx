@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { GOOGLE_SITE_VERIFICATION, NAVER_SITE_VERIFICATION, SITE_URL } from "@/config/site";
 
 const TITLE = "온기 | Conditioning Studio 온기 근막이완 컨디셔닝";
-const DESC = "몸을 편안하게, 움직임을 자유롭게. 온기 근막이완 컨디셔닝 소개, 지점 안내(잠원 본점·신반포스퀘어점·선릉점), 체험·회원·PT 상담 예약을 한곳에서.";
+const DESC = "몸을 편안하게, 움직임을 자유롭게. 온기 근막이완 컨디셔닝 소개, 지점 안내(잠원동 1·2호점·신반포스퀘어점·선릉점), 체험·회원·PT 상담 예약을 한곳에서.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

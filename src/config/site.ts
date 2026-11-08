@@ -131,18 +131,18 @@ export const PRICES = {
 export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[] }[] = [
   {
     id: "main",
-    title: "온기 PT&근막이완 (본점)",
+    title: "온기 PT&근막이완 잠원동 1호점",
     photo: `${IMG}/2026/9/6/2026-9-6-1788738958963.webp`,
     more: ["/branches/main/1-w.webp", "/branches/main/2-w.webp", "/branches/main/3.webp", "/branches/main/4.webp"],
-    tags: ["본점 · 잠원동", "1인 공간", "성별 무관"],
+    tags: ["잠원동 1호점", "1인 공간", "성별 무관"],
     points: ["PT, 근막이완, 근막이완+PT 결합 프로그램", "대표 및 여성 트레이너가 프로그램 진행"],
   },
   {
     id: "priv",
-    title: "온기 근막이완 (본점)",
+    title: "온기 근막이완 잠원동 2호점",
     photo: `${IMG}/2026/9/6/2026-9-6-1788739013282.webp`,
     more: ["/branches/priv/2.webp", "/branches/priv/3.webp", "/branches/priv/1.webp"],
-    tags: ["잠원동 · 본점과 같은 건물", "1인 공간", "성별 무관"],
+    tags: ["잠원동 2호점 · 1호점과 같은 건물", "1인 공간", "성별 무관"],
     points: ["프리미엄 근막이완 전용 1인 공간", "남성 근막이완 테크니션이 프로그램 진행"],
   },
   {
@@ -150,7 +150,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
     title: "온기 근막이완 신반포스퀘어점",
     photo: `${IMG}/2026/9/7/2026-9-7-1788742310631.webp`,
     more: ["/branches/sbp/1.webp", "/branches/sbp/2.webp", "/branches/sbp/3.webp", "/branches/sbp/4.webp"],
-    tags: ["잠원동 · 본점에서 도보 5분", "여성 전용", "2룸"],
+    tags: ["잠원동 · 1호점에서 도보 5분", "여성 전용", "2룸"],
     points: ["여성 전용 근막이완 센터", "여성 근막이완 테크니션이 프로그램 진행"],
   },
   {
@@ -165,9 +165,9 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
 
 export const GUIDE = [
   { q: "여자 선생님을 원해요", a: "신반포스퀘어점 (여성만 신청 가능)" },
-  { q: "1인 전용 공간을 원해요", a: "온기 근막이완 (본점)" },
+  { q: "1인 전용 공간을 원해요", a: "온기 근막이완 잠원동 2호점" },
   { q: "여러 명이 함께 받고 싶어요", a: "선릉점 (3룸)" },
-  { q: "대표에게 받고 싶어요", a: "온기 PT&근막이완 (본점, 현재 신규 체험 불가)" },
+  { q: "대표에게 받고 싶어요", a: "온기 PT&근막이완 잠원동 1호점 (현재 신규 체험 불가)" },
 ];
 
 export const TEAM: { name: string; role: string; photo: string; link?: string }[] = [

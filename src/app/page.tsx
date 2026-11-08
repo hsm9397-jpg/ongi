@@ -169,7 +169,7 @@ export default function Home() {
 
         {/* 지점 */}
         <section id="branches" className="sec">
-          <h2>지점 안내</h2>
+          <h2>지점 안내 <small className="h2-note">온기의 모든 지점은 직영으로 운영됩니다.</small></h2>
           <div className="bcards">
             {BRANCH_CARDS.map((c) => {
               const b = branchById[c.id];

@@ -41,8 +41,8 @@ async function programTitle(pageId: string): Promise<string> {
 export type HistoryRow = { date: string; program: string; branch: string; total: number | null };
 
 const BRANCH_OF: Record<string, string> = {
-  "28346121f7658009936ef563ffe67ab9": "온기PT&근막이완(본점)",
-  "3c646121f76580a4a078fe1e650b3b7b": "온기 근막이완(본점)",
+  "28346121f7658009936ef563ffe67ab9": "온기 PT&근막이완 잠원동 1호점",
+  "3c646121f76580a4a078fe1e650b3b7b": "온기 근막이완 잠원동 2호점",
   "34f46121f76580889991f2be9c2e1b95": "신반포스퀘어점",
   "25c1832e36d34eb0800f3a5e3d61e521": "선릉점",
 };
