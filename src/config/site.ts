@@ -5,7 +5,7 @@ export const SITE_URL = "https://www.xn--ok0bn86b.com";
 /** 네이버 서치어드바이저 사이트 소유확인 코드 (meta 태그의 content 값) */
 export const NAVER_SITE_VERIFICATION = "41e06ae0283fefab0b1058a2c3ef5c6c8c7d18fd";
 /** 구글 서치 콘솔 소유확인 코드 */
-export const GOOGLE_SITE_VERIFICATION = "";
+export const GOOGLE_SITE_VERIFICATION = "f8NzVl3nv7Q_tlSEPemVkBr1gySRIC7lhzcYQtw9mBA";
 
 const IMG = "https://d13k46lqgoj3d6.cloudfront.net";
 
