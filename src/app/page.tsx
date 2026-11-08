@@ -2,7 +2,7 @@ import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
 import FaqAnswer from "@/components/FaqAnswer";
 import MethodVideo from "@/components/MethodVideo";
-import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, JOURNEY, LINKS, METHOD, PRICING, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
+import { BRANCH_CARDS, FAQ, FOOTER, GUIDE, HERO, JOURNEY, LINKS, METHOD, PRICING, REVIEWS, SITE_URL, STORY, TEAM, TEAM_PROMISE } from "@/config/site";
 import BookingFlow from "@/components/BookingFlow";
 import BranchHead from "@/components/BranchHead";
 import { mapSrc } from "@/lib/map";
@@ -11,6 +11,7 @@ const NAV = [
   ["about", "소개"],
   ["method", "근막이완"],
   ["process", "진행 과정"],
+  ["reviews", "후기"],
   ["branches", "지점"],
   ["team", "팀"],
   ["info", "이용 안내"],
@@ -147,6 +148,23 @@ export default function Home() {
             {JOURNEY.recommend.map((r) => <li key={r}>{r}</li>)}
           </ul>
           <a className="btn-primary j-cta" href="#trial">근막이완 체험 예약하기</a>
+        </section>
+
+        {/* 고객 후기 */}
+        <section id="reviews" className="sec reviews">
+          <h2>고객 후기</h2>
+          <p className="rv-lead">네이버 예약 고객님들이 남겨주신 후기 중 일부를 그대로 옮겼어요.</p>
+          <div className="rv-track">
+            {REVIEWS.map((r, i) => (
+              <figure key={i} className="rv-card">
+                <span className="rv-q" aria-hidden="true">“</span>
+                <blockquote>{r.text}</blockquote>
+                <figcaption><b>{r.who}</b><span>{r.menu}</span></figcaption>
+              </figure>
+            ))}
+          </div>
+          <p className="rv-hint">옆으로 넘겨서 더 보기 →</p>
+          <a className="btn-ghost rv-more" href={LINKS.naverReview} target="_blank" rel="noopener noreferrer">네이버 리뷰 더 보기</a>
         </section>
 
         {/* 지점 */}
