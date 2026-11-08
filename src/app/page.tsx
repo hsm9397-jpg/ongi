@@ -15,6 +15,7 @@ const NAV = [
   ["branches", "지점"],
   ["team", "팀"],
   ["info", "이용 안내"],
+  ["price", "서비스 금액"],
   ["book", "예약"],
   ["faq", "FAQ"],
 ];
@@ -56,7 +57,6 @@ export default function Home() {
         </a>
         <div className="topnav-links">
           <a href="/member" className="nav-member">회원 페이지</a>
-          <a href="/price">서비스 금액</a>
           {NAV.map(([id, label]) => (
             <a key={id} href={`#${id}`}>{label}</a>
           ))}
