@@ -464,3 +464,8 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .pr-vat{margin:0;text-align:center;color:var(--muted);font-size:13px}
 .pr-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (min-width:641px){.pr-cards{grid-template-columns:1fr 1fr}}
+
+.pr-teaser{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pr-teaser div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.pr-teaser b{color:var(--brown);font-size:16px}
+.pr-teaser span{color:var(--muted);font-size:13px}
