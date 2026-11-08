@@ -601,12 +601,12 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
                     setWaitPop(b);
                   }}
                 >
-                  {b.short}
+                  <span className="nl">{b.short.replace(" 잠원동", "\n잠원동")}</span>
                   {b.womenOnly && <small>여성전용</small>}
                 </a>
               ) : (
                 <button key={b.id} type="button" className="chip" onClick={() => setClosedPop(true)}>
-                  {b.short} <small>예약 불가</small>
+                  <span className="nl">{b.short.replace(" 잠원동", "\n잠원동")}</span> <small>예약 불가</small>
                 </button>
               )
             )}

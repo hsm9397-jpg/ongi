@@ -490,3 +490,5 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .rv-tabs button small{font-weight:500;color:var(--muted);margin-left:2px}
 .rv-tabs button[aria-selected="true"]{background:var(--brown);border-color:var(--brown);color:#fff}
 .rv-tabs button[aria-selected="true"] small{color:rgba(255,255,255,.75)}
+.nl,.j-why p,.j-steps p{white-space:pre-line}
+.chip .nl{display:block}
