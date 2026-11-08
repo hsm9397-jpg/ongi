@@ -134,7 +134,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
     title: "온기 PT&근막이완 잠원동 1호점",
     photo: `${IMG}/2026/9/6/2026-9-6-1788738958963.webp`,
     more: ["/branches/main/1-w.webp", "/branches/main/2-w.webp", "/branches/main/3.webp", "/branches/main/4.webp"],
-    tags: ["잠원동 1호점", "1인 공간", "성별 무관"],
+    tags: ["잠원동 1호점", "본점", "1인 공간", "성별 무관"],
     points: ["PT, 근막이완, 근막이완+PT 결합 프로그램", "대표 및 여성 트레이너가 프로그램 진행"],
   },
   {
