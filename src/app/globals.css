@@ -557,3 +557,5 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 /* 문의 버튼 브랜드 색 (2026-11-09) */
 .contact a.c-naver{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:600}
 .contact a.c-insta{background:linear-gradient(45deg,#f58529,#dd2a7b 50%,#8134af);border-color:transparent;color:#fff;font-weight:600}
+/* 슬로건 폭을 위 이벤트 배너(420px)에 맞춤 (2026-11-09) */
+.hero .slogan{font-size:clamp(20px,5.4vw,28px);max-width:420px;margin-left:auto;margin-right:auto}
