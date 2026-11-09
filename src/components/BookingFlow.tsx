@@ -26,6 +26,11 @@ const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(
 
 type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean; cancelable: boolean; changedToday: boolean; who: string; label: string };
 
+/** 다음 단계가 화면 가운데(또는 위)에 오도록 부드럽게 이동 (렌더 뒤에) */
+function focusOn(id: string, block: ScrollLogicalPosition = "center") {
+  setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block }), 120);
+}
+
 // 회원 페이지(MemberPortal)가 이 폰에 기억해 둔 회원 정보 (같은 키)
 const MEMBER_KEY = "ongi-member";
 function rememberedMember(): { token: string; last4?: string } | null {
@@ -363,6 +368,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         setDays(r.days);
         const first = Object.entries(r.days).find(([, s]) => s.some((x) => x.available));
         setDay(first ? first[0] : null);
+        // 회원 확인·선생님 선택 뒤 날짜 고르는 곳이 화면 가운데 오도록
+        focusOn("bk-date");
       })
       .catch((e) => !cancelled && setErr(e.message))
       .finally(() => !cancelled && setLoading(false));
@@ -805,20 +812,20 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       {loading && <p className="loading">예약 가능한 시간을 불러오는 중이에요…</p>}
 
       {days && (
-        <div className="step">
+        <div className="step" id="bk-date">
           <h3>2 · 날짜</h3>
-          <MonthCalendar days={days} selected={day} onPick={(d) => { setDay(d); setHour(null); }} />
+          <MonthCalendar days={days} selected={day} onPick={(d) => { setDay(d); setHour(null); focusOn("bk-time"); }} />
         </div>
       )}
 
       {days && day && (
-        <div className="step">
+        <div className="step" id="bk-time">
           <h3>
             3 · 시간 <span style={{ fontWeight: 400 }}>({sessionMinutes}분 진행)</span>
           </h3>
           <div className="times">
             {slots.map((s) => (
-              <button key={s.hour} className="chip" disabled={!s.available} aria-pressed={hour === s.hour} onClick={() => { setHour(s.hour); setErr(""); }}>
+              <button key={s.hour} className="chip" disabled={!s.available} aria-pressed={hour === s.hour} onClick={() => { setHour(s.hour); setErr(""); focusOn(kind === "member" ? "bk-go" : "bk-info", kind === "member" ? "center" : "start"); }}>
                 {s.hour}:00
               </button>
             ))}
@@ -828,7 +835,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       )}
 
       {days && day && hour != null && kind !== "member" && (
-        <div className="step">
+        <div className="step" id="bk-info">
           <h3>4 · 예약자 정보</h3>
           <div className="row2">
             <div className="field">
@@ -857,7 +864,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       {err && <div className="err">{err}</div>}
 
       {days && day && hour != null && (
-        <button className="primary" disabled={busy} onClick={confirm}>
+        <button id="bk-go" className="primary" disabled={busy} onClick={confirm}>
           {busy ? "예약하는 중…" : `${fmtDay(day)} ${hour}:00 예약하기`}
         </button>
       )}
