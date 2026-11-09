@@ -24,11 +24,11 @@ export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 const MEMBER_BOOKING_READY = true;
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
-type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean; cancelable: boolean; changedToday: boolean };
+type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean; cancelable: boolean; changedToday: boolean; who: string; label: string };
 
 /** 내 예약 확인·변경·취소 */
 function ManageBookings() {
-  const [name, setName] = useState("");
+  const [pick, setPick] = useState<string | null>(null);
   const [last4, setLast4] = useState("");
   const [list, setList] = useState<MyBooking[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -44,8 +44,10 @@ function ManageBookings() {
   async function lookup() {
     setErr(""); setMsg(""); setBusy(true); setChanging(null); setConfirmCancel(null);
     try {
-      const r = await api<{ bookings: MyBooking[] }>("/api/my/lookup", { method: "POST", body: JSON.stringify({ name, last4 }) });
+      const r = await api<{ bookings: MyBooking[] }>("/api/my/lookup", { method: "POST", body: JSON.stringify({ last4 }) });
       setList(r.bookings);
+      const labels = [...new Set(r.bookings.map((b) => b.label))];
+      setPick((p) => (labels.length === 1 ? labels[0] : p && labels.includes(p) ? p : null));
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -56,7 +58,7 @@ function ManageBookings() {
   async function cancel(b: MyBooking) {
     setErr(""); setBusy(true);
     try {
-      await api("/api/my/cancel", { method: "POST", body: JSON.stringify({ token: b.token, name, last4 }) });
+      await api("/api/my/cancel", { method: "POST", body: JSON.stringify({ token: b.token, who: b.who, last4 }) });
       setMsg(`${fmtDay(b.date)} ${b.hour}:00 예약을 취소했어요.`);
       setConfirmCancel(null);
       await lookup();
@@ -88,7 +90,7 @@ function ManageBookings() {
     if (!changing || !day || hour == null) return;
     setErr(""); setBusy(true);
     try {
-      await api("/api/my/change", { method: "POST", body: JSON.stringify({ token: changing.token, name, last4, date: day, hour }) });
+      await api("/api/my/change", { method: "POST", body: JSON.stringify({ token: changing.token, who: changing.who, last4, date: day, hour }) });
       setMsg(`${fmtDay(day)} ${hour}:00으로 변경했어요.`);
       setChanging(null);
       await lookup();
@@ -115,17 +117,11 @@ function ManageBookings() {
         </div>
       )}
       <h3>예약 조회</h3>
-      <div className="row2">
-        <div className="field">
-          <label htmlFor="myn">예약자 이름</label>
-          <input id="myn" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="myp">연락처 뒷 4자리</label>
-          <input id="myp" inputMode="numeric" maxLength={4} value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, ""))} />
-        </div>
+      <div className="field">
+        <label htmlFor="myp">연락처 뒷 4자리</label>
+        <input id="myp" inputMode="numeric" maxLength={4} value={last4} onChange={(e) => { setLast4(e.target.value.replace(/\D/g, "")); setList(null); setPick(null); }} />
       </div>
-      <button className="ghost" disabled={busy || name.trim().length < 2 || last4.length !== 4} onClick={lookup}>
+      <button className="ghost" disabled={busy || last4.length !== 4} onClick={lookup}>
         {busy && !list ? "조회 중…" : "내 예약 조회"}
       </button>
       {msg && <p className="okmsg">{msg}</p>}
@@ -135,9 +131,20 @@ function ManageBookings() {
         <p className="note">홈페이지로 예약하신 내역이 없어요. 다른 방법으로 예약하셨다면 카카오톡으로 문의해 주세요.</p>
       )}
 
-      {list && list.length > 0 && (
+      {list && new Set(list.map((b) => b.label)).size > 1 && (
+        <div className="field">
+          <label>예약자를 골라주세요</label>
+          <div className="chips">
+            {[...new Set(list.map((b) => b.label))].map((l) => (
+              <button key={l} type="button" className="chip" aria-pressed={pick === l} onClick={() => setPick(l)}>{l}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {list && list.length > 0 && pick && (
         <ul className="mylist">
-          {list.map((b) => (
+          {list.filter((b) => b.label === pick).map((b) => (
             <li key={b.token} className="mybook">
               <div className="mybook-main">
                 <b>{fmtDay(b.date)} {b.hour}:{String(b.minute).padStart(2, "0")}</b>

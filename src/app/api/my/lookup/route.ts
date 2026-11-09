@@ -11,11 +11,11 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const name = cleanName(body.name);
   const last4 = digitsOnly(body.last4);
-  if (name.length < 2 || last4.length !== 4) {
-    return NextResponse.json({ error: "예약하신 이름과 연락처 뒷 4자리를 입력해 주세요." }, { status: 400 });
+  if (last4.length !== 4) {
+    return NextResponse.json({ error: "연락처 뒷 4자리를 입력해 주세요." }, { status: 400 });
   }
   try {
-    const bookings = await findBookings(name, last4);
+    const bookings = await findBookings(name.length >= 2 ? name : "", last4);
     return NextResponse.json({ bookings }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("my/lookup", e);

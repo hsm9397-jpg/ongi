@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { BOOKING, BRANCHES, Branch, Trainer, calendarIdOf, getBranch } from "@/config/branches";
 import { CalEvent, getEvent, listEvents } from "./google";
 import { kstHourMinute, todayKst } from "./time";
+import { mask, nameToken } from "./members";
 
 const secret = () =>
   crypto
@@ -75,8 +76,13 @@ export type MyBooking = {
   cancelable: boolean;
   /** 오늘 이미 변경함 → 다시 누르면 담당 선생님 문의 팝업 */
   changedToday: boolean;
+  /** 예약자 이름 서명값 (변경·취소 때 이름 대신 보냄) */
+  who: string;
+  /** 가린 예약자 이름 (같은 뒷번호로 여러 명이면 고르기용) */
+  label: string;
 };
 
+/** name이 비어 있으면 뒷번호 4자리만으로 찾는다 (2026-11-09 대표: 이름 입력 없이) */
 export async function findBookings(name: string, last4: string, now = new Date()): Promise<MyBooking[]> {
   const to = new Date(now.getTime() + (BOOKING.daysAhead + 2) * 86_400_000);
   const out: MyBooking[] = [];
@@ -87,7 +93,7 @@ export async function findBookings(name: string, last4: string, now = new Date()
         if (!cal) return;
         const events = await listEvents(cal, now, to, undefined, { source: "ongi-web", last4 }).catch(() => [] as CalEvent[]);
         for (const e of events) {
-          if (!ownedBy(e, name, last4) || e.props?.branch !== b.id) continue;
+          if (!(name ? ownedBy(e, name, last4) : e.fromWeb && e.props?.last4 === last4) || e.props?.branch !== b.id) continue;
           const { date, hour, minute } = kstHourMinute(e.start);
           out.push({
             token: makeToken(b.id, t.id, e.id),
@@ -102,6 +108,8 @@ export async function findBookings(name: string, last4: string, now = new Date()
             changeable: e.props?.kind === "member" ? canMemberChange(e.start, now) : canChange(e.start, now),
             cancelable: canChange(e.start, now),
             changedToday: e.props?.kind === "member" && changedToday(e, now),
+            who: nameToken(e.props?.name ?? ""),
+            label: mask(e.props?.name ?? ""),
           });
         }
       })

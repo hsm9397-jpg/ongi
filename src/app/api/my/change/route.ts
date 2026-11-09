@@ -3,6 +3,7 @@ import { BOOKING, calendarIdOf } from "@/config/branches";
 import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent, deleteEvent } from "@/lib/google";
 import { loadOwned } from "@/lib/manage";
+import { readNameToken } from "@/lib/members";
 import { notify } from "@/lib/notify";
 import { alimtalk } from "@/lib/alimtalk";
 import { isValidDate, todayKst } from "@/lib/time";
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "요청이 너무 많아요. 잠시 후 다시 시도해 주세요." }, { status: 429 });
   }
   const body = await req.json().catch(() => ({}));
-  const name = cleanName(body.name);
+  const name = cleanName(body.who ? readNameToken(body.who) ?? "" : body.name);
   const last4 = digitsOnly(body.last4);
   const date = body.date;
   const hour = Number(body.hour);
