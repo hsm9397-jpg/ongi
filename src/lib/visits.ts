@@ -16,7 +16,7 @@ const url = () => conn().url;
 const token = () => conn().token;
 export const visitsReady = () => !!(url() && token());
 
-async function pipeline(cmds: (string | number)[][]): Promise<unknown[]> {
+export async function pipeline(cmds: (string | number)[][]): Promise<unknown[]> {
   const r = await fetch(`${url()}/pipeline`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },

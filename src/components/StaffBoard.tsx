@@ -107,6 +107,7 @@ export default function StaffBoard() {
         <div className="stat"><small>베드 가동률</small><b>{cap ? Math.round((timed.length / cap) * 100) : 0}%</b></div>
       </div>
       <Visits v={visits} />
+      <Remind staffKey={key} />
       {shown.map((b) => {
         const hours = Array.from({ length: b.lastHour - b.firstHour + 1 }, (_, i) => b.firstHour + i);
         return (
@@ -180,6 +181,51 @@ function Visits({ v }: { v: V | null }) {
         ))}
       </div>
       <p className="vnote">최근 30일 {sum(30)}명 · 누적 페이지 조회 {v.totalViews ?? 0}회</p>
+    </div>
+  );
+}
+
+type RItem = { name: string; when: string; branch: string; trainer: string; status: string; reason?: string };
+function Remind({ staffKey }: { staffKey: string }) {
+  const [d, setD] = useState<{ preview: { date: string; items: RItem[] }; last: { at: string; date: string; items: RItem[] } | null } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const load = async () => {
+    setBusy(true); setErr("");
+    try {
+      const r = await fetch("/api/cron/remind", { method: "POST", headers: { "x-staff-key": staffKey } });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      setD(j);
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  };
+  const list = (items: RItem[]) => (
+    <ul className="rm-list">
+      {items.map((i, k) => (
+        <li key={k} className={i.status}>
+          <b>{i.name}</b> {i.when} · {i.branch} {i.trainer}
+          {i.status === "skip" || i.status === "fail" ? <em> — {i.reason}</em> : i.status === "sent" ? <em> — 보냄</em> : null}
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <div className="branch visits">
+      <h3>1일전 리마인드 알림톡 <small>매일 12시 자동 발송 · 체험 제외</small></h3>
+      {!d && <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : "내일 발송 대상 미리보기"}</button>}
+      {err && <div className="err">{err}</div>}
+      {d && (
+        <>
+          <p className="vnote">내일({d.preview.date}) 대상 {d.preview.items.filter((i) => i.status === "send").length}명, 못 보냄 {d.preview.items.filter((i) => i.status !== "send").length}건</p>
+          {list(d.preview.items)}
+          {d.last && (
+            <>
+              <p className="vnote">마지막 발송: {new Date(d.last.at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} ({d.last.date} 예약분)</p>
+              {list(d.last.items)}
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

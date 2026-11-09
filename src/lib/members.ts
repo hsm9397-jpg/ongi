@@ -187,3 +187,10 @@ export async function fullPhoneOf(name: string, last4: string): Promise<string> 
     return "";
   }
 }
+
+/** 리마인드용: 이름(+뒷번호)으로 누적 회원 DB에서 찾은 서로 다른 전체 연락처들 */
+export async function phonesFor(name: string, last4?: string): Promise<string[]> {
+  const n = normName(name);
+  const list = (await phoneBook()).filter((e) => e.name === n && (!last4 || e.phone.endsWith(last4)));
+  return [...new Set(list.map((e) => e.phone))];
+}
