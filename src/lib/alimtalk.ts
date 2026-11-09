@@ -48,7 +48,7 @@ export async function alimtalk(a: AlimInput): Promise<void> {
   const key = process.env.SOLAPI_API_KEY;
   const secret = process.env.SOLAPI_API_SECRET;
   const from = (process.env.SOLAPI_SENDER || "").replace(/\D/g, "");
-  const pfId = process.env.SOLAPI_PFID || "";
+  const pfId = process.env.SOLAPI_PFID || "KA01PF2605110707236702uKEbcB6bFY"; // 카카오 채널 [온기pt] (비밀값 아님)
   let to = a.phone.replace(/\D/g, "");
   if (to.length === 4) to = await fullPhoneOf(a.name, to);
   const variables = alimVariables(a);
