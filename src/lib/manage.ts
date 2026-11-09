@@ -44,9 +44,9 @@ export function ownedBy(e: CalEvent, name: string, last4: string) {
   return e.fromWeb && e.props?.last4 === last4 && norm(e.props?.name ?? "") === norm(name);
 }
 
-/** 취소(그리고 체험·PT 변경): 하루 전까지 */
+/** 취소(그리고 체험·PT 변경): 예약 전날 자정(23:59)까지. 예약 당일이 되면 불가 (2026-11-09 대표) */
 export function canChange(start: Date, now = new Date()) {
-  return start.getTime() - now.getTime() >= BOOKING.changeCutoffHours * 3_600_000;
+  return todayKst(now) < kstHourMinute(start).date;
 }
 
 /** 기존 회원 시간 변경: 예약 2시간 전까지 */
@@ -122,6 +122,6 @@ export async function loadOwned(token: unknown, name: string, last4: string, act
     return { ...ref, ev } as const;
   }
   if (!canChange(ev.start))
-    return { error: `예약 ${BOOKING.changeCutoffHours}시간 전부터는 직접 변경·취소할 수 없어요. 카카오톡으로 문의해 주세요.`, status: 400 } as const;
+    return { error: "예약 당일에는 직접 변경·취소할 수 없어요(전날 자정까지 가능). 카카오톡으로 문의해 주세요.", status: 400 } as const;
   return { ...ref, ev } as const;
 }

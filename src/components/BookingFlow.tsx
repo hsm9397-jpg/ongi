@@ -158,12 +158,12 @@ function ManageBookings() {
                       <button className="ghost" onClick={() => setContactPop(true)}>시간 변경</button>
                     )}
                     {b.cancelable && <button className="ghost danger" disabled={busy} onClick={() => setConfirmCancel(b.token)}>취소</button>}
-                    {!b.cancelable && <span className="mybook-hint">취소는 예약 하루 전까지만 직접 할 수 있어요. 지금은 담당 선생님께 문의해 주세요.</span>}
+                    {!b.cancelable && <span className="mybook-hint">취소는 예약 전날 자정까지만 직접 할 수 있어요. 지금은 담당 선생님께 문의해 주세요.</span>}
                   </div>
                 )
               ) : (
                 <p className="note">
-                  {b.kind === "member" ? "예약 2시간 전부터는 직접 변경이 어려워요. 담당 선생님께 문의해 주세요." : "예약 하루 전부터는 직접 변경·취소가 어려워요. 카카오톡으로 문의해 주세요."}
+                  {b.kind === "member" ? "예약 2시간 전부터는 직접 변경이 어려워요. 담당 선생님께 문의해 주세요." : "예약 당일에는 직접 변경·취소가 어려워요(전날 자정까지 가능). 카카오톡으로 문의해 주세요."}
                 </p>
               )}
               {changing?.token === b.token && (
@@ -496,7 +496,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <dt>예약자</dt>
           <dd>{done.name}</dd>
         </dl>
-        <p className="note">예약 전날 안내 메시지를 보내드려요. 변경·취소는 첫 화면의 &quot;내 예약 확인 · 변경 · 취소&quot;에서 예약 하루 전까지 직접 할 수 있어요.</p>
+        <p className="note">예약 전날 안내 메시지를 보내드려요. 변경·취소는 첫 화면의 &quot;내 예약 확인 · 변경 · 취소&quot;에서 예약 전날 자정까지 직접 할 수 있어요.</p>
         <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
         <button className="ghost" onClick={() => { setDone(null); switchKind(kind); }}>
           처음으로
