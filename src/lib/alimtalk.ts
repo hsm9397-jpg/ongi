@@ -2,7 +2,7 @@
 // 필요한 환경변수: SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER(발신번호), SOLAPI_PFID(카카오 채널 발신프로필 ID)
 // 설정이 없거나 고객 연락처를 모르면 조용히 건너뛴다 (예약 자체는 막지 않음).
 import crypto from "node:crypto";
-import type { Branch, Trainer } from "@/config/branches";
+import { phoneOf, type Branch, type Trainer } from "@/config/branches";
 import { fullPhoneOf } from "./members";
 import { kstHourMinute } from "./time";
 
@@ -32,6 +32,8 @@ export type AlimInput = {
   phone: string;
   when: Date;
   oldWhen?: Date;
+  /** 변경 때 이전 담당 (다르면 그 선생님에게도 보냄) */
+  oldTrainer?: Trainer;
 };
 
 /** 승인된 템플릿 변수 (2026-11-09 캡처 기준)
@@ -79,9 +81,14 @@ export async function sendAlim(to: string, templateId: string, variables: Record
   return (await sendAlimDetail(to, templateId, variables)).ok;
 }
 
+/** 예약자와 담당 선생님(Vercel 환경변수 PHONE_이름)에게 같은 알림톡을 보낸다 (2026-11-09 대표) */
 export async function alimtalk(a: AlimInput): Promise<void> {
   let to = a.phone.replace(/\D/g, "");
   if (to.length === 4) to = await fullPhoneOf(a.name, to);
   const variables = alimVariables(a);
-  if (!(await sendAlim(to, ALIMTALK_TEMPLATES[a.type], variables))) console.log("alimtalk 건너뜀/실패", a.type, JSON.stringify(variables));
+  const targets = new Set<string>([to, ...[a.trainer, a.oldTrainer].map((t) => (t && phoneOf(t)) || "")].filter((x) => x.length >= 10));
+  if (!to) console.log("alimtalk 예약자 번호 없음", a.type, JSON.stringify(variables));
+  for (const t of targets) {
+    if (!(await sendAlim(t, ALIMTALK_TEMPLATES[a.type], variables))) console.log("alimtalk 실패", a.type, JSON.stringify(variables));
+  }
 }

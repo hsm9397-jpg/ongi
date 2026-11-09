@@ -3,7 +3,7 @@
 //   NOTIFY_PHONES(항상 받을 번호, 쉼표로 여러 개), PHONE_선생님(예: PHONE_HYUNSEUNGMIN)
 // 설정이 없으면 조용히 건너뛴다 (예약 자체는 막지 않음).
 import crypto from "node:crypto";
-import { Trainer, phoneOf } from "@/config/branches";
+import { Trainer } from "@/config/branches";
 import { kstHourMinute } from "./time";
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -47,10 +47,7 @@ export async function notify(n: NotifyInput): Promise<void> {
   const from = (process.env.SOLAPI_SENDER || "").replace(/\D/g, "");
   const to = new Set<string>();
   for (const p of (process.env.NOTIFY_PHONES || "").split(",")) if (p.replace(/\D/g, "").length >= 10) to.add(p.replace(/\D/g, ""));
-  for (const t of [n.trainer, n.oldTrainer, ...(n.team ?? [])]) {
-    const p = t && phoneOf(t);
-    if (p) to.add(p);
-  }
+  // 담당 선생님은 알림톡으로 받으므로 문자는 NOTIFY_PHONES(관리자)에게만 보낸다 (2026-11-09)
   if (!key || !secret || !from || !to.size) {
     console.log("notify (문자 설정 없음, 건너뜀)\n" + text);
     return;
