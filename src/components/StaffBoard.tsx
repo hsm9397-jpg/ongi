@@ -265,6 +265,7 @@ function AlimTest({ staffKey }: { staffKey: string }) {
 
 function AfterTrial({ staffKey }: { staffKey: string }) {
   const [items, setItems] = useState<(RItem & { from?: string })[] | null>(null);
+  const [dbs, setDbs] = useState<{ name: string; status: string }[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const load = async () => {
@@ -274,6 +275,7 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
       setItems(j.items);
+      setDbs(j.dbs ?? null);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
   const label: Record<string, string> = { wait: "대기", sent: "보냄", skip: "못 보냄", fail: "실패" };
@@ -282,6 +284,7 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
       <h3>체험 후 안내 알림톡 <small>체험 일정 끝나는 시각에 자동 발송</small></h3>
       <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : items ? "새로고침" : "오늘 체험자 보기"}</button>
       {err && <div className="err">{err}</div>}
+      {dbs && <p className="vnote">노션 {dbs.map((d) => `${d.name}: ${d.status}`).join(" · ")}</p>}
       {items && (items.length ? (
         <ul className="rm-list">
           {items.map((i, k) => (

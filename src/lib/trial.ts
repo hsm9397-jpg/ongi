@@ -15,6 +15,8 @@ const TRIAL_DBS = () =>
 const phonesIn = (s: string) => (s.match(/01\d[\d-\s]{7,11}\d/g) ?? []).map((x) => x.replace(/\D/g, "")).filter((x) => x.length >= 10 && x.length <= 11);
 
 let cache: { at: number; rows: { name: string; phone: string; date: string }[] } | null = null;
+/** 직원 화면 확인용: 체험자 DB별 읽기 결과 */
+export const trialDbStatus: Record<string, string> = {};
 async function trialRows() {
   if (cache && Date.now() - cache.at < 5 * 60_000) return cache.rows;
   const rows: { name: string; phone: string; date: string }[] = [];
@@ -33,7 +35,9 @@ async function trialRows() {
         const date = d?.start ? (d.start.length > 10 ? kstHourMinute(new Date(d.start)).date : d.start) : "";
         if (name && phone && (!date || date >= since)) rows.push({ name, phone, date });
       }
+      trialDbStatus[db] = `연결됨 (${r.results.length}줄)`;
     } catch (e) {
+      trialDbStatus[db] = "연결 안 됨";
       console.error("trial db", db, (e as Error).message);
     }
   }
@@ -57,4 +61,17 @@ export async function trialPhone(ev: { summary: string; description?: string; st
   const any = [...new Set(rows.map((r) => r.phone))];
   if (any.length === 1) return { name, phone: any[0], from: "노션 체험자 DB" };
   return { name, phone: "", from: any.length > 1 ? "같은 이름 여러 명" : "" };
+}
+
+/** 체험자 DB 연결 상태를 새로 확인 */
+export async function checkTrialDbs(): Promise<{ name: string; status: string }[]> {
+  cache = null;
+  await trialRows();
+  const names: Record<string, string> = {
+    "39946121f76580e9a5d7ec0c170893e3": "체험자(지하)",
+    "3b246121f76580d0b3f7e40ea96e28f1": "체험자(2층)",
+    "3b446121f7658097a365d5fb1b5d7650": "체험자(신반포스퀘어)",
+    "40946121f765805f8239da7d08d5bc53": "체험자(선릉)",
+  };
+  return TRIAL_DBS().map((id) => ({ name: names[id] ?? id, status: trialDbStatus[id] ?? "확인 못 함" }));
 }

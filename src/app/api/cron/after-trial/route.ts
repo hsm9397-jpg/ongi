@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runAfterTrial } from "@/lib/afterTrial";
 import { staffAuthorized } from "@/lib/staffAuth";
+import { checkTrialDbs } from "@/lib/trial";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -23,7 +24,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   if (!staffAuthorized(req)) return NextResponse.json({ error: "비밀번호가 맞지 않아요." }, { status: 401 });
   try {
-    return NextResponse.json({ items: await runAfterTrial({ send: false }) });
+    const dbs = await checkTrialDbs();
+    return NextResponse.json({ dbs, items: await runAfterTrial({ send: false }) });
   } catch (e) {
     console.error("after-trial preview", e);
     return NextResponse.json({ error: "불러오지 못했어요." }, { status: 502 });
