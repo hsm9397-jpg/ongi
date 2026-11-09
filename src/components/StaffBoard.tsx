@@ -107,7 +107,8 @@ export default function StaffBoard() {
         <div className="stat"><small>베드 가동률</small><b>{cap ? Math.round((timed.length / cap) * 100) : 0}%</b></div>
       </div>
       <Visits v={visits} />
-      <Remind staffKey={key} />
+      <Remind staffKey={key} trial={false} />
+      <Remind staffKey={key} trial />
       <AfterTrial staffKey={key} />
       <AlimTest staffKey={key} />
       {shown.map((b) => {
@@ -188,7 +189,7 @@ function Visits({ v }: { v: V | null }) {
 }
 
 type RItem = { name: string; when: string; branch: string; trainer: string; status: string; reason?: string };
-function Remind({ staffKey }: { staffKey: string }) {
+function Remind({ staffKey, trial }: { staffKey: string; trial: boolean }) {
   const [d, setD] = useState<{ preview: { date: string; items: RItem[] }; last: { at: string; date: string; items: RItem[] } | null } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -202,16 +203,16 @@ function Remind({ staffKey }: { staffKey: string }) {
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
   const isT = (i: RItem) => i.name.endsWith("(체험)");
-  const groups = (items: RItem[]) => (
-    <>
-      {[["회원 1일전 리마인드", items.filter((i) => !isT(i))], ["체험자 1일전 체험 안내 (지점별 템플릿)", items.filter(isT)]].map(([t, g]) => (
-        <div key={t as string}>
-          <h4 style={{ margin: "14px 0 4px", fontSize: 15 }}>{t as string} <small style={{ fontWeight: 400, opacity: 0.7 }}>{(g as RItem[]).filter((i) => i.status === "send" || i.status === "sent").length}명 · 못 보냄 {(g as RItem[]).filter((i) => i.status === "skip" || i.status === "fail").length}건</small></h4>
-          {(g as RItem[]).length ? list((g as RItem[]).map((i) => ({ ...i, name: i.name.replace(/\s*\(체험\)$/, "") }))) : <p className="vnote">없음</p>}
-        </div>
-      ))}
-    </>
-  );
+  const groups = (items: RItem[]) => {
+    const g = items.filter((i) => isT(i) === trial).map((i) => ({ ...i, name: i.name.replace(/\s*\(체험\)$/, "") }));
+    const ok = g.filter((i) => i.status === "send" || i.status === "sent").length;
+    return (
+      <>
+        <p className="vnote">{ok}명 · 못 보냄 {g.length - ok}건</p>
+        {g.length ? list(g) : <p className="vnote">없음</p>}
+      </>
+    );
+  };
   const list = (items: RItem[]) => (
     <ul className="rm-list">
       {items.map((i, k) => (
@@ -224,7 +225,7 @@ function Remind({ staffKey }: { staffKey: string }) {
   );
   return (
     <div className="branch visits">
-      <h3>1일전 안내 알림톡 <small>매일 12시 자동 발송</small></h3>
+      <h3>{trial ? "체험자 1일전 체험 안내" : "회원 1일전 리마인드"} <small>{trial ? "매일 12시 자동 발송 · 담당 선생님 지점 체험 템플릿" : "매일 12시 자동 발송 · 체험자 제외"}</small></h3>
       {!d && <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : "내일 발송 대상 미리보기"}</button>}
       {err && <div className="err">{err}</div>}
       {d && (
