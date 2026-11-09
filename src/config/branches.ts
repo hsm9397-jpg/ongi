@@ -216,6 +216,8 @@ export const BRANCHES: Branch[] = [
 export const BOOKING = {
   /** 한 타임 진행 시간(분) */
   sessionMinutes: 50,
+  /** 캘린더에 잡히는 길이(분): 정시 1시간 한 칸 */
+  calendarMinutes: 60,
   /** 오늘부터 며칠 앞까지 예약을 열지 */
   daysAhead: 30,
   /** 기존 회원은 2주 앞까지만 예약 (2026-11-06 대표 요청) */

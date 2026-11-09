@@ -54,7 +54,8 @@ function hoursFor(branch: Branch, opens: Opens, date: string, onlyTrainer?: stri
 }
 
 function slotState(branch: Branch, busy: Busy, opens: Opens, date: string, hour: number, start: Date, onlyTrainer?: string) {
-  const end = new Date(start.getTime() + BOOKING.sessionMinutes * 60_000);
+  // 캘린더에는 정시 1시간 한 칸으로 잡는다 (예: 15:00~16:00, 이름이 보이게 · 2026-11-09 대표)
+  const end = new Date(start.getTime() + BOOKING.calendarMinutes * 60_000);
   // 일정이 그 정시 한 시간(예: 13:00~14:00) 안에 조금이라도 걸치면 그 타임은 막는다.
   // 30분에 시작한 일정(13:30~14:20)은 13시·14시 두 타임을 모두 막는다 (2026-11-09 대표)
   const hourEnd = new Date(start.getTime() + 60 * 60_000);
