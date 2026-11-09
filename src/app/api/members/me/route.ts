@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readMemberToken, validMembers } from "@/lib/members";
+import { nameToken, readMemberToken, validMembers } from "@/lib/members";
 
 export const dynamic = "force-dynamic";
 
@@ -12,5 +12,5 @@ export async function POST(req: Request) {
   if (!list) return NextResponse.json({ error: "잠시 후 다시 시도해 주세요." }, { status: 502 });
   const m = list.find((x) => x.id === id);
   if (!m) return NextResponse.json({ expired: true });
-  return NextResponse.json({ name: m.name, url: m.url });
+  return NextResponse.json({ name: m.name, url: m.url, who: nameToken(m.name) });
 }

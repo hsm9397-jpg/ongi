@@ -6,7 +6,8 @@ type Group = { name: string; photo: string };
 type Found = { name: string; url: string; token: string };
 const KEY = "ongi-member";
 
-function load(): { token: string; name: string } | null {
+type Saved = { token: string; name: string; last4?: string };
+function load(): Saved | null {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) || "null");
     return v && typeof v.token === "string" ? v : null;
@@ -14,7 +15,7 @@ function load(): { token: string; name: string } | null {
     return null;
   }
 }
-function save(v: { token: string; name: string } | null) {
+function save(v: Saved | null) {
   try {
     if (v) localStorage.setItem(KEY, JSON.stringify(v));
     else localStorage.removeItem(KEY);
@@ -50,8 +51,9 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
     if (group) pinRef.current?.focus();
   }, [group]);
 
-  function go(f: Found) {
-    save({ token: f.token, name: f.name });
+  function go(f: Found, code = last4) {
+    // 뒷번호도 이 폰에만 기억해 두고, 예약하기를 누르면 다시 묻지 않는다
+    save({ token: f.token, name: f.name, last4: code });
     setMe({ token: f.token, name: f.name, url: f.url });
     window.location.href = f.url;
   }
@@ -66,7 +68,7 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "다시 시도해 주세요.");
       const items = d.items as Found[];
-      if (items.length === 1) return go(items[0]);
+      if (items.length === 1) return go(items[0], code);
       setFound(items);
     } catch (e) {
       setErr((e as Error).message);

@@ -26,6 +26,24 @@ const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(
 
 type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean; cancelable: boolean; changedToday: boolean; who: string; label: string };
 
+// 회원 페이지(MemberPortal)가 이 폰에 기억해 둔 회원 정보 (같은 키)
+const MEMBER_KEY = "ongi-member";
+function rememberedMember(): { token: string; last4?: string } | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(MEMBER_KEY) || "null");
+    return v && typeof v.token === "string" ? v : null;
+  } catch {
+    return null;
+  }
+}
+/** 회원 페이지로 확인한 폰이면 예약 때 넣은 뒷번호도 기억해 둔다 (다음부터 바로 예약) */
+function rememberLast4(last4: string) {
+  try {
+    const v = rememberedMember();
+    if (v && !(v as { last4?: string }).last4) localStorage.setItem(MEMBER_KEY, JSON.stringify({ ...v, last4 }));
+  } catch {}
+}
+
 /** 내 예약 확인·변경·취소 */
 function ManageBookings() {
   const [pick, setPick] = useState<string | null>(null);
@@ -361,8 +379,12 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       else if (h === "trial" || h === "member" || h === "pt") switchKind(h);
       else return;
       document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
-      // 기존 회원 예약은 바로 뒷 4자리를 입력할 수 있게 입력칸에 커서를 둔다
-      if (h === "member" && MEMBER_BOOKING_READY) setTimeout(() => (document.getElementById("mp") as HTMLInputElement | null)?.focus({ preventScroll: true }), 400);
+      // 기존 회원 예약: 회원 페이지에서 이미 확인한 폰이면 바로 담당 선생님 단계로, 아니면 뒷 4자리 칸에 커서
+      if (h === "member" && MEMBER_BOOKING_READY) {
+        const saved = rememberedMember();
+        if (saved?.last4) autoVerify(saved);
+        else setTimeout(() => (document.getElementById("mp") as HTMLInputElement | null)?.focus({ preventScroll: true }), 400);
+      }
       history.replaceState(null, "", window.location.pathname + window.location.search);
     };
     // 주소에 #이 남으면 새로고침할 때마다 그 위치로 튀므로, 페이지 안 이동은 주소를 바꾸지 않고 직접 스크롤한다
@@ -415,7 +437,18 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     resetSlots();
   }
 
-  async function verify(code = last4, pick?: string) {
+  async function autoVerify(saved: { token: string; last4?: string }) {
+    if (!saved.last4) return;
+    setLast4(saved.last4);
+    let pick: string | undefined;
+    try {
+      const r = await fetch("/api/members/me", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: saved.token }) });
+      pick = (await r.json()).who;
+    } catch {}
+    await verify(saved.last4, pick, true);
+  }
+
+  async function verify(code = last4, pick?: string, auto = false) {
     if (busy || code.length !== 4) return;
     setErr("");
     setBusy(true);
@@ -432,12 +465,16 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         setExpiredPop(true);
         return;
       }
-      if (!res.ok) throw new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+      if (!res.ok) {
+        if (auto && pick) return verify(code, undefined, false);
+        throw new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+      }
       if (data.choices) {
         setChoices(data.choices);
         return;
       }
       const r = data as { who: string; label: string; memberships: Membership[] };
+      rememberLast4(code);
       setWho(r.who);
       setLabel(r.label);
       setLeft(null);
