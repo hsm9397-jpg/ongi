@@ -225,7 +225,7 @@ function Remind({ staffKey, trial }: { staffKey: string; trial: boolean }) {
   );
   return (
     <div className="branch visits">
-      <h3>{trial ? "체험자 1일전 체험 안내" : "회원 1일전 리마인드"} <small>{trial ? "매일 12시 자동 발송 · 담당 선생님 지점 체험 템플릿" : "매일 12시 자동 발송 · 체험자 제외"}</small></h3>
+      <h3>{trial ? "체험자 1일전 안내" : "회원 1일전 리마인드"} <small>{trial ? "매일 12시 자동 발송 · 담당 선생님 지점 체험 템플릿" : "매일 12시 자동 발송 · 체험자 제외"}</small></h3>
       {!d && <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : "내일 발송 대상 미리보기"}</button>}
       {err && <div className="err">{err}</div>}
       {d && (
@@ -294,7 +294,7 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
   const label: Record<string, string> = { wait: "대기", sent: "보냄", skip: "못 보냄", fail: "실패" };
   return (
     <div className="branch visits">
-      <h3>체험 후 안내 알림톡 <small>체험 일정 끝나는 시각에 자동 발송</small></h3>
+      <h3>체험 후 안내 <small>체험 일정 끝나는 시각에 자동 발송</small></h3>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button className={tmr && items ? "" : "ghost"} onClick={() => load(true)} disabled={busy}>내일 체험자 (번호 확인)</button>
         <button className={!tmr && items ? "" : "ghost"} onClick={() => load(false)} disabled={busy}>오늘 체험자 (발송 현황)</button>
