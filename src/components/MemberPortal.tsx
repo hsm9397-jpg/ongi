@@ -120,7 +120,7 @@ export default function MemberPortal({ groups, kakao, booking }: { groups: Group
             <MemberInfo token={me.token} />
           </>
         )}
-        <button className="mp-forget" onClick={forget}>다른 회원으로 보기</button>
+        <button className="mp-forget" onClick={forget}>로그아웃</button>
       </section>
     );
   }
