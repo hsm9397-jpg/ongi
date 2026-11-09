@@ -158,6 +158,7 @@ function ManageBookings() {
                       <button className="ghost" onClick={() => setContactPop(true)}>시간 변경</button>
                     )}
                     {b.cancelable && <button className="ghost danger" disabled={busy} onClick={() => setConfirmCancel(b.token)}>취소</button>}
+                    {!b.cancelable && <span className="mybook-hint">취소는 예약 하루 전까지만 직접 할 수 있어요. 지금은 담당 선생님께 문의해 주세요.</span>}
                   </div>
                 )
               ) : (
