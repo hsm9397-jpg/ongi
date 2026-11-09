@@ -2,6 +2,8 @@ import MemberPortal from "@/components/MemberPortal";
 import EventNotice from "@/components/EventNotice";
 import AnnivNotice from "@/components/AnnivNotice";
 import { TEAM, LINKS } from "@/config/site";
+import BookingFlow from "@/components/BookingFlow";
+import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 
 export const metadata = { title: "회원 페이지 | 온기", robots: { index: false } };
 
@@ -19,7 +21,19 @@ export default function MemberPage() {
         </a>
         <h1>회원 페이지</h1>
       </header>
-      <MemberPortal groups={groups} kakao={LINKS.kakao} />
+      <MemberPortal
+        groups={groups}
+        kakao={LINKS.kakao}
+        booking={
+          <BookingFlow
+            branches={publicBranches()}
+            trialPrice={BOOKING.trialPriceText}
+            sessionMinutes={BOOKING.sessionMinutes}
+            comingSoon={BRANCHES.filter((b) => !b.open).map((b) => b.short)}
+            memberOnly
+          />
+        }
+      />
       <EventNotice img="/event/anniv-member.webp" alt="온기 1주년 감사제 회원 혜택: 근막이완 1회 추가 증정, 모든 프로그램 10% 할인(금액권은 5%), 감사 사은품 증정. 기간 2026년 11월 1일부터 11월 30일까지" until="2026-11-30" />
       <AnnivNotice />
     </main>

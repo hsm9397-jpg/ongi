@@ -129,7 +129,7 @@ table.grid{border-collapse:separate;border-spacing:4px;width:100%;min-width:420p
 .binfo .kakao{align-self:flex-start}
 
 /* 내 예약 */
-.my-link{align-self:stretch;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--brown);font-size:16px;font-weight:600;border-radius:14px;cursor:pointer;padding:14px 16px;min-height:52px}
+.my-link{align-self:stretch;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:16px;font-weight:700;border-radius:14px;cursor:pointer;padding:14px 16px;min-height:52px}
 .my-link[aria-pressed="true"]{border-color:var(--terra);color:var(--terra);background:var(--terra-soft)}
 .mylist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .mybook{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
@@ -545,3 +545,4 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .rm-list li.skip em,.rm-list li.fail em{color:var(--terra);font-style:normal}
 .rm-list li.sent em{color:var(--muted);font-style:normal}
 .mybook-hint{flex-basis:100%;font-size:12.5px;color:var(--muted);margin-top:2px}
+.mp-booking{margin-top:14px;text-align:left}

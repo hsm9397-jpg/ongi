@@ -304,9 +304,9 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: string; sessionMinutes: number; comingSoon: string[] }) {
-  const { branches, trialPrice, sessionMinutes, comingSoon } = props;
-  const [kind, setKind] = useState<"trial" | "member" | "pt">("trial");
+export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: string; sessionMinutes: number; comingSoon: string[]; memberOnly?: boolean }) {
+  const { branches, trialPrice, sessionMinutes, comingSoon, memberOnly } = props;
+  const [kind, setKind] = useState<"trial" | "member" | "pt">(memberOnly ? "member" : "trial");
   const [manage, setManage] = useState(false);
   const [branch, setBranch] = useState<string | null>(null);
   const [days, setDays] = useState<Record<string, Slot[]> | null>(null);
@@ -377,6 +377,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       cancelled = true;
     };
   }, [activeBranch, trainer, needTrainer, selfBook]);
+
+  // 회원 페이지 안에서 열린 예약 창: 이 폰에 기억된 회원이면 바로 확인
+  useEffect(() => {
+    if (!memberOnly) return;
+    const saved = rememberedMember();
+    if (saved?.last4) autoVerify(saved);
+    else setTimeout(() => (document.getElementById("mp") as HTMLInputElement | null)?.focus({ preventScroll: true }), 300);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 홈페이지의 버튼(#trial, #member, #pt, #my)으로 예약 종류를 바로 열기
   useEffect(() => {
@@ -633,6 +642,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           </div>
         </div>
       )}
+      {!memberOnly && (
       <div className="kind kind3" role="tablist" aria-label="예약 종류">
         <button role="tab" aria-pressed={!manage && kind === "trial"} aria-selected={!manage && kind === "trial"} onClick={() => switchKind("trial")}>
           <b>근막이완<br />체험 신청</b>
@@ -646,9 +656,16 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           <b>기존 회원<br />예약</b>
         </button>
       </div>
+      )}
+      {memberOnly ? (
+        <button className="my-link" aria-pressed={manage} onClick={() => setManage(!manage)}>
+          {manage ? "‹ 예약하기로 돌아가기" : <>내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span></>}
+        </button>
+      ) : (
       <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
         내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
       </button>
+      )}
 
       {!manage && kind === "trial" && (
         <div className="contra">

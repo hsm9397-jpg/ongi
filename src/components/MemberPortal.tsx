@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import MemberInfo from "./MemberInfo";
 
 type Group = { name: string; photo: string };
@@ -22,7 +22,8 @@ function save(v: Saved | null) {
   } catch {}
 }
 
-export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao: string }) {
+export default function MemberPortal({ groups, kakao, booking }: { groups: Group[]; kakao: string; booking?: ReactNode }) {
+  const [showBook, setShowBook] = useState(false);
   const [me, setMe] = useState<{ token: string; name: string; url?: string; remaining?: number | null } | null>(null);
   const [expired, setExpired] = useState(false);
   const [group, setGroup] = useState<string | null>(null);
@@ -101,7 +102,21 @@ export default function MemberPortal({ groups, kakao }: { groups: Group[]; kakao
             <a className="primary mp-open" href={me.url ?? "#"} aria-disabled={!me.url}>
               {me.url ? "내 페이지 열기" : "불러오는 중…"}
             </a>
-            <a className="ghost mp-book" href="/#member">예약하기</a>
+            {booking ? (
+              <button
+                className="ghost mp-book"
+                aria-pressed={showBook}
+                onClick={() => {
+                  setShowBook((v) => !v);
+                  setTimeout(() => document.getElementById("mp-booking")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+                }}
+              >
+                {showBook ? "예약 창 닫기" : "예약하기"}
+              </button>
+            ) : (
+              <a className="ghost mp-book" href="/#member">예약하기</a>
+            )}
+            {showBook && booking && <div id="mp-booking" className="mp-booking">{booking}</div>}
             <MemberInfo token={me.token} />
           </>
         )}
