@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 type Ev = { title: string; allDay: boolean; start: string; end: string; startHour: number; kind: "trial" | "member" | "other"; fromWeb: boolean };
 type T = { id: string; name: string; connected: boolean; events: Ev[] };
+type V = { ready: boolean; days?: { date: string; visitors: number; views: number }[]; total?: number; totalViews?: number; since?: string | null };
 type B = { id: string; name: string; beds: number; firstHour: number; lastHour: number; trainers: T[] };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -26,6 +27,7 @@ export default function StaffBoard() {
   const [data, setData] = useState<B[] | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [visits, setVisits] = useState<V | null>(null);
 
   useEffect(() => {
     try {
@@ -43,6 +45,10 @@ export default function StaffBoard() {
       if (res.status === 401) { setAuthed(false); throw new Error(j.error); }
       if (!res.ok) throw new Error(j.error);
       setData(j.branches);
+      fetch("/api/staff/visits", { headers: { "x-staff-key": key } })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((v) => v && setVisits(v))
+        .catch(() => {});
       try { sessionStorage.setItem("ongi-staff", key); } catch {}
     } catch (e) {
       setErr((e as Error).message);
@@ -100,6 +106,7 @@ export default function StaffBoard() {
         <div className="stat"><small>회원·기타 일정</small><b>{timed.length - trial}</b></div>
         <div className="stat"><small>베드 가동률</small><b>{cap ? Math.round((timed.length / cap) * 100) : 0}%</b></div>
       </div>
+      <Visits v={visits} />
       {shown.map((b) => {
         const hours = Array.from({ length: b.lastHour - b.firstHour + 1 }, (_, i) => b.firstHour + i);
         return (
@@ -143,5 +150,36 @@ export default function StaffBoard() {
         );
       })}
     </>
+  );
+}
+
+function Visits({ v }: { v: V | null }) {
+  if (!v) return null;
+  if (!v.ready || !v.days) {
+    return <div className="dayoff">방문자 수: 아직 저장소가 연결되지 않았어요. (Vercel → Storage → Upstash Redis 연결 필요)</div>;
+  }
+  const sum = (n: number) => v.days!.slice(0, n).reduce((s, d) => s + d.visitors, 0);
+  const week = v.days.slice(0, 7);
+  const max = Math.max(1, ...week.map((d) => d.visitors));
+  return (
+    <div className="branch visits">
+      <h3>홈페이지 방문자 <small>{v.since ? `${v.since.slice(2).replace(/-/g, ".")}부터 집계 · ` : ""}같은 기기는 하루 1명으로 셈</small></h3>
+      <div className="stats">
+        <div className="stat"><small>오늘</small><b>{v.days[0].visitors}</b></div>
+        <div className="stat"><small>어제</small><b>{v.days[1]?.visitors ?? 0}</b></div>
+        <div className="stat"><small>최근 7일</small><b>{sum(7)}</b></div>
+        <div className="stat"><small>누적 방문자</small><b>{v.total ?? 0}</b></div>
+      </div>
+      <div className="vbars">
+        {[...week].reverse().map((d) => (
+          <div key={d.date} className="vbar">
+            <span className="vn">{d.visitors}</span>
+            <i style={{ height: `${Math.round((d.visitors / max) * 100)}%` }} />
+            <small>{label(d.date).replace(/^\d+월 /, "")}</small>
+          </div>
+        ))}
+      </div>
+      <p className="vnote">최근 30일 {sum(30)}명 · 누적 페이지 조회 {v.totalViews ?? 0}회</p>
+    </div>
   );
 }

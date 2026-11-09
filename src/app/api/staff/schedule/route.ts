@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { staffAuthorized } from "@/lib/staffAuth";
 import { BRANCHES, calendarIdOf } from "@/config/branches";
 import { listEvents } from "@/lib/google";
 import { addDays, isValidDate, kstDate, kstHourMinute, todayKst } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
-function authorized(req: NextRequest) {
-  const want = process.env.STAFF_PASSWORD ?? "";
-  const got = req.headers.get("x-staff-key") ?? "";
-  if (!want) return false;
-  const a = Buffer.from(want), b = Buffer.from(got);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
 
 export async function GET(req: NextRequest) {
-  if (!authorized(req)) return NextResponse.json({ error: "비밀번호가 맞지 않아요." }, { status: 401 });
+  if (!staffAuthorized(req)) return NextResponse.json({ error: "비밀번호가 맞지 않아요." }, { status: 401 });
   const date = req.nextUrl.searchParams.get("date") ?? todayKst();
   if (!isValidDate(date)) return NextResponse.json({ error: "날짜가 올바르지 않아요." }, { status: 400 });
   const from = kstDate(date, 0), to = kstDate(addDays(date, 1), 0);
