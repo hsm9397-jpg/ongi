@@ -32,11 +32,16 @@ export type AlimInput = {
   oldWhen?: Date;
 };
 
+/** 승인된 템플릿 변수 (2026-11-09 캡처 기준)
+ *  확정: 이름·날짜·시간·지점·담당자 / 변경: 이름·이전일시·일시·지점·담당자 / 취소: 이름·일시·지점·담당자 */
 export function alimVariables(a: AlimInput): Record<string, string> {
-  const v: Record<string, string> = { "#{이름}": a.name, "#{일시}": fmtKakao(a.when), "#{지점}": a.branch.name };
-  if (a.type !== "cancel") v["#{담당자}"] = a.trainer.name;
-  if (a.type === "change") v["#{이전일시}"] = a.oldWhen ? fmtKakao(a.oldWhen) : "";
-  return v;
+  const base = { "#{이름}": a.name, "#{지점}": a.branch.name, "#{담당자}": a.trainer.name };
+  if (a.type === "new") {
+    const [day, dow, time] = fmtKakao(a.when).split(" "); // 26.11.07 (토) 14:00
+    return { ...base, "#{날짜}": `${day} ${dow}`, "#{시간}": time };
+  }
+  if (a.type === "change") return { ...base, "#{이전일시}": a.oldWhen ? fmtKakao(a.oldWhen) : "", "#{일시}": fmtKakao(a.when) };
+  return { ...base, "#{일시}": fmtKakao(a.when) };
 }
 
 export async function alimtalk(a: AlimInput): Promise<void> {
