@@ -6,7 +6,7 @@ import { trialPhone } from "./trial";
 import { listEvents } from "./google";
 import { phonesFor } from "./members";
 import { normName } from "./notion";
-import { addDays, kstDate, todayKst } from "./time";
+import { addDays, kstDate, kstHourMinute, todayKst } from "./time";
 import { pipeline, visitsReady } from "./visits";
 
 export type RemindItem = { name: string; when: string; branch: string; trainer: string; status: "send" | "sent" | "skip" | "fail"; reason?: string };
@@ -22,7 +22,9 @@ function parseTitle(t: string): { name: string; last4?: string } | null {
 }
 
 export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ date: string; items: RemindItem[] }> {
-  const date = addDays(todayKst(opts.now ?? new Date()), 1);
+  const now = opts.now ?? new Date();
+  // 미리보기는 다음 발송분을 보여줌: 12시가 지났으면 모레 일정 (12시에 보낼 대상)
+  const date = addDays(todayKst(now), opts.dry && kstHourMinute(now).hour >= 12 ? 2 : 1);
   const from = kstDate(date, 0), to = kstDate(addDays(date, 1), 0);
   const items: RemindItem[] = [];
   // 같은 사람이 내일 여러 타임이면 가장 이른 타임 1번만

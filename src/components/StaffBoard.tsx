@@ -218,7 +218,7 @@ function Remind({ staffKey }: { staffKey: string }) {
       {err && <div className="err">{err}</div>}
       {d && (
         <>
-          <p className="vnote">내일({d.preview.date}) 대상 {d.preview.items.filter((i) => i.status === "send").length}명, 못 보냄 {d.preview.items.filter((i) => i.status !== "send").length}건</p>
+          <p className="vnote">다음 12시 발송 대상 ({d.preview.date} 일정)  {d.preview.items.filter((i) => i.status === "send").length}명, 못 보냄 {d.preview.items.filter((i) => i.status !== "send").length}건</p>
           {list(d.preview.items)}
           {d.last && (
             <>
