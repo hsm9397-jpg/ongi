@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
-/** 회원 페이지: 1주년 감사제 안내(11/30까지) + 2027 이용금액 조정 사전 안내(12/31까지). 내용은 대표 노션 '온기 1주년 감사제 및 공지 사항 안내'에서 옮김 */
+/** 회원 페이지: 1주년 감사제 안내(11/30까지) + 2027 이용금액 조정 사전 안내(11/30까지, 대표 요청). 내용은 대표 노션 '온기 1주년 감사제 및 공지 사항 안내'에서 옮김 */
 const KAKAO = "http://pf.kakao.com/_eYctn";
 const past = (d: string) => Date.now() > new Date(`${d}T23:59:59+09:00`).getTime();
 
 export default function AnnivNotice() {
   const [now, setNow] = useState({ event: true, price: true });
-  useEffect(() => setNow({ event: !past("2026-11-30"), price: !past("2026-12-31") }), []);
+  useEffect(() => setNow({ event: !past("2026-11-30"), price: !past("2026-11-30") }), []);
   if (!now.event && !now.price) return null;
   return (
     <div className="an">
