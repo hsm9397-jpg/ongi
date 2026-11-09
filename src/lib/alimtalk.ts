@@ -47,16 +47,18 @@ export function alimVariables(a: AlimInput): Record<string, string> {
   return { ...base, "#{일시}": fmtKakao(a.when) };
 }
 
-/** 알림톡 한 건 보내기. 성공하면 true */
-export async function sendAlim(to: string, templateId: string, variables: Record<string, string>): Promise<boolean> {
+/** 알림톡 한 건 보내기. ok와 사유(실패 시 솔라피 응답)를 돌려준다 */
+export async function sendAlimDetail(to: string, templateId: string, variables: Record<string, string>): Promise<{ ok: boolean; detail: string }> {
   const key = process.env.SOLAPI_API_KEY;
   const secret = process.env.SOLAPI_API_SECRET;
   const from = (process.env.SOLAPI_SENDER || "").replace(/\D/g, "");
-  const pfId = process.env.SOLAPI_PFID || "KA01PF2605110707236702uKEbcB6bFY";
-  if (!key || !secret || !from || to.length < 10) return false;
+  const pfId = process.env.SOLAPI_PFID || "KA01PF2605110707236702uKEbcB6bFY"; // 카카오 채널 [온기pt] (비밀값 아님)
+  const missing = [!key && "SOLAPI_API_KEY", !secret && "SOLAPI_API_SECRET", !from && "SOLAPI_SENDER"].filter(Boolean);
+  if (missing.length) return { ok: false, detail: `Vercel 환경변수 없음: ${missing.join(", ")} (넣은 뒤 Redeploy 필요)` };
+  if (to.length < 10) return { ok: false, detail: "받는 번호를 찾지 못함" };
   const date = new Date().toISOString();
   const salt = crypto.randomBytes(16).toString("hex");
-  const signature = crypto.createHmac("sha256", secret).update(date + salt).digest("hex");
+  const signature = crypto.createHmac("sha256", secret!).update(date + salt).digest("hex");
   try {
     const res = await fetch("https://api.solapi.com/messages/v4/send-many/detail", {
       method: "POST",
@@ -64,13 +66,17 @@ export async function sendAlim(to: string, templateId: string, variables: Record
       body: JSON.stringify({ messages: [{ to, from, kakaoOptions: { pfId, templateId, variables, disableSms: true } }] }),
     });
     const body = await res.text();
-    if (!res.ok) { console.error("alimtalk 실패", res.status, body); return false; }
-    if (/"failedMessageList":\[\{/.test(body)) { console.error("alimtalk 일부 실패", body); return false; }
-    return true;
+    if (!res.ok) { console.error("alimtalk 실패", res.status, body); return { ok: false, detail: `솔라피 ${res.status}: ${body.slice(0, 400)}` }; }
+    if (/"failedMessageList":\[\{/.test(body)) { console.error("alimtalk 일부 실패", body); return { ok: false, detail: `솔라피 거부: ${body.slice(body.indexOf("failedMessageList"), body.indexOf("failedMessageList") + 400)}` }; }
+    return { ok: true, detail: "솔라피 접수 완료" };
   } catch (e) {
     console.error("alimtalk 오류", e);
-    return false;
+    return { ok: false, detail: `연결 오류: ${(e as Error).message}` };
   }
+}
+
+export async function sendAlim(to: string, templateId: string, variables: Record<string, string>): Promise<boolean> {
+  return (await sendAlimDetail(to, templateId, variables)).ok;
 }
 
 export async function alimtalk(a: AlimInput): Promise<void> {

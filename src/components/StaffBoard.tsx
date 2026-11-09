@@ -108,6 +108,7 @@ export default function StaffBoard() {
       </div>
       <Visits v={visits} />
       <Remind staffKey={key} />
+      <AlimTest staffKey={key} />
       {shown.map((b) => {
         const hours = Array.from({ length: b.lastHour - b.firstHour + 1 }, (_, i) => b.firstHour + i);
         return (
@@ -226,6 +227,37 @@ function Remind({ staffKey }: { staffKey: string }) {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function AlimTest({ staffKey }: { staffKey: string }) {
+  const [to, setTo] = useState("");
+  const [type, setType] = useState("new");
+  const [res, setRes] = useState("");
+  const [busy, setBusy] = useState(false);
+  const send = async () => {
+    setBusy(true); setRes("");
+    try {
+      const r = await fetch("/api/staff/alimtest", { method: "POST", headers: { "x-staff-key": staffKey, "Content-Type": "application/json" }, body: JSON.stringify({ to, type }) });
+      const j = await r.json();
+      setRes(j.error ?? (j.ok ? "✓ " : "✕ ") + j.detail);
+    } catch (e) { setRes((e as Error).message); } finally { setBusy(false); }
+  };
+  return (
+    <div className="branch visits">
+      <h3>알림톡 테스트 <small>입력한 번호로 예시 내용을 보내요</small></h3>
+      <div className="left" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input inputMode="numeric" placeholder="01012345678" value={to} onChange={(e) => setTo(e.target.value)} />
+        <select value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="new">예약 확정</option>
+          <option value="change">예약 변경</option>
+          <option value="cancel">예약 취소</option>
+          <option value="remind">1일전 리마인드</option>
+        </select>
+        <button className="ghost" onClick={send} disabled={busy || to.replace(/\D/g, "").length < 10}>{busy ? "보내는 중…" : "보내기"}</button>
+      </div>
+      {res && <p className="vnote" style={{ wordBreak: "break-all" }}>{res}</p>}
     </div>
   );
 }
