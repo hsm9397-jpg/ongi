@@ -147,9 +147,9 @@ export async function carveOpen(calendarId: string, start: Date, end: Date): Pro
 
 export async function createEvent(
   calendarId: string,
-  input: { summary: string; start: Date; end: Date; description: string; kind: "trial" | "member" | "pt"; phone: string; name: string; branch: string }
+  input: { summary: string; start: Date; end: Date; description: string; kind: "trial" | "member" | "pt"; phone: string; name: string; branch: string; extra?: Record<string, string> }
 ): Promise<{ id: string; htmlLink?: string }> {
-  const props = { source: "ongi-web", kind: input.kind, phone: input.phone, last4: input.phone.slice(-4), name: input.name, branch: input.branch };
+  const props = { ...(input.extra ?? {}), source: "ongi-web", kind: input.kind, phone: input.phone, last4: input.phone.slice(-4), name: input.name, branch: input.branch };
   if (demoMode()) return demoCreate(calendarId, input.summary, input.start, input.end, props, input.description);
   const c = getClient();
   const res = await c.request<{ id: string; htmlLink?: string }>({

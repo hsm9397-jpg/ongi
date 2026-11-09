@@ -2,7 +2,7 @@
 import crypto from "node:crypto";
 import { BOOKING, BRANCHES, Branch, Trainer, calendarIdOf, getBranch } from "@/config/branches";
 import { CalEvent, getEvent, listEvents } from "./google";
-import { kstHourMinute } from "./time";
+import { kstHourMinute, todayKst } from "./time";
 
 const secret = () =>
   crypto
@@ -44,9 +44,20 @@ export function ownedBy(e: CalEvent, name: string, last4: string) {
   return e.fromWeb && e.props?.last4 === last4 && norm(e.props?.name ?? "") === norm(name);
 }
 
+/** 취소(그리고 체험·PT 변경): 하루 전까지 */
 export function canChange(start: Date, now = new Date()) {
   return start.getTime() - now.getTime() >= BOOKING.changeCutoffHours * 3_600_000;
 }
+
+/** 기존 회원 시간 변경: 예약 2시간 전까지 */
+export function canMemberChange(start: Date, now = new Date()) {
+  return start.getTime() - now.getTime() >= BOOKING.memberChangeCutoffHours * 3_600_000;
+}
+
+/** 오늘 이미 한 번 시간을 바꾼 예약인지 (바꿀 때 새 일정에 chgDate를 남김) */
+export const changedToday = (e: CalEvent, now = new Date()) => e.props?.chgDate === todayKst(now);
+
+export const CONTACT_TRAINER = "담당 선생님께 문의해 주세요.";
 
 export type MyBooking = {
   token: string;
@@ -58,7 +69,12 @@ export type MyBooking = {
   date: string;
   hour: number;
   minute: number;
+  /** 시간 변경 버튼을 보여줄지 */
   changeable: boolean;
+  /** 취소 버튼을 보여줄지 */
+  cancelable: boolean;
+  /** 오늘 이미 변경함 → 다시 누르면 담당 선생님 문의 팝업 */
+  changedToday: boolean;
 };
 
 export async function findBookings(name: string, last4: string, now = new Date()): Promise<MyBooking[]> {
@@ -83,7 +99,9 @@ export async function findBookings(name: string, last4: string, now = new Date()
             date,
             hour,
             minute,
-            changeable: canChange(e.start, now),
+            changeable: e.props?.kind === "member" ? canMemberChange(e.start, now) : canChange(e.start, now),
+            cancelable: canChange(e.start, now),
+            changedToday: e.props?.kind === "member" && changedToday(e, now),
           });
         }
       })
@@ -93,11 +111,16 @@ export async function findBookings(name: string, last4: string, now = new Date()
 }
 
 /** 토큰 + 이름 + 뒷4자리로 실제 일정을 다시 확인 */
-export async function loadOwned(token: unknown, name: string, last4: string) {
+export async function loadOwned(token: unknown, name: string, last4: string, action: "change" | "cancel" = "cancel") {
   const ref = readToken(token);
   if (!ref) return { error: "예약 정보를 다시 조회해 주세요.", status: 400 } as const;
   const ev = await getEvent(ref.calendarId, ref.eventId);
   if (!ev || !ownedBy(ev, name, last4)) return { error: "예약을 찾지 못했어요. 이미 변경·취소되었을 수 있어요.", status: 404 } as const;
+  if (action === "change" && ev.props?.kind === "member") {
+    if (!canMemberChange(ev.start)) return { error: CONTACT_TRAINER, contact: true, status: 409 } as const;
+    if (changedToday(ev)) return { error: CONTACT_TRAINER, contact: true, status: 409 } as const;
+    return { ...ref, ev } as const;
+  }
   if (!canChange(ev.start))
     return { error: `예약 ${BOOKING.changeCutoffHours}시간 전부터는 직접 변경·취소할 수 없어요. 카카오톡으로 문의해 주세요.`, status: 400 } as const;
   return { ...ref, ev } as const;

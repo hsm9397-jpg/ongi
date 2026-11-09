@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const branchId = req.nextUrl.searchParams.get("branch") ?? "";
   const trainer = req.nextUrl.searchParams.get("trainer") ?? undefined;
+  // 기존 회원 시간 변경 화면: 2시간 뒤 타임부터 보여줌
+  const forChange = req.nextUrl.searchParams.get("change") === "1" && !!trainer;
   const branch = getBranch(branchId);
   if (!branch || !branch.open) return NextResponse.json({ error: "지점을 찾을 수 없어요." }, { status: 400 });
   if (trainer && !branch.trainers.some((t) => t.id === trainer)) {
@@ -14,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     // 담당 선생님을 지정하는 건 기존 회원 예약뿐 → 2주까지만
-    const days = await getAvailability(branch, trainer, new Date(), trainer ? BOOKING.memberDaysAhead : BOOKING.daysAhead);
+    const days = await getAvailability(branch, trainer, new Date(), trainer ? BOOKING.memberDaysAhead : BOOKING.daysAhead, forChange ? BOOKING.memberChangeLeadHours : BOOKING.minLeadHours);
     // 예약 중지 지점은 달력은 보여주되 모든 시간을 마감으로
     if (branch.bookable === false) for (const k of Object.keys(days)) days[k] = days[k].map((s) => ({ ...s, available: false }));
     return NextResponse.json({ days }, { headers: { "Cache-Control": "no-store" } });

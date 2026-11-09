@@ -187,6 +187,9 @@ export const BOOKING = {
   minLeadHours: 3,
   /** 예약 시작 몇 시간 전까지 고객이 직접 변경·취소할 수 있는지 */
   changeCutoffHours: 24,
+  /** 기존 회원 시간 변경 규칙 (2026-11-09 대표 요청): 예약 2시간 전부터 변경 불가, 2시간 이내 타임으로 변경 불가, 같은 날 변경은 1번만 */
+  memberChangeCutoffHours: 2,
+  memberChangeLeadHours: 2,
   /** 체험 안내 문구 */
   trialPriceText: "7만원",
   /** 이 단어가 들어간 종일 일정은 그날 전체를 막습니다 */

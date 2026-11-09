@@ -64,13 +64,13 @@ function slotState(branch: Branch, busy: Busy, opens: Opens, hour: number, start
   return { available: bedsUsed < branch.beds && candidates.length > 0, candidates, end };
 }
 
-function bookableStart(date: string, hour: number, now: Date) {
+function bookableStart(date: string, hour: number, now: Date, leadHours = BOOKING.minLeadHours) {
   const start = kstDate(date, hour);
-  return start.getTime() - now.getTime() >= BOOKING.minLeadHours * 3_600_000 ? start : null;
+  return start.getTime() - now.getTime() >= leadHours * 3_600_000 ? start : null;
 }
 
 /** 오늘부터 daysAhead일 동안의 지점 빈자리 */
-export async function getAvailability(branch: Branch, trainerId?: string, now = new Date(), daysAhead = BOOKING.daysAhead): Promise<DaySlots> {
+export async function getAvailability(branch: Branch, trainerId?: string, now = new Date(), daysAhead = BOOKING.daysAhead, leadHours = BOOKING.minLeadHours): Promise<DaySlots> {
   const first = todayKst(now);
   const from = kstDate(first, 0);
   const to = kstDate(addDays(first, daysAhead), 0);
@@ -81,7 +81,7 @@ export async function getAvailability(branch: Branch, trainerId?: string, now = 
     const date = addDays(first, i);
     const slots: Slot[] = [];
     for (const h of hoursFor(branch, opens, date, trainerId)) {
-      const start = bookableStart(date, h, now);
+      const start = bookableStart(date, h, now, leadHours);
       slots.push({ hour: h, available: !!start && slotState(branch, busy, opens, h, start, trainerId).available });
     }
     out[date] = slots;
@@ -96,11 +96,12 @@ export async function pickTrainer(
   hour: number,
   trainerId?: string,
   now = new Date(),
-  daysAhead = BOOKING.daysAhead
+  daysAhead = BOOKING.daysAhead,
+  leadHours = BOOKING.minLeadHours
 ): Promise<{ trainer: Trainer; start: Date; end: Date } | null> {
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
   if (date >= addDays(todayKst(now), daysAhead)) return null;
-  const start = bookableStart(date, hour, now);
+  const start = bookableStart(date, hour, now, leadHours);
   if (!start) return null;
   const opens: Opens = new Map();
   const busy = await loadBusy(branch, kstDate(date, 0), kstDate(addDays(date, 1), 0), opens);

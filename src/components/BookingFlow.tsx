@@ -24,7 +24,7 @@ export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 const MEMBER_BOOKING_READY = true;
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
-type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean };
+type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean; cancelable: boolean; changedToday: boolean };
 
 /** 내 예약 확인·변경·취소 */
 function ManageBookings() {
@@ -39,6 +39,7 @@ function ManageBookings() {
   const [days, setDays] = useState<Record<string, Slot[]> | null>(null);
   const [day, setDay] = useState<string | null>(null);
   const [hour, setHour] = useState<number | null>(null);
+  const [contactPop, setContactPop] = useState(false);
 
   async function lookup() {
     setErr(""); setMsg(""); setBusy(true); setChanging(null); setConfirmCancel(null);
@@ -67,9 +68,12 @@ function ManageBookings() {
   }
 
   async function startChange(b: MyBooking) {
-    setErr(""); setMsg(""); setChanging(b); setDays(null); setDay(null); setHour(null); setConfirmCancel(null);
+    setErr(""); setMsg(""); setConfirmCancel(null);
+    // 기존 회원은 같은 날 한 번만 직접 변경 가능
+    if (b.changedToday) { setContactPop(true); return; }
+    setChanging(b); setDays(null); setDay(null); setHour(null);
     const q = new URLSearchParams({ branch: b.branchId });
-    if (b.kind === "member") q.set("trainer", b.trainerId);
+    if (b.kind === "member") { q.set("trainer", b.trainerId); q.set("change", "1"); }
     try {
       const r = await api<{ days: Record<string, Slot[]> }>(`/api/availability?${q}`);
       setDays(r.days);
@@ -89,7 +93,8 @@ function ManageBookings() {
       setChanging(null);
       await lookup();
     } catch (e) {
-      setErr((e as Error).message);
+      if ((e as Error & { contact?: boolean }).contact) { setChanging(null); setContactPop(true); }
+      else setErr((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -99,6 +104,16 @@ function ManageBookings() {
 
   return (
     <div className="step">
+      {contactPop && (
+        <div className="pop-bg" onClick={() => setContactPop(false)}>
+          <div className="pop wait" role="dialog" aria-modal="true" aria-label="변경 안내" onClick={(e) => e.stopPropagation()}>
+            <h3>담당 선생님께 문의해 주세요</h3>
+            <p>기존 회원 예약은 예약 2시간 전까지, 같은 날 한 번만 직접 변경할 수 있어요.</p>
+            <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡으로 문의하기</a>
+            <button className="mp-forget" onClick={() => setContactPop(false)}>닫기</button>
+          </div>
+        </div>
+      )}
       <h3>예약 조회</h3>
       <div className="row2">
         <div className="field">
@@ -128,7 +143,7 @@ function ManageBookings() {
                 <b>{fmtDay(b.date)} {b.hour}:{String(b.minute).padStart(2, "0")}</b>
                 <span>{b.branchName} · {b.trainerName} 선생님 · {b.kind === "trial" ? "체험" : b.kind === "pt" ? "PT 상담·평가" : "회원"}</span>
               </div>
-              {b.changeable ? (
+              {b.changeable || b.cancelable ? (
                 confirmCancel === b.token ? (
                   <div className="mybook-actions">
                     <span className="err">이 예약을 취소할까요?</span>
@@ -137,12 +152,18 @@ function ManageBookings() {
                   </div>
                 ) : (
                   <div className="mybook-actions">
-                    <button className="ghost" disabled={busy} onClick={() => startChange(b)}>시간 변경</button>
-                    <button className="ghost danger" disabled={busy} onClick={() => setConfirmCancel(b.token)}>취소</button>
+                    {b.changeable ? (
+                      <button className="ghost" disabled={busy} onClick={() => startChange(b)}>시간 변경</button>
+                    ) : (
+                      <button className="ghost" onClick={() => setContactPop(true)}>시간 변경</button>
+                    )}
+                    {b.cancelable && <button className="ghost danger" disabled={busy} onClick={() => setConfirmCancel(b.token)}>취소</button>}
                   </div>
                 )
               ) : (
-                <p className="note">예약 하루 전부터는 직접 변경·취소가 어려워요. 카카오톡으로 문의해 주세요.</p>
+                <p className="note">
+                  {b.kind === "member" ? "예약 2시간 전부터는 직접 변경이 어려워요. 담당 선생님께 문의해 주세요." : "예약 하루 전부터는 직접 변경·취소가 어려워요. 카카오톡으로 문의해 주세요."}
+                </p>
               )}
               {changing?.token === b.token && (
                 <div className="mychange">
@@ -248,7 +269,7 @@ const fmtDay = (d: string) => {
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, headers: { "Content-Type": "application/json" } });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+  if (!res.ok) throw Object.assign(new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요."), { contact: !!data.contact });
   return data as T;
 }
 
