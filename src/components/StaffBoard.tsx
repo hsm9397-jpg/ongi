@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 
 type Ev = { title: string; allDay: boolean; start: string; end: string; startHour: number; kind: "trial" | "member" | "other"; fromWeb: boolean };
 type T = { id: string; name: string; connected: boolean; events: Ev[] };
-type V = { ready: boolean; days?: { date: string; visitors: number; views: number }[]; total?: number; totalViews?: number; since?: string | null };
+type CK = { days: number[]; total: number; todayByBranch: Record<string, number> };
+type V = { ready: boolean; days?: { date: string; visitors: number; views: number }[]; total?: number; totalViews?: number; since?: string | null; clicks?: { trial: CK; pt: CK } | null; branchNames?: Record<string, string> };
 type B = { id: string; name: string; beds: number; firstHour: number; lastHour: number; trainers: T[] };
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -184,6 +185,27 @@ function Visits({ v }: { v: V | null }) {
         ))}
       </div>
       <p className="vnote">최근 30일 {sum(30)}명 · 누적 페이지 조회 {v.totalViews ?? 0}회</p>
+      {v.clicks && (
+        <>
+          <h3 style={{ marginTop: 18 }}>예약 버튼 누름 <small>네이버 예약으로 넘어간 횟수 (실제 예약 완료 수와는 다를 수 있어요)</small></h3>
+          {([["trial", "체험 예약"], ["pt", "PT 상담"]] as const).map(([k, name]) => {
+            const c = v.clicks![k];
+            const s7 = c.days.slice(0, 7).reduce((a, b) => a + b, 0);
+            const by = Object.entries(c.todayByBranch).map(([id, n]) => `${v.branchNames?.[id] ?? id} ${n}`).join(" · ");
+            return (
+              <div key={k}>
+                <div className="stats">
+                  <div className="stat"><small>{name} 오늘</small><b>{c.days[0] ?? 0}</b></div>
+                  <div className="stat"><small>어제</small><b>{c.days[1] ?? 0}</b></div>
+                  <div className="stat"><small>최근 7일</small><b>{s7}</b></div>
+                  <div className="stat"><small>누적</small><b>{c.total}</b></div>
+                </div>
+                {k === "trial" && by && <p className="vnote">오늘 지점별: {by}</p>}
+              </div>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }

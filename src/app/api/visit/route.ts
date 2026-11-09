@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { recordVisit, visitsReady } from "@/lib/visits";
+import { recordClick, recordVisit, visitsReady } from "@/lib/visits";
+import { BRANCHES } from "@/config/branches";
 import { todayKst } from "@/lib/time";
 import { clientIp, tooMany } from "@/lib/validate";
 
@@ -13,7 +14,17 @@ export async function POST(req: Request) {
   if (!visitsReady() || BOT.test(ua)) return new NextResponse(null, { status: 204 });
   const ip = clientIp(req);
   if (tooMany(`visit:${ip}`, 60)) return new NextResponse(null, { status: 204 });
+  const body = (await req.json().catch(() => null)) as { href?: string } | null;
   try {
+    if (body?.href) {
+      // 네이버 예약 버튼 클릭: 주소로 지점·종류를 찾는다
+      const h = String(body.href).slice(0, 300);
+      const b = BRANCHES.find((x) => x.naverTrial && h.startsWith(x.naverTrial));
+      const pt = BRANCHES.find((x) => x.naverPt && h.startsWith(x.naverPt));
+      if (b) await recordClick(todayKst(), "trial", b.id);
+      else if (pt) await recordClick(todayKst(), "pt", pt.id);
+      return new NextResponse(null, { status: 204 });
+    }
     await recordVisit(todayKst(), ip, ua);
   } catch (e) {
     console.error("visit", e);

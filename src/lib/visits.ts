@@ -53,3 +53,30 @@ export async function readVisits(dates: string[]) {
     since: (res[dates.length * 2 + 2] as string | null) ?? null,
   };
 }
+
+/** 네이버 예약 버튼 클릭 (체험·PT 상담). kind: trial|pt, branch: 지점 id */
+export async function recordClick(date: string, kind: string, branch: string) {
+  await pipeline([
+    ["INCR", `c:${kind}:${date}`],
+    ["INCR", `c:${kind}:total`],
+    ["HINCRBY", `c:${kind}:br:${date}`, branch, 1],
+    ["EXPIRE", `c:${kind}:br:${date}`, 3456000],
+  ]);
+}
+
+export async function readClicks(dates: string[]) {
+  const kinds = ["trial", "pt"];
+  const res = await pipeline([
+    ...kinds.flatMap((k) => [...dates.map((d) => ["GET", `c:${k}:${d}`]), ["GET", `c:${k}:total`], ["HGETALL", `c:${k}:br:${dates[0]}`]]),
+  ]);
+  const n = (x: unknown) => Number(x ?? 0) || 0;
+  const out: Record<string, { days: number[]; total: number; todayByBranch: Record<string, number> }> = {};
+  kinds.forEach((k, ki) => {
+    const off = ki * (dates.length + 2);
+    const h = (res[off + dates.length + 1] as string[] | null) ?? [];
+    const by: Record<string, number> = {};
+    for (let i = 0; i + 1 < h.length; i += 2) by[h[i]] = n(h[i + 1]);
+    out[k] = { days: dates.map((_, i) => n(res[off + i])), total: n(res[off + dates.length]), todayByBranch: by };
+  });
+  return out;
+}

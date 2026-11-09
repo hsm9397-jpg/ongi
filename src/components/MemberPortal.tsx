@@ -22,7 +22,7 @@ function save(v: Saved | null) {
   } catch {}
 }
 
-export default function MemberPortal({ groups, kakao, booking }: { groups: Group[]; kakao: string; booking?: ReactNode }) {
+export default function MemberPortal({ groups, kakao, booking, notices }: { groups: Group[]; kakao: string; booking?: ReactNode; notices?: ReactNode }) {
   const [showBook, setShowBook] = useState(false);
   const [me, setMe] = useState<{ token: string; name: string; url?: string; remaining?: number | null } | null>(null);
   const [expired, setExpired] = useState(false);
@@ -89,6 +89,7 @@ export default function MemberPortal({ groups, kakao, booking }: { groups: Group
 
   if (me) {
     return (
+      <>
       <section className="mp-card mp-me">
         {expired ? (
           <>
@@ -122,6 +123,9 @@ export default function MemberPortal({ groups, kakao, booking }: { groups: Group
         )}
         <button className="mp-forget" onClick={forget}>로그아웃</button>
       </section>
+      {/* 회원 혜택·공지는 본인 확인 뒤에만 보여준다 (2026-11-10 대표) */}
+      {!expired && notices}
+      </>
     );
   }
 
