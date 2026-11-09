@@ -10,6 +10,8 @@ export type Trainer = {
   selfBook?: boolean;
   /** 선생님별 근무 요일·시간: 요일(0=일 ~ 6=토) → [첫 타임, 마지막 타임 시작]. 적힌 요일만 근무. 없으면 지점 시간대 */
   week?: Partial<Record<number, [number, number]>>;
+  /** 공휴일 휴무 (HOLIDAYS 날짜에는 예약을 받지 않음) */
+  holidaysOff?: boolean;
 };
 
 export type Branch = {
@@ -57,8 +59,19 @@ export type Branch = {
   waitlist?: boolean;
 };
 
+/** 공휴일(대체공휴일 포함). 매년 말에 다음 해를 추가해 주세요. */
+export const HOLIDAYS = new Set([
+  // 2026
+  "2026-12-25",
+  // 2027
+  "2027-01-01", "2027-02-06", "2027-02-07", "2027-02-08", "2027-02-09", "2027-03-01", "2027-05-05", "2027-05-13",
+  "2027-06-06", "2027-08-15", "2027-08-16", "2027-09-14", "2027-09-15", "2027-09-16", "2027-10-03", "2027-10-04",
+  "2027-10-09", "2027-10-11", "2027-12-25", "2027-12-27",
+]);
+
 /** 이 선생님이 그날('YYYY-MM-DD') 예약을 받는 시작 시각들 */
 export function trainerHoursOn(b: Branch, t: Trainer, date: string): number[] {
+  if (t.holidaysOff && HOLIDAYS.has(date)) return [];
   if (!t.week) return hoursOf(b);
   const w = t.week[new Date(`${date}T00:00:00Z`).getUTCDay()];
   return w ? Array.from({ length: w[1] - w[0] + 1 }, (_, i) => w[0] + i) : [];
@@ -84,7 +97,16 @@ export const BRANCHES: Branch[] = [
     short: "온기 PT&근막이완 (잠원동 1호점)",
     beds: 1,
     open: true,
-    trainers: [{ id: "hsm", name: "현승민", calendarEnv: "CAL_HYUNSEUNGMIN" }],
+    trainers: [
+      {
+        id: "hsm",
+        name: "현승민",
+        calendarEnv: "CAL_HYUNSEUNGMIN",
+        // 평일 7~20시 타임(시작 기준), 토 8~15시 타임, 일·공휴일 휴무 (2026-11-09 대표)
+        week: { 1: [7, 20], 2: [7, 20], 3: [7, 20], 4: [7, 20], 5: [7, 20], 6: [8, 15] },
+        holidaysOff: true,
+      },
+    ],
     memberDbEnv: "NOTION_MEMBER_DB_MAIN",
     firstHour: 10,
     lastHour: 20,
