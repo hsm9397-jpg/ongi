@@ -201,6 +201,17 @@ function Remind({ staffKey }: { staffKey: string }) {
       setD(j);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
+  const isT = (i: RItem) => i.name.endsWith("(체험)");
+  const groups = (items: RItem[]) => (
+    <>
+      {[["회원 1일전 리마인드", items.filter((i) => !isT(i))], ["체험자 1일전 체험 안내 (지점별 템플릿)", items.filter(isT)]].map(([t, g]) => (
+        <div key={t as string}>
+          <h4 style={{ margin: "14px 0 4px", fontSize: 15 }}>{t as string} <small style={{ fontWeight: 400, opacity: 0.7 }}>{(g as RItem[]).filter((i) => i.status === "send" || i.status === "sent").length}명 · 못 보냄 {(g as RItem[]).filter((i) => i.status === "skip" || i.status === "fail").length}건</small></h4>
+          {(g as RItem[]).length ? list((g as RItem[]).map((i) => ({ ...i, name: i.name.replace(/\s*\(체험\)$/, "") }))) : <p className="vnote">없음</p>}
+        </div>
+      ))}
+    </>
+  );
   const list = (items: RItem[]) => (
     <ul className="rm-list">
       {items.map((i, k) => (
@@ -213,17 +224,17 @@ function Remind({ staffKey }: { staffKey: string }) {
   );
   return (
     <div className="branch visits">
-      <h3>1일전 안내 알림톡 <small>매일 12시 자동 발송 · 회원 + 체험(지점별 템플릿)</small></h3>
+      <h3>1일전 안내 알림톡 <small>매일 12시 자동 발송</small></h3>
       {!d && <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : "내일 발송 대상 미리보기"}</button>}
       {err && <div className="err">{err}</div>}
       {d && (
         <>
-          <p className="vnote">다음 12시 발송 대상 ({d.preview.date} 일정)  {d.preview.items.filter((i) => i.status === "send").length}명, 못 보냄 {d.preview.items.filter((i) => i.status !== "send").length}건</p>
-          {list(d.preview.items)}
+          <p className="vnote">다음 12시 발송 대상 ({d.preview.date} 일정)</p>
+          {groups(d.preview.items)}
           {d.last && (
             <>
               <p className="vnote">마지막 발송: {new Date(d.last.at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} ({d.last.date} 예약분)</p>
-              {list(d.last.items)}
+              {groups(d.last.items)}
             </>
           )}
         </>
