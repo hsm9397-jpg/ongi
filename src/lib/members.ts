@@ -168,6 +168,17 @@ export async function namesByLast4(last4: string): Promise<Map<string, Set<strin
 
 /** 담당 선생님(또는 금액권) 회원 중 뒷번호가 일치하는 회원 */
 export async function findByLast4(group: string, last4: string): Promise<ValidMember[]> {
+  const found = await findByLast4Once(group, last4);
+  // 방금 노션에 추가한 회원은 5분 캐시에 없을 수 있어, 못 찾으면 30초 넘은 캐시는 버리고 한 번 더 찾는다
+  if (found.length || process.env.DEMO_MODE === "1") return found;
+  const old = (c: { at: number } | null) => !c || Date.now() - c.at > 30_000;
+  if (!old(cache) && !old(phoneCache)) return found;
+  cache = null;
+  phoneCache = null;
+  return findByLast4Once(group, last4);
+}
+
+async function findByLast4Once(group: string, last4: string): Promise<ValidMember[]> {
   const list = (await validMembers()) ?? [];
   const inGroup = list.filter((m) => m.group === group);
   // 금액권 공유자: 공유자 칸에 적힌 뒷번호로 들어오면 결제한 회원의 페이지를 함께 연다 (이름은 공유자 이름으로 표시)
