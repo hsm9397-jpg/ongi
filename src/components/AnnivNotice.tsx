@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
-/** 회원 페이지: 1주년 감사제 안내(11/30까지) + 2027 이용금액 조정 사전 안내(11/30까지, 대표 요청). 내용은 대표 노션 '온기 1주년 감사제 및 공지 사항 안내'에서 옮김 */
+/** 회원 페이지: 1주년 감사제 안내(11/30까지) + 2027 이용금액 조정 사전 안내(12/31까지). 내용은 대표 노션 '온기 1주년 감사제 및 공지 사항 안내'에서 옮김 */
 const KAKAO = "http://pf.kakao.com/_eYctn";
 const past = (d: string) => Date.now() > new Date(`${d}T23:59:59+09:00`).getTime();
 
 export default function AnnivNotice() {
   const [now, setNow] = useState({ event: true, price: true });
-  useEffect(() => setNow({ event: !past("2026-11-30"), price: !past("2026-11-30") }), []);
+  useEffect(() => setNow({ event: !past("2026-11-30"), price: !past("2026-12-31") }), []);
   if (!now.event && !now.price) return null;
   return (
     <div className="an">
@@ -94,7 +94,7 @@ export default function AnnivNotice() {
             <li>2027년부터는 보다 명확하고 투명한 이용금액 안내를 위해 모든 금액을 부가세가 포함된 실제 결제금액으로 안내합니다.</li>
             <li>PT와 가동성회복프로그램의 단가는 동일하며, 부가세 포함 금액으로 표기되는 것 또한 동일합니다.</li>
           </ul>
-          <p>기존 이용금액은 2026년 12월 31일까지 적용되며, <span className="an-hl">1주년 감사제 기간에는 기존 이용금액을 기준으로 10% 할인된 감사제 혜택이 적용됩니다.</span></p>
+          <p>기존 이용금액은 2026년 12월 31일까지 적용됩니다.{now.event && <> <span className="an-hl">1주년 감사제 기간에는 기존 이용금액을 기준으로 10% 할인된 감사제 혜택이 적용됩니다.</span></>}</p>
           <p>가격이 달라지는 만큼 그 이상의 가치를 느끼실 수 있도록, 서비스의 품질과 공간, 그리고 온기만의 컨디셔닝 경험을 더욱 발전시켜 나가겠습니다.</p>
           <p>모든 분들께 감사드립니다.</p>
           <p className="an-sign">온기穩己 대표 현승민 올림</p>
