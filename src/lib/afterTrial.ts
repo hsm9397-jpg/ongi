@@ -11,9 +11,9 @@ export type TrialItem = { name: string; when: string; branch: string; trainer: s
 const isTrial = (t: string) => /체험/.test(t) && !/상담/.test(t);
 
 /** 오늘 체험 일정 전체. send=true면 끝난 지 window분 안의 일정에 발송 */
-export async function runAfterTrial(opts: { send: boolean; now?: Date; windowMin?: number }): Promise<TrialItem[]> {
+export async function runAfterTrial(opts: { send: boolean; now?: Date; windowMin?: number; tomorrow?: boolean }): Promise<TrialItem[]> {
   const now = opts.now ?? new Date();
-  const date = todayKst(now);
+  const date = opts.tomorrow ? addDays(todayKst(now), 1) : todayKst(now);
   const items: TrialItem[] = [];
   for (const b of BRANCHES.filter((b) => b.open || b.hidden)) {
     for (const t of b.trainers) {
@@ -26,7 +26,7 @@ export async function runAfterTrial(opts: { send: boolean; now?: Date; windowMin
         const item: TrialItem = { name: who.name || e.summary, when: fmtKakao(e.end), branch: b.short, trainer: t.name, status: "wait", from: who.from };
         items.push(item);
         if (!who.phone) { item.status = "skip"; item.reason = who.from || "연락처를 못 찾음 (노션 체험자 DB에 이름·번호 입력 필요)"; continue; }
-        if (e.end.getTime() > now.getTime()) { item.reason = "끝나는 시각에 발송"; continue; }
+        if (e.end.getTime() > now.getTime()) { item.reason = opts.tomorrow ? "번호 확인됨 · 끝나는 시각에 발송" : "끝나는 시각에 발송"; continue; }
         const key = `at:${e.id}`;
         if (visitsReady()) {
           const [v] = await pipeline([["GET", key]]).catch(() => [null]);

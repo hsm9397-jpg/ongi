@@ -268,10 +268,11 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
   const [dbs, setDbs] = useState<{ name: string; status: string }[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const load = async () => {
-    setBusy(true); setErr("");
+  const [tmr, setTmr] = useState(true);
+  const load = async (t = tmr) => {
+    setBusy(true); setErr(""); setTmr(t);
     try {
-      const r = await fetch("/api/cron/after-trial", { method: "POST", headers: { "x-staff-key": staffKey } });
+      const r = await fetch("/api/cron/after-trial", { method: "POST", headers: { "x-staff-key": staffKey, "content-type": "application/json" }, body: JSON.stringify({ tomorrow: t }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
       setItems(j.items);
@@ -282,7 +283,11 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
   return (
     <div className="branch visits">
       <h3>체험 후 안내 알림톡 <small>체험 일정 끝나는 시각에 자동 발송</small></h3>
-      <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : items ? "새로고침" : "오늘 체험자 보기"}</button>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <button className={tmr && items ? "" : "ghost"} onClick={() => load(true)} disabled={busy}>내일 체험자 (번호 확인)</button>
+        <button className={!tmr && items ? "" : "ghost"} onClick={() => load(false)} disabled={busy}>오늘 체험자 (발송 현황)</button>
+      </div>
+      {busy && <p className="vnote">불러오는 중…</p>}
       {err && <div className="err">{err}</div>}
       {dbs && <p className="vnote">노션 {dbs.map((d) => `${d.name}: ${d.status}`).join(" · ")}</p>}
       {items && (items.length ? (
@@ -293,7 +298,7 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
             </li>
           ))}
         </ul>
-      ) : <p className="vnote">오늘 체험 일정이 없어요.</p>)}
+      ) : <p className="vnote">{tmr ? "내일" : "오늘"} 체험 일정이 없어요.</p>)}
     </div>
   );
 }
