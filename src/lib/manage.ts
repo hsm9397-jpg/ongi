@@ -51,7 +51,7 @@ export function canChange(start: Date, now = new Date()) {
 
 /** 기존 회원 시간 변경: 예약 2시간 전까지 */
 export function canMemberChange(start: Date, now = new Date()) {
-  return start.getTime() - now.getTime() >= BOOKING.memberChangeCutoffHours * 3_600_000;
+  return start.getTime() - now.getTime() > BOOKING.memberChangeCutoffHours * 3_600_000;
 }
 
 /** 오늘 이미 한 번 시간을 바꾼 예약인지 (바꿀 때 새 일정에 chgDate를 남김) */

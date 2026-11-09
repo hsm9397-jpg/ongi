@@ -66,7 +66,10 @@ function slotState(branch: Branch, busy: Busy, opens: Opens, hour: number, start
 
 function bookableStart(date: string, hour: number, now: Date, leadHours = BOOKING.minLeadHours) {
   const start = kstDate(date, hour);
-  return start.getTime() - now.getTime() >= leadHours * 3_600_000 ? start : null;
+  const gap = start.getTime() - now.getTime();
+  // 회원 변경(2시간)은 '딱 2시간 뒤'도 막음: 1시에 보면 2시·3시 두 타임 불가, 4시부터 가능
+  const ok = leadHours === BOOKING.memberChangeLeadHours ? gap > leadHours * 3_600_000 : gap >= leadHours * 3_600_000;
+  return ok ? start : null;
 }
 
 /** 오늘부터 daysAhead일 동안의 지점 빈자리 */
