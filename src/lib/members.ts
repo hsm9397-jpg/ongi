@@ -182,6 +182,10 @@ export async function fullPhoneOf(name: string, last4: string): Promise<string> 
   if (process.env.DEMO_MODE === "1") return "";
   const n = normName(name);
   try {
+    const hit = (await phoneBook()).find((e) => e.name === n && e.phone.endsWith(last4))?.phone;
+    if (hit) return hit;
+    // 방금 등록한 회원은 5분 캐시에 없을 수 있어 한 번 새로 읽는다
+    phoneCache = null;
     return (await phoneBook()).find((e) => e.name === n && e.phone.endsWith(last4))?.phone ?? "";
   } catch {
     return "";
@@ -191,6 +195,10 @@ export async function fullPhoneOf(name: string, last4: string): Promise<string> 
 /** 리마인드용: 이름(+뒷번호)으로 누적 회원 DB에서 찾은 서로 다른 전체 연락처들 */
 export async function phonesFor(name: string, last4?: string): Promise<string[]> {
   const n = normName(name);
-  const list = (await phoneBook()).filter((e) => e.name === n && (!last4 || e.phone.endsWith(last4)));
+  let list = (await phoneBook()).filter((e) => e.name === n && (!last4 || e.phone.endsWith(last4)));
+  if (!list.length && phoneCache && Date.now() - phoneCache.at > 60_000) {
+    phoneCache = null;
+    list = (await phoneBook()).filter((e) => e.name === n && (!last4 || e.phone.endsWith(last4)));
+  }
   return [...new Set(list.map((e) => e.phone))];
 }
