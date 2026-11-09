@@ -4,6 +4,7 @@ import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent, deleteEvent } from "@/lib/google";
 import { loadOwned } from "@/lib/manage";
 import { notify } from "@/lib/notify";
+import { alimtalk } from "@/lib/alimtalk";
 import { isValidDate, todayKst } from "@/lib/time";
 import { cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
     await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await deleteEvent(r.calendarId, r.eventId);
     await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, team: r.branch.trainers, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
+    await alimtalk({ type: "change", branch: r.branch, trainer: pick.trainer, name: props.name ?? name, phone: props.phone ?? last4, when: pick.start, oldWhen: r.ev.start });
     return NextResponse.json({ ok: true, booking: { date, hour, minutes: BOOKING.sessionMinutes, trainerName: pick.trainer.name, branchName: r.branch.name } });
   } catch (e) {
     console.error("my/change", e);

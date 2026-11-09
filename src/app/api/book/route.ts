@@ -4,6 +4,7 @@ import { isValidName, readNameToken } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
+import { alimtalk } from "@/lib/alimtalk";
 import { findMember } from "@/lib/notion";
 import { isValidDate, kstDate } from "@/lib/time";
 import { cleanMemo, cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
       kind,
       when: pick.start,
     });
+    await alimtalk({ type: "new", branch, trainer: pick.trainer, name: memberName, phone, when: pick.start });
 
     return NextResponse.json({
       ok: true,

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { deleteEvent } from "@/lib/google";
 import { loadOwned } from "@/lib/manage";
 import { notify } from "@/lib/notify";
+import { alimtalk } from "@/lib/alimtalk";
 import { cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
     if ("error" in r) return NextResponse.json({ error: r.error }, { status: r.status });
     await deleteEvent(r.calendarId, r.eventId);
     await notify({ type: "cancel", branchName: r.branch.name, trainer: r.trainer, team: r.branch.trainers, name: r.ev.props?.name ?? name, kind: r.ev.props?.kind ?? "", when: r.ev.start });
+    await alimtalk({ type: "cancel", branch: r.branch, trainer: r.trainer, name: r.ev.props?.name ?? name, phone: r.ev.props?.phone ?? last4, when: r.ev.start });
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("my/cancel", e);

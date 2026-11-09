@@ -176,3 +176,14 @@ export async function findByLast4(group: string, last4: string): Promise<ValidMe
   const hits = await namesByLast4(last4);
   return [...inGroup.filter((m) => hits.has(m.name)), ...shared];
 }
+
+/** 회원 알림톡용: 이름 + 뒷번호로 누적 회원 DB의 전체 연락처를 찾는다 (없으면 빈 값) */
+export async function fullPhoneOf(name: string, last4: string): Promise<string> {
+  if (process.env.DEMO_MODE === "1") return "";
+  const n = normName(name);
+  try {
+    return (await phoneBook()).find((e) => e.name === n && e.phone.endsWith(last4))?.phone ?? "";
+  } catch {
+    return "";
+  }
+}
