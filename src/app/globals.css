@@ -501,3 +501,29 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .ev-pop{width:min(92vw,480px);max-height:90vh;overflow:auto;background:var(--surface);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
 .ev-pop img{width:100%;height:auto;border-radius:10px;display:block}
 .ev-note{margin:2px 0 0;font-size:12.5px;color:var(--terra);font-weight:600;text-align:center}
+/* 회원 페이지 감사제·공지 */
+.an{display:flex;flex-direction:column;gap:14px}
+.an-card{gap:10px}
+.an-card h2{margin:0;font-family:var(--display);color:var(--brown);font-size:20px}
+.an-card h3{margin:6px 0 0;font-size:15px;color:var(--brown)}
+.an-card p{margin:0;line-height:1.7;font-size:14.5px}
+.an-dl{margin:0;display:flex;flex-direction:column;gap:8px}
+.an-dl div{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start}
+.an-dl dt{background:var(--brown);color:#fff;border-radius:999px;text-align:center;font-size:13px;padding:3px 0}
+.an-dl dd{margin:0;font-weight:600}
+.an-dl small,.an-list small{display:block;font-weight:400;color:var(--muted);font-size:13px;line-height:1.6;margin-top:2px}
+.an-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;line-height:1.6}
+.an-box{background:var(--off);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.an-box p{font-size:13.5px}
+.an-warn{font-size:13px!important;color:var(--terra)}
+.an-hl{background:var(--terra-soft);color:var(--terra);font-weight:600;padding:0 4px;border-radius:4px}
+.an-price{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.an-price>div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
+.an-price span{display:block;font-weight:700;color:var(--brown);margin-bottom:6px;font-size:14px}
+.an-price span small{font-weight:400;color:var(--muted);font-size:12px;margin-left:4px}
+.an-price ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.an-price li{display:flex;justify-content:space-between}
+.an-new{border-color:var(--terra)!important;background:var(--terra-soft)!important}
+.an-dots{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.6}
+.an-letter p{text-align:center;color:var(--brown)}
+.an-sign{text-align:right;font-family:var(--display);color:var(--brown);font-weight:700;margin-top:6px!important}
