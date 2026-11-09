@@ -144,10 +144,15 @@ async function phoneBook(): Promise<Entry[]> {
       });
       for (const p of r.results) {
         const title = plainText(p.properties[titleProp]);
-        const phone = (phoneProp ? plainText(p.properties[phoneProp]) : "").replace(/\D/g, "") || title.replace(/\D/g, "");
+        const raw = phoneProp ? plainText(p.properties[phoneProp]) : "";
+        // 2:1 회원처럼 번호가 둘이면 "010-1111-2222, 010-3333-4444"로 적어도 각각 읽는다
+        const phones = (raw.match(/\d[\d-\s]{8,}\d/g) ?? []).map((x) => x.replace(/\D/g, "")).filter((x) => x.length >= 10 && x.length <= 11);
+        if (!phones.length) phones.push(raw.replace(/\D/g, "") || title.replace(/\D/g, ""));
         const n = normName(title);
-        if (!n || phone.length < 4) continue;
-        list.push({ name: n, phone, dbId: db });
+        for (const phone of phones) {
+          if (!n || phone.length < 4) continue;
+          list.push({ name: n, phone, dbId: db });
+        }
       }
       cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
     } while (cursor);

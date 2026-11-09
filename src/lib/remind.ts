@@ -46,6 +46,16 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
             if (f.length === 1) { full = f; break; }
           }
         }
+        // 2:1 묶음 회원은 번호가 여러 개면 모두에게 보냄
+        const multi = name.includes("/") && full.length > 1;
+        if (multi) {
+          for (const ph of full.slice(1)) {
+            if (byPhone.has(ph)) continue;
+            byPhone.set(ph, { name, when: e.start, idx: items.length });
+            items.push({ ...item });
+          }
+          full = full.slice(0, 1);
+        }
         if (full.length !== 1) {
           item.status = "skip";
           item.reason = full.length ? "같은 이름 회원이 여러 명" : "노션에서 연락처를 못 찾음";
