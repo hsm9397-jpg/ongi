@@ -213,7 +213,7 @@ function Remind({ staffKey }: { staffKey: string }) {
   );
   return (
     <div className="branch visits">
-      <h3>1일전 리마인드 알림톡 <small>매일 12시 자동 발송 · 체험 제외</small></h3>
+      <h3>1일전 안내 알림톡 <small>매일 12시 자동 발송 · 회원 + 체험(지점별 템플릿)</small></h3>
       {!d && <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : "내일 발송 대상 미리보기"}</button>}
       {err && <div className="err">{err}</div>}
       {d && (

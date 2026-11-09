@@ -1,7 +1,8 @@
 // 1일전 리마인드: 내일 모든 선생님 캘린더 일정 중 체험·PT상담·오픈·종일 일정을 빼고,
 // 노션 누적 회원 DB에서 연락처를 찾아 알림톡을 보낸다. (2026-11-09 대표 결정: 체험자 제외 전체 스케줄)
 import { BRANCHES, calendarIdOf } from "@/config/branches";
-import { ALIMTALK_TEMPLATES, alimVariables, fmtKakao, sendAlim } from "./alimtalk";
+import { ALIMTALK_TEMPLATES, TRIAL_REMIND_TEMPLATES, alimVariables, fmtKakao, sendAlim } from "./alimtalk";
+import { trialPhone } from "./trial";
 import { listEvents } from "./google";
 import { phonesFor } from "./members";
 import { normName } from "./notion";
@@ -25,13 +26,29 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
   const from = kstDate(date, 0), to = kstDate(addDays(date, 1), 0);
   const items: RemindItem[] = [];
   // 같은 사람이 내일 여러 타임이면 가장 이른 타임 1번만
-  const byPhone = new Map<string, { name: string; when: Date; idx: number }>();
+  const byPhone = new Map<string, { name: string; when: Date; idx: number; tpl?: string }>();
   for (const b of BRANCHES.filter((b) => b.open || b.hidden)) {
     for (const t of b.trainers) {
       const cal = calendarIdOf(t);
       if (!cal) continue;
       const events = await listEvents(cal, from, to).catch(() => []);
       for (const e of events) {
+        // 체험자: 지점별 체험 예약 안내 템플릿으로 (번호는 홈페이지 예약 → 캘린더 메모 → 노션 체험자 DB)
+        if (!e.allDay && /체험/.test(e.summary) && !/상담/.test(e.summary)) {
+          const who = await trialPhone(e).catch(() => ({ name: "", phone: "", from: "" }));
+          const item: RemindItem = { name: `${who.name || e.summary} (체험)`, when: fmtKakao(e.start), branch: b.short, trainer: t.name, status: "send" };
+          const tpl = TRIAL_REMIND_TEMPLATES[b.id];
+          if (!who.phone || !tpl) {
+            item.status = "skip";
+            item.reason = !tpl ? "이 지점 체험 템플릿 없음" : who.from || "체험자 연락처를 못 찾음 (노션 체험자 DB에 이름·번호 입력)";
+            items.push(item);
+            continue;
+          }
+          if (byPhone.has(who.phone)) continue;
+          byPhone.set(who.phone, { name: who.name, when: e.start, idx: items.length, tpl });
+          items.push(item);
+          continue;
+        }
         if (e.allDay || e.open || SKIP_TITLE.test(e.summary) || e.props?.kind === "trial" || e.props?.kind === "pt") continue;
         const p = parseTitle(e.summary);
         if (!p) continue;
@@ -78,7 +95,7 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
         const [ok] = await pipeline([["SET", `rm:${date}:${phone}`, "1", "NX", "EX", 259200]]).catch(() => ["OK"]);
         if (ok !== "OK") { it.status = "sent"; it.reason = "이미 보냄"; continue; }
       }
-      const sent = await sendAlim(phone, ALIMTALK_TEMPLATES.remind, alimVariables({ type: "remind", branch: BRANCHES[0], trainer: BRANCHES[0].trainers[0], name: v.name, phone, when: v.when }));
+      const sent = await sendAlim(phone, v.tpl ?? ALIMTALK_TEMPLATES.remind, alimVariables({ type: "remind", branch: BRANCHES[0], trainer: BRANCHES[0].trainers[0], name: v.name, phone, when: v.when }));
       it.status = sent ? "sent" : "fail";
       if (!sent) it.reason = "발송 실패 (솔라피 발송 내역 확인)";
     }

@@ -6,6 +6,15 @@ import { phoneOf, type Branch, type Trainer } from "@/config/branches";
 import { fullPhoneOf } from "./members";
 import { kstHourMinute } from "./time";
 
+/** 지점별 체험 1일전 안내 (변수: 회원명, 예약시간). 일정이 있는 선생님 캘린더의 지점으로 고른다 (2026-11-09 대표) */
+export const TRIAL_REMIND_TEMPLATES: Record<string, string> = {
+  main: "KA01TP261102085311480GQ2cz2LY28J", // 2층 온기PT&근막이완 (잠원동 1호점)
+  pt: "KA01TP261102085311480GQ2cz2LY28J",
+  sbp: "KA01TP261102085355069vnlti0moWj2", // 신반포스퀘어점
+  priv: "KA01TP261102074702198wQaZ4EHvgww", // 지하 1층 온기 근막이완 (잠원동 2호점)
+  sl: "KA01TP261102065637779YZX79oD7ASk", // 선릉점
+};
+
 /** 솔라피에서 승인된 템플릿 ID (2026-11-09 대표 전달) */
 export const ALIMTALK_TEMPLATES = {
   new: "KA01TP261107001224054lxp93yb59Vu",
