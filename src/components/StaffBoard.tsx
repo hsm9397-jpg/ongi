@@ -108,6 +108,7 @@ export default function StaffBoard() {
       </div>
       <Visits v={visits} />
       <Remind staffKey={key} />
+      <AfterTrial staffKey={key} />
       <AlimTest staffKey={key} />
       {shown.map((b) => {
         const hours = Array.from({ length: b.lastHour - b.firstHour + 1 }, (_, i) => b.firstHour + i);
@@ -258,6 +259,38 @@ function AlimTest({ staffKey }: { staffKey: string }) {
         <button className="ghost" onClick={send} disabled={busy || to.replace(/\D/g, "").length < 10}>{busy ? "보내는 중…" : "보내기"}</button>
       </div>
       {res && <p className="vnote" style={{ wordBreak: "break-all" }}>{res}</p>}
+    </div>
+  );
+}
+
+function AfterTrial({ staffKey }: { staffKey: string }) {
+  const [items, setItems] = useState<(RItem & { from?: string })[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const load = async () => {
+    setBusy(true); setErr("");
+    try {
+      const r = await fetch("/api/cron/after-trial", { method: "POST", headers: { "x-staff-key": staffKey } });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      setItems(j.items);
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  };
+  const label: Record<string, string> = { wait: "대기", sent: "보냄", skip: "못 보냄", fail: "실패" };
+  return (
+    <div className="branch visits">
+      <h3>체험 후 안내 알림톡 <small>체험 일정 끝나는 시각에 자동 발송</small></h3>
+      <button className="ghost" onClick={load} disabled={busy}>{busy ? "불러오는 중…" : items ? "새로고침" : "오늘 체험자 보기"}</button>
+      {err && <div className="err">{err}</div>}
+      {items && (items.length ? (
+        <ul className="rm-list">
+          {items.map((i, k) => (
+            <li key={k} className={i.status}>
+              <b>{i.name}</b> {i.when} 종료 · {i.branch} {i.trainer} — <em>{label[i.status]}{i.reason ? ` · ${i.reason}` : ""}{i.from ? ` · 번호: ${i.from}` : ""}</em>
+            </li>
+          ))}
+        </ul>
+      ) : <p className="vnote">오늘 체험 일정이 없어요.</p>)}
     </div>
   );
 }

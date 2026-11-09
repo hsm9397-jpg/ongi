@@ -13,6 +13,8 @@ export const ALIMTALK_TEMPLATES = {
   cancel: "KA01TP261107001630236v2rj6xYxJCu",
   /** 1일전 리마인드 (변수: 회원명, 예약시간) */
   remind: "KA01TP260812013652923zi15VSaFT4T",
+  /** 체험 후 안내 (변수: 이름). 체험 일정 끝나는 시각에 발송 */
+  afterTrial: "KA01TP260921130621048h3HqArYcdxs",
 } as const;
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -44,6 +46,7 @@ export function alimVariables(a: AlimInput): Record<string, string> {
     const [day, dow, time] = fmtKakao(a.when).split(" "); // 26.11.07 (토) 14:00
     return { ...base, "#{날짜}": `${day} ${dow}`, "#{시간}": time };
   }
+  if (a.type === "afterTrial") return { "#{이름}": a.name };
   if (a.type === "remind") return { "#{회원명}": a.name, "#{예약시간}": fmtKakao(a.when) };
   if (a.type === "change") return { ...base, "#{이전일시}": a.oldWhen ? fmtKakao(a.oldWhen) : "", "#{일시}": fmtKakao(a.when) };
   return { ...base, "#{일시}": fmtKakao(a.when) };
