@@ -3,7 +3,7 @@
 import { BRANCHES, calendarIdOf } from "@/config/branches";
 import { ALIMTALK_TEMPLATES, alimVariables, fmtKakao, sendAlim } from "./alimtalk";
 import { listEvents } from "./google";
-import { mask, phonesFor } from "./members";
+import { phonesFor } from "./members";
 import { normName } from "./notion";
 import { addDays, kstDate, todayKst } from "./time";
 import { pipeline, visitsReady } from "./visits";
@@ -36,7 +36,7 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
         if (!p) continue;
         const name = e.props?.name ? normName(e.props.name) : p.name;
         const last4 = (e.props?.phone ?? "").length === 4 ? e.props!.phone : p.last4;
-        const item: RemindItem = { name: mask(name), when: fmtKakao(e.start), branch: b.short, trainer: t.name, status: "send" };
+        const item: RemindItem = { name, when: fmtKakao(e.start), branch: b.short, trainer: t.name, status: "send" };
         const full = (e.props?.phone ?? "").length >= 10 ? [e.props!.phone] : await phonesFor(name, last4).catch(() => []);
         if (full.length !== 1) {
           item.status = "skip";
