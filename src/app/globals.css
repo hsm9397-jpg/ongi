@@ -549,3 +549,5 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 /* 내 예약 확인 버튼: 배경과 구분되게 (2026-11-09) */
 .my-link{background:var(--brown-soft);border:1.5px solid #d9c7b0}
 .my-link[aria-pressed="true"]{border-color:var(--terra);color:var(--terra);background:var(--terra-soft)}
+/* 회원 페이지 버튼 3개 같은 글자 크기·굵기·높이 (2026-11-09) */
+.mp-me .mp-open,.mp-me .mp-book{display:flex;align-items:center;justify-content:center;min-height:54px;font-family:var(--body);font-size:17px;font-weight:700;border-radius:12px;padding:12px 16px}
