@@ -1,4 +1,4 @@
-import { BOOKING, Branch, Trainer, calendarIdOf, hoursOf } from "@/config/branches";
+import { BOOKING, Branch, Trainer, calendarIdOf, trainerHoursOn } from "@/config/branches";
 import { CalEvent, listEvents } from "./google";
 import { addDays, kstDate, todayKst } from "./time";
 
@@ -34,15 +34,16 @@ async function loadBusy(branch: Branch, from: Date, to: Date, opens: Opens = new
 const overlaps = (e: CalEvent, s: Date, en: Date) => e.start < en && e.end > s;
 
 /** 이 선생님이 이 시간에 일하는지: 평소 시간대이거나, '오픈' 일정이 세션 전체를 덮을 때 */
-function works(branch: Branch, opens: Opens, t: Trainer, hour: number, start: Date, end: Date) {
-  return hoursOf(branch).includes(hour) || (opens.get(t.id) ?? []).some((o) => o.start <= start && o.end >= end);
+function works(branch: Branch, opens: Opens, t: Trainer, date: string, hour: number, start: Date, end: Date) {
+  return trainerHoursOn(branch, t, date).includes(hour) || (opens.get(t.id) ?? []).some((o) => o.start <= start && o.end >= end);
 }
 
 /** 그날 열 수 있는 시작 시각: 평소 시간대 + '오픈' 일정 안의 정시들 */
 function hoursFor(branch: Branch, opens: Opens, date: string, onlyTrainer?: string) {
-  const hs = new Set(hoursOf(branch));
+  const hs = new Set<number>();
   for (const t of branch.trainers) {
     if (onlyTrainer && t.id !== onlyTrainer) continue;
+    for (const h of trainerHoursOn(branch, t, date)) hs.add(h);
     for (const o of opens.get(t.id) ?? [])
       for (let h = 0; h < 24; h++) {
         const s = kstDate(date, h);
@@ -52,14 +53,14 @@ function hoursFor(branch: Branch, opens: Opens, date: string, onlyTrainer?: stri
   return [...hs].sort((a, b) => a - b);
 }
 
-function slotState(branch: Branch, busy: Busy, opens: Opens, hour: number, start: Date, onlyTrainer?: string) {
+function slotState(branch: Branch, busy: Busy, opens: Opens, date: string, hour: number, start: Date, onlyTrainer?: string) {
   const end = new Date(start.getTime() + BOOKING.sessionMinutes * 60_000);
   const busyTrainers = branch.trainers.filter((t) => (busy.get(t.id) ?? []).some((e) => overlaps(e, start, end)));
   // 종일 휴무는 베드를 차지하지 않으므로 '시간 일정'이 있는 선생님 수만 베드 사용으로 센다
   const bedsUsed = branch.trainers.filter((t) =>
     (busy.get(t.id) ?? []).some((e) => !e.allDay && overlaps(e, start, end))
   ).length;
-  const free = branch.trainers.filter((t) => !t.selfBook && !busyTrainers.includes(t) && works(branch, opens, t, hour, start, end));
+  const free = branch.trainers.filter((t) => !t.selfBook && !busyTrainers.includes(t) && works(branch, opens, t, date, hour, start, end));
   const candidates = onlyTrainer ? free.filter((t) => t.id === onlyTrainer) : free;
   return { available: bedsUsed < branch.beds && candidates.length > 0, candidates, end };
 }
@@ -85,7 +86,7 @@ export async function getAvailability(branch: Branch, trainerId?: string, now = 
     const slots: Slot[] = [];
     for (const h of hoursFor(branch, opens, date, trainerId)) {
       const start = bookableStart(date, h, now, leadHours);
-      slots.push({ hour: h, available: !!start && slotState(branch, busy, opens, h, start, trainerId).available });
+      slots.push({ hour: h, available: !!start && slotState(branch, busy, opens, date, h, start, trainerId).available });
     }
     out[date] = slots;
   }
@@ -108,7 +109,7 @@ export async function pickTrainer(
   if (!start) return null;
   const opens: Opens = new Map();
   const busy = await loadBusy(branch, kstDate(date, 0), kstDate(addDays(date, 1), 0), opens);
-  const st = slotState(branch, busy, opens, hour, start, trainerId);
+  const st = slotState(branch, busy, opens, date, hour, start, trainerId);
   if (!st.available) return null;
   const load = (t: Trainer) => (busy.get(t.id) ?? []).filter((e) => !e.allDay).length;
   const trainer = [...st.candidates].sort((a, b) => load(a) - load(b))[0];

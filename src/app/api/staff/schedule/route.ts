@@ -25,8 +25,8 @@ export async function GET(req: NextRequest) {
         id: b.id,
         name: b.name,
         beds: b.beds,
-        firstHour: b.firstHour,
-        lastHour: b.lastHour,
+        firstHour: Math.min(b.firstHour, ...b.trainers.flatMap((t) => Object.values(t.week ?? {}).map((w) => w![0]))),
+        lastHour: Math.max(b.lastHour, ...b.trainers.flatMap((t) => Object.values(t.week ?? {}).map((w) => w![1]))),
         trainers: await Promise.all(
           b.trainers.map(async (t) => {
             const cal = calendarIdOf(t);

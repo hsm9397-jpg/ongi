@@ -8,6 +8,8 @@ export type Trainer = {
   calendarEnv: string;
   /** 선생님이 직접 일정을 잡음: 사이트 예약을 받지 않고 '직접 문의' 안내만 띄운다 */
   selfBook?: boolean;
+  /** 선생님별 근무 요일·시간: 요일(0=일 ~ 6=토) → [첫 타임, 마지막 타임 시작]. 적힌 요일만 근무. 없으면 지점 시간대 */
+  week?: Partial<Record<number, [number, number]>>;
 };
 
 export type Branch = {
@@ -54,6 +56,13 @@ export type Branch = {
   /** 대기 예약만 받는 지점 (체험 누르면 안내 팝업) */
   waitlist?: boolean;
 };
+
+/** 이 선생님이 그날('YYYY-MM-DD') 예약을 받는 시작 시각들 */
+export function trainerHoursOn(b: Branch, t: Trainer, date: string): number[] {
+  if (!t.week) return hoursOf(b);
+  const w = t.week[new Date(`${date}T00:00:00Z`).getUTCDay()];
+  return w ? Array.from({ length: w[1] - w[0] + 1 }, (_, i) => w[0] + i) : [];
+}
 
 /** 이 지점이 예약을 받는 시작 시각들 */
 export const hoursOf = (b: Branch): number[] =>
@@ -114,7 +123,13 @@ export const BRANCHES: Branch[] = [
     open: true,
     trainers: [
       { id: "hsr", name: "황사라", calendarEnv: "CAL_HWANGSARA" },
-      { id: "kny", name: "김나영", calendarEnv: "CAL_KIMNAYOUNG" },
+      {
+        id: "kny",
+        name: "김나영",
+        calendarEnv: "CAL_KIMNAYOUNG",
+        // 월~금 10~21시(마지막 타임 20시), 토 9~15시(마지막 타임 14시), 일 휴무 (2026-11-09 대표)
+        week: { 1: [10, 20], 2: [10, 20], 3: [10, 20], 4: [10, 20], 5: [10, 20], 6: [9, 14] },
+      },
     ],
     memberDbEnv: "NOTION_MEMBER_DB_SBP",
     firstHour: 10,
