@@ -14,7 +14,8 @@ const SKIP_TITLE = /체험|상담|오픈|휴무|휴가|점심|회의|교육|블�
 
 /** 제목 "김온기 3/10", "김온기1234 3/10" → 이름, 뒷번호 */
 function parseTitle(t: string): { name: string; last4?: string } | null {
-  const m = t.trim().match(/^([가-힣]{2,4})(?:\s*(\d{4})(?![\d/]))?/);
+  // 2:1 회원은 "강혜정/고희영"처럼 이름을 /로 이어 씀 → 통째로 이름으로 본다
+  const m = t.trim().match(/^([가-힣]{2,4}(?:\s*\/\s*[가-힣]{2,4})*)(?:\s*(\d{4})(?![\d/]))?/);
   if (!m) return null;
   return { name: normName(m[1]), last4: m[2] };
 }
@@ -37,7 +38,14 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
         const name = e.props?.name ? normName(e.props.name) : p.name;
         const last4 = (e.props?.phone ?? "").length === 4 ? e.props!.phone : p.last4;
         const item: RemindItem = { name, when: fmtKakao(e.start), branch: b.short, trainer: t.name, status: "send" };
-        const full = (e.props?.phone ?? "").length >= 10 ? [e.props!.phone] : await phonesFor(name, last4).catch(() => []);
+        let full = (e.props?.phone ?? "").length >= 10 ? [e.props!.phone] : await phonesFor(name, last4).catch(() => [] as string[]);
+        // 2:1 회원: 묶음 이름으로 못 찾으면 한 명씩 찾아 첫 번째로 찾은 번호로 보냄
+        if (!full.length && name.includes("/")) {
+          for (const part of name.split("/")) {
+            const f = await phonesFor(part).catch(() => [] as string[]);
+            if (f.length === 1) { full = f; break; }
+          }
+        }
         if (full.length !== 1) {
           item.status = "skip";
           item.reason = full.length ? "같은 이름 회원이 여러 명" : "노션에서 연락처를 못 찾음";
