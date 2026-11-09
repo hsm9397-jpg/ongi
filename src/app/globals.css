@@ -554,3 +554,6 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 /* 체험 지점 버튼: 배경과 구분되게 베이지 (2026-11-09) */
 .trial-chips .chip{background:var(--brown-soft);border:1.5px solid #d9c7b0}
 .trial-chips .chip-soon{background:var(--off);border-color:var(--line)}
+/* 문의 버튼 브랜드 색 (2026-11-09) */
+.contact a.c-naver{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:600}
+.contact a.c-insta{background:linear-gradient(45deg,#f58529,#dd2a7b 50%,#8134af);border-color:transparent;color:#fff;font-weight:600}

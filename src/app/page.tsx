@@ -270,9 +270,9 @@ export default function Home() {
           </div>
           <div className="contact">
             <a href={LINKS.kakao} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
-            <a href={LINKS.naverTalk} target="_blank" rel="noopener noreferrer">네이버 톡톡 문의</a>
-            <a href={LINKS.instagram} target="_blank" rel="noopener noreferrer">인스타그램</a>
-            <a href={LINKS.naverPlace} target="_blank" rel="noopener noreferrer">네이버 플레이스</a>
+            <a className="c-naver" href={LINKS.naverTalk} target="_blank" rel="noopener noreferrer">네이버 톡톡 문의</a>
+            <a className="c-insta" href={LINKS.instagram} target="_blank" rel="noopener noreferrer">인스타그램</a>
+            <a className="c-naver" href={LINKS.naverPlace} target="_blank" rel="noopener noreferrer">네이버 플레이스</a>
           </div>
         </section>
       </main>
