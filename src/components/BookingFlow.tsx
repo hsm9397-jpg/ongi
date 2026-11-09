@@ -21,7 +21,7 @@ const CONTRA_ABS: [string, string][] = [
 const CONTRA_REL = ["임산부 / 고령자", "하지정맥류 (심하면 절대 금기 대상)", "항응고제 복용 환자", "골다공증 (심하면 절대 금기 대상)"];
 export const KAKAO_CHAT_URL = "https://pf.kakao.com/_eYctn/chat";
 /** 기존 회원 예약을 열지 여부. 세팅(선생님 캘린더 공유 등)이 끝나면 true로 바꾸면 됨 */
-const MEMBER_BOOKING_READY = false;
+const MEMBER_BOOKING_READY = true;
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
 type MyBooking = { token: string; branchId: string; branchName: string; trainerId: string; trainerName: string; kind: "trial" | "member" | "pt"; date: string; hour: number; minute: number; changeable: boolean };
