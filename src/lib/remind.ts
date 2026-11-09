@@ -14,7 +14,7 @@ const SKIP_TITLE = /체험|상담|오픈|휴무|휴가|점심|회의|교육|블�
 
 /** 제목 "김온기 3/10", "김온기1234 3/10" → 이름, 뒷번호 */
 function parseTitle(t: string): { name: string; last4?: string } | null {
-  const m = t.trim().match(/^([가-힣]{2,4})\s*(\d{4})?(?:\D|$)/);
+  const m = t.trim().match(/^([가-힣]{2,4})(?:\s*(\d{4})(?![\d/]))?/);
   if (!m) return null;
   return { name: normName(m[1]), last4: m[2] };
 }
