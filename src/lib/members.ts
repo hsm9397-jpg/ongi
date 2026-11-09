@@ -7,7 +7,14 @@ import { findMember, normName, notion, plainText, schemaOf } from "./notion";
 type Prop = { type: string; [k: string]: unknown };
 type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
 
-export type ValidMember = { id: string; name: string; group: string; url: string };
+export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: { name: string; last4: string }[] };
+
+/** 금액권 '공유자' 칸: "김은수3509, 현재상1209"처럼 이름+뒷번호 4자리 */
+function parseSharers(text: string): { name: string; last4: string }[] {
+  const out: { name: string; last4: string }[] = [];
+  for (const m of text.matchAll(/([가-힣A-Za-z]{2,})\s*\(?\s*(?:\d{3}-?\d{3,4}-?)?(\d{4})\)?/g)) out.push({ name: normName(m[1]), last4: m[2] });
+  return out;
+}
 
 const VALID_DBS = () =>
   (process.env.NOTION_VALID_DBS || "fcb46121f765830ea8d501a3a6eb51ee,32946121f765801a8bf9c58f847716c9")
@@ -20,7 +27,7 @@ const DEMO: ValidMember[] = [
   { id: "demo1", name: "김온기", group: "현승민", url: "https://www.notion.so" },
   { id: "demo2", name: "이경신", group: "현승민", url: "https://www.notion.so" },
   { id: "demo3", name: "박선영", group: "황사라", url: "https://www.notion.so" },
-  { id: "demo4", name: "조은비", group: "금액권", url: "https://www.notion.so" },
+  { id: "demo4", name: "조은비", group: "금액권", url: "https://www.notion.so", sharers: [{ name: "조은솔", last4: "5678" }] },
 ];
 
 let cache: { at: number; list: ValidMember[] } | null = null;
@@ -45,7 +52,9 @@ export async function validMembers(): Promise<ValidMember[] | null> {
           const sel = Object.entries(p.properties).find(([k, x]) => k.includes("담당") && x.type === "select")?.[1];
           const group = sel ? ((sel.select as { name?: string } | null)?.name ?? "") : "금액권";
           const id = p.id.replace(/-/g, "");
-          list.push({ id, name, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}` });
+          const shareProp = Object.entries(p.properties).find(([k]) => k.includes("공유자"))?.[1];
+          const sharers = shareProp ? parseSharers(plainText(shareProp)) : [];
+          list.push({ id, name, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}) });
         }
         cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
       } while (cursor);
@@ -63,7 +72,7 @@ export async function isValidName(name: string): Promise<boolean> {
   const list = await validMembers();
   if (!list) return true;
   const n = normName(name);
-  return list.some((m) => m.name === n);
+  return list.some((m) => m.name === n || m.sharers?.some((x) => x.name === n));
 }
 
 /** 이 이름 + 뒷번호가 지점 누적 회원 DB에 있는지 */
@@ -161,7 +170,9 @@ export async function namesByLast4(last4: string): Promise<Map<string, Set<strin
 export async function findByLast4(group: string, last4: string): Promise<ValidMember[]> {
   const list = (await validMembers()) ?? [];
   const inGroup = list.filter((m) => m.group === group);
-  if (process.env.DEMO_MODE === "1") return last4 === "1234" ? inGroup.slice(0, 1) : [];
+  // 금액권 공유자: 공유자 칸에 적힌 뒷번호로 들어오면 결제한 회원의 페이지를 함께 연다 (이름은 공유자 이름으로 표시)
+  const shared = inGroup.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name })));
+  if (process.env.DEMO_MODE === "1") return [...(last4 === "1234" ? inGroup.slice(0, 1) : []), ...shared];
   const hits = await namesByLast4(last4);
-  return inGroup.filter((m) => hits.has(m.name));
+  return [...inGroup.filter((m) => hits.has(m.name)), ...shared];
 }
