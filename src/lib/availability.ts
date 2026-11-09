@@ -55,10 +55,13 @@ function hoursFor(branch: Branch, opens: Opens, date: string, onlyTrainer?: stri
 
 function slotState(branch: Branch, busy: Busy, opens: Opens, date: string, hour: number, start: Date, onlyTrainer?: string) {
   const end = new Date(start.getTime() + BOOKING.sessionMinutes * 60_000);
-  const busyTrainers = branch.trainers.filter((t) => (busy.get(t.id) ?? []).some((e) => overlaps(e, start, end)));
+  // 일정이 그 정시 한 시간(예: 13:00~14:00) 안에 조금이라도 걸치면 그 타임은 막는다.
+  // 30분에 시작한 일정(13:30~14:20)은 13시·14시 두 타임을 모두 막는다 (2026-11-09 대표)
+  const hourEnd = new Date(start.getTime() + 60 * 60_000);
+  const busyTrainers = branch.trainers.filter((t) => (busy.get(t.id) ?? []).some((e) => overlaps(e, start, hourEnd)));
   // 종일 휴무는 베드를 차지하지 않으므로 '시간 일정'이 있는 선생님 수만 베드 사용으로 센다
   const bedsUsed = branch.trainers.filter((t) =>
-    (busy.get(t.id) ?? []).some((e) => !e.allDay && overlaps(e, start, end))
+    (busy.get(t.id) ?? []).some((e) => !e.allDay && overlaps(e, start, hourEnd))
   ).length;
   const free = branch.trainers.filter((t) => !t.selfBook && !busyTrainers.includes(t) && works(branch, opens, t, date, hour, start, end));
   const candidates = onlyTrainer ? free.filter((t) => t.id === onlyTrainer) : free;
