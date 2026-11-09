@@ -15,8 +15,8 @@ export default function EventNotice({ img, alt, until, banner }: { img: string; 
       <button type="button" className="ev-banner" onClick={() => setOpen(true)}>
         <span className="ev-tag">EVENT</span>
         <b>{banner.title}</b>
-        <span className="ev-sub">{banner.sub} · 자세히 보기 ›</span>
-        {banner.note && <span className="ev-note">{banner.note}</span>}
+        <span className="ev-date">{banner.sub}</span>
+        <span className="ev-sub">자세히 보기 ›</span>
       </button>
       {open && (
         <div className="pop-bg" onClick={() => setOpen(false)}>

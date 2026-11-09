@@ -68,7 +68,7 @@ export default function Home() {
       <main id="top">
         {/* 첫 화면 */}
         <header className="hero">
-          <EventNotice img="/event/anniv-public.webp" alt="온기 1주년 감사제. 지금까지 온기를 찾아주신 모든 분들께 감사의 마음을 전합니다. 대상 온기의 모든 회원, 기간 2026년 11월 1일부터 11월 30일까지" until="2026-11-30" banner={{ title: "온기 1주년 감사제", sub: "11.1 ~ 11.30", note: "자세한 내용은 회원들께만 안내됩니다." }} />
+          <EventNotice img="/event/anniv-public.webp" alt="온기 1주년 감사제. 지금까지 온기를 찾아주신 모든 분들께 감사의 마음을 전합니다. 대상 온기의 모든 회원, 기간 2026년 11월 1일부터 11월 30일까지" until="2026-11-30" banner={{ title: "온기 1주년 감사제", sub: "2026. 11. 1 ~ 11. 30", note: "자세한 내용은 회원들께만 안내됩니다." }} />
           <h1><Logo width={220} /></h1>
           <svg className="eyebrow" viewBox="0 0 1000 64" role="img" aria-label={HERO.eyebrow}>
             <text x="0" y="50" textLength="1000" lengthAdjust="spacing">{HERO.eyebrow.toUpperCase()}</text>
