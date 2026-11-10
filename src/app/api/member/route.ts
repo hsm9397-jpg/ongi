@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { BRANCHES, memberDbIdsOf } from "@/config/branches";
-import { isValidName, mask, maskAll, namesByLast4, nameToken, readNameToken } from "@/lib/members";
+import { isValidName, mask, maskAll, namesByLast4, nameToken, readNameToken, validMembers } from "@/lib/members";
+import { normName } from "@/lib/notion";
 import { guessTrainer } from "@/lib/availability";
 import { clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
@@ -42,7 +43,20 @@ export async function POST(req: Request) {
     const name = valid[0];
     const dbs = hits.get(name)!;
     const memberships = [];
+    // 담당 선생님 기준: '근막이완 회원 리스트(담당자별)'에서 이 회원의 담당 선생님 지점만 연다.
+    // (지점을 옮긴 회원이 예전 지점 누적 DB에도 남아 있어도 현재 담당 지점으로 잡히도록 · 2026-11-10 대표)
+    const groups = new Set(((await validMembers()) ?? []).filter((m) => m.name === normName(name)).map((m) => m.group));
     for (const b of BRANCHES.filter((b) => b.open)) {
+      const t = b.trainers.find((x) => groups.has(x.name));
+      if (!t) continue;
+      memberships.push({
+        branch: b.id,
+        branchName: b.name,
+        trainerId: t.id,
+        trainers: b.trainers.map((x) => ({ id: x.id, name: x.name, selfBook: !!x.selfBook })),
+      });
+    }
+    if (!memberships.length) for (const b of BRANCHES.filter((b) => b.open)) {
       if (!memberDbIdsOf(b).some((id) => dbs.has(id))) continue;
       memberships.push({
         branch: b.id,
