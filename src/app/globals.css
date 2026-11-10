@@ -569,3 +569,5 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .mp-upcoming li b{font-size:16px}
 .mp-upcoming li span{font-size:14px;opacity:.75}
 .mp-upcoming .mp-note{margin:0;font-size:14px;opacity:.75}
+.mp-upcoming h3{color:var(--brown)}
+.mp-upcoming li b{color:var(--terra)}
