@@ -17,16 +17,17 @@ export const TRIAL_REMIND_TEMPLATES: Record<string, string> = {
 
 /** 솔라피에서 승인된 템플릿 ID (2026-11-09 대표 전달) */
 export const ALIMTALK_TEMPLATES = {
-  new: "KA01TP261107001224054lxp93yb59Vu",
-  change: "KA01TP2611070015236412pe7uroxEiY",
-  cancel: "KA01TP261107001630236v2rj6xYxJCu",
+  // 2026-11-10 대표: 회원·담당 선생님 모두 새 템플릿 (이전: 확정 …lxp93yb59Vu, 변경 …2pe7uroxEiY, 취소 …v2rj6xYxJCu)
+  new: "KA01TP261110025711564wymi58lDVP1",
+  change: "KA01TP261110025841815DDu2xbo43c8",
+  cancel: "KA01TP261110025749751gC338HqnmvU",
   /** 1일전 리마인드 (변수: 회원명, 예약시간) */
   remind: "KA01TP260812013652923zi15VSaFT4T",
   /** 체험 후 안내 (변수: 이름). 체험 일정 끝나는 시각에 발송 */
   afterTrial: "KA01TP260921130621048h3HqArYcdxs",
 } as const;
 
-/** 내부용(담당 선생님에게 가는) 확정·변경·취소 템플릿 (2026-11-10 대표). 변수는 회원용과 같음 */
+/** 담당 선생님용 템플릿. 2026-11-10부터 회원과 같은 템플릿을 씀 (따로 바꾸고 싶으면 여기만 수정) */
 export const STAFF_TEMPLATES: Partial<Record<keyof typeof ALIMTALK_TEMPLATES, string>> = {
   new: "KA01TP261110025711564wymi58lDVP1",
   change: "KA01TP261110025841815DDu2xbo43c8",
