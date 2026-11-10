@@ -48,7 +48,8 @@ async function trialRows() {
 /** 체험 일정 하나의 연락처. 못 찾으면 빈 값 */
 export async function trialPhone(ev: { summary: string; description?: string; start: Date; props?: Record<string, string> }): Promise<{ name: string; phone: string; from: string }> {
   // "강나연체험", "강나연 체험 1234" → 이름에서 체험·상담 글자를 뗀다
-  const m = ev.summary.replace(/체험|상담|근막이완|PT/gi, " ").trim().match(/^([가-힣]{2,4})\s*(\d{4})?/);
+  // "한 희 체험"처럼 이름 사이에 띄어쓰기가 있어도 붙여서 읽는다
+  const m = ev.summary.replace(/체험|상담|근막이완|PT/gi, " ").trim().match(/^([가-힣](?:\s?[가-힣]){1,3})(?![가-힣])\s*(\d{4})?/);
   const name = ev.props?.name ? normName(ev.props.name) : m ? normName(m[1]) : "";
   const last4 = m?.[2];
   if ((ev.props?.phone ?? "").length >= 10) return { name, phone: ev.props!.phone, from: "홈페이지 예약" };
