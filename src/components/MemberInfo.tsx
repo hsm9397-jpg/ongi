@@ -37,7 +37,7 @@ export default function MemberInfo({ token }: { token: string }) {
   return (
     <>
       <button type="button" className="ghost mp-book" aria-expanded={open} onClick={load}>
-        회원정보 조회
+        잔여 회차 · 회원권 확인
       </button>
       {open && (
         <div className="mp-info">
