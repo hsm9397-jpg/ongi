@@ -6,6 +6,7 @@ import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
 import { alimtalk } from "@/lib/alimtalk";
 import { findMember } from "@/lib/notion";
+import { programKindOf } from "@/lib/sessions";
 import { isValidDate, kstDate } from "@/lib/time";
 import { cleanMemo, cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
@@ -61,8 +62,15 @@ export async function POST(req: Request) {
     if (!pick) return NextResponse.json({ error: "방금 다른 예약이 들어왔어요. 다른 시간을 골라주세요." }, { status: 409 });
     const cal = calendarIdOf(pick.trainer)!;
 
+    // 회원: 선생님 설정에 따라 "이름 근막"/"이름 PT"와 일정 색 (매출 현황 최근 등록으로 구분)
+    const look = { suffix: "", color: undefined as string | undefined };
+    if (kind === "member" && (pick.trainer.memberSuffix || pick.trainer.memberColor)) {
+      const pt = pick.trainer.ptSuffix || pick.trainer.ptColor ? (await programKindOf(memberName)) === "pt" : false;
+      look.suffix = (pt ? pick.trainer.ptSuffix : pick.trainer.memberSuffix) ?? "";
+      look.color = pt ? pick.trainer.ptColor : pick.trainer.memberColor;
+    }
     // 일정 제목은 기존 노션 '예약 분석' 집계 규칙과 같게: 체험='이름+뒷4자리 체험', 회원='이름' (회차는 담당자가 붙임)
-    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${memberName}${pick.trainer.memberSuffix ?? ""}`;
+    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${memberName}${look.suffix}`;
     const memo = cleanMemo(body.memo);
     const description = [
       `[홈페이지 예약] ${kind === "trial" ? "첫 방문 체험" : kind === "pt" ? "PT 상담·평가(무료)" : "회원 예약"}`,
@@ -73,7 +81,7 @@ export async function POST(req: Request) {
       .filter(Boolean)
       .join("\n");
 
-    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id, colorId: kind === "member" ? pick.trainer.memberColor : undefined });
+    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id, colorId: look.color });
     await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await notify({
       type: "new",

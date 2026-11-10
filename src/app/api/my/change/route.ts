@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       branch: r.branch.id,
       // 같은 날 두 번째 변경을 막기 위해 변경한 날짜를 남김
       extra: kind === "member" ? { chgDate: todayKst() } : undefined,
-      colorId: kind === "member" ? pick.trainer.memberColor : undefined,
+      colorId: kind === "member" ? r.ev.colorId ?? pick.trainer.memberColor : undefined,
     });
     await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await deleteEvent(r.calendarId, r.eventId);

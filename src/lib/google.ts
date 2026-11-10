@@ -32,6 +32,8 @@ export type CalEvent = {
   open?: boolean;
   /** 홈페이지 예약에 붙여 둔 정보 (이름, 뒷4자리, 종류 등) */
   props?: Record<string, string>;
+  /** 일정 색 (구글 colorId) */
+  colorId?: string;
 };
 
 type RawEvent = {
@@ -43,6 +45,7 @@ type RawEvent = {
   start?: { date?: string; dateTime?: string };
   end?: { date?: string; dateTime?: string };
   extendedProperties?: { private?: Record<string, string> };
+  colorId?: string;
 };
 
 /** 캘린더 하나의 일정 목록 (반복 일정은 펼쳐서) */
@@ -93,6 +96,7 @@ export async function listEvents(
         open,
         description: e.description,
         fromWeb: e.extendedProperties?.private?.source === "ongi-web",
+        colorId: e.colorId,
         props: e.extendedProperties?.private,
       });
     }
@@ -186,6 +190,7 @@ export async function getEvent(calendarId: string, eventId: string): Promise<Cal
       blocks: e.transparency !== "transparent",
       description: e.description,
       fromWeb: e.extendedProperties?.private?.source === "ongi-web",
+      colorId: e.colorId,
       props: e.extendedProperties?.private,
     };
   } catch {

@@ -185,3 +185,14 @@ export async function walletOf(pageId: string): Promise<Wallet[]> {
     };
   });
 }
+
+/** 회원 예약 일정 구분: 매출 현황의 가장 최근 등록(체험 제외)이 PT면 "pt", 아니면 "fascia". 기록 없으면 "fascia" */
+export async function programKindOf(name: string): Promise<"pt" | "fascia"> {
+  try {
+    const h = (await historyOf(normName(name))).filter((x) => !/체험/.test(x.program));
+    const last = h[h.length - 1];
+    return last && /PT/i.test(last.program) ? "pt" : "fascia";
+  } catch {
+    return "fascia";
+  }
+}

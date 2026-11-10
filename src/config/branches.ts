@@ -16,6 +16,9 @@ export type Trainer = {
   memberSuffix?: string;
   /** 회원 예약 일정 색 (구글 캘린더 colorId: 5=노랑(바나나)) */
   memberColor?: string;
+  /** PT 회원(매출 현황 최근 등록이 PT)일 때 제목 뒤 말·색. 없으면 memberSuffix/memberColor */
+  ptSuffix?: string;
+  ptColor?: string;
 };
 
 export type Branch = {
@@ -112,6 +115,9 @@ export const BRANCHES: Branch[] = [
         // 회원 예약은 "이름 근막", 노란색(바나나) 일정으로 (2026-11-10 대표)
         memberSuffix: " 근막",
         memberColor: "5",
+        // PT 회원은 "이름 PT", 파란색(블루베리)
+        ptSuffix: " PT",
+        ptColor: "9",
       },
     ],
     memberDbEnv: "NOTION_MEMBER_DB_MAIN",
