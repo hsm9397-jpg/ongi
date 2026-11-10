@@ -442,8 +442,8 @@ function Insight({ staffKey }: { staffKey: string }) {
 
 type VocItem = { id: string; url: string; title: string; content: string; type: string; branch: string; priority: string; created: string };
 const VOC_BRANCH: Record<string, string> = {
-  "온기PT&근막이완": "잠원동 1호점",
-  "온기 근막이완 더프라이빗": "잠원동 2호점",
+  "온기PT&근막이완": "온기PT&근막이완",
+  "온기 근막이완 더프라이빗": "온기 근막이완",
   "신반포스퀘어점": "신반포스퀘어점",
   "선릉점": "선릉점",
 };
