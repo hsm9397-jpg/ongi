@@ -4,7 +4,7 @@ import { mapSrc } from "@/lib/map";
 import { useEffect, useState } from "react";
 
 type PubBranch = { id: string; name: string; short: string; womenOnly: boolean; hidden: boolean; only?: "pt"; bookable: boolean; trialClosed: boolean; desc: string; notice: string; address: string; mapQuery: string; naverTrial: string; naverPt: string; photos: string[]; waitlist: boolean; lat: number; lng: number; trainers: { id: string; name: string }[] };
-type Slot = { hour: number; available: boolean };
+export type Slot = { hour: number; available: boolean };
 type Membership = { branch: string; branchName: string; trainerId?: string; trainers: { id: string; name: string; selfBook?: boolean }[] };
 type Done = { kind: "trial" | "member" | "pt"; branchName: string; date: string; hour: number; minutes: number; trainerName: string; name: string };
 
@@ -253,7 +253,7 @@ function BranchInfo({ b }: { b: PubBranch }) {
 }
 
 /** 한 달 달력: 예약 가능한 날만 누를 수 있음 */
-function MonthCalendar({ days, selected, onPick }: { days: Record<string, Slot[]>; selected: string | null; onPick: (d: string) => void }) {
+export function MonthCalendar({ days, selected, onPick }: { days: Record<string, Slot[]>; selected: string | null; onPick: (d: string) => void }) {
   const keys = Object.keys(days).sort();
   const months = Array.from(new Set(keys.map((k) => k.slice(0, 7))));
   const [idx, setIdx] = useState(() => Math.max(0, months.indexOf((selected ?? keys[0] ?? "").slice(0, 7))));
@@ -297,7 +297,7 @@ const fmtDay = (d: string) => {
   return `${x.getMonth() + 1}월 ${x.getDate()}일 (${DOW[x.getDay()]})`;
 };
 
-async function api<T>(url: string, init?: RequestInit): Promise<T> {
+export async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, headers: { "Content-Type": "application/json" } });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(data.error || "문제가 생겼어요. 잠시 후 다시 시도해 주세요."), { contact: !!data.contact });

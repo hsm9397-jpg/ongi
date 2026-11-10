@@ -134,7 +134,7 @@ export async function loadOwned(token: unknown, name: string, last4: string, act
   return { ...ref, ev } as const;
 }
 
-export type Upcoming = { date: string; hour: number; minute: number; branchName: string; trainerName: string; web: boolean };
+export type Upcoming = { date: string; hour: number; minute: number; branchName: string; trainerName: string; web: boolean; act?: { token: string; who: string; kind: string; branchId: string; trainerId: string; changeable: boolean; cancelable: boolean; changedToday: boolean } };
 /** 회원 페이지 '내 예약': 홈페이지 예약 + 선생님이 캘린더에 직접 잡은 일정(제목 이름이 같은 것) */
 export async function myUpcoming(name: string, last4: string, sameNameCount: number, now = new Date()): Promise<Upcoming[]> {
   const { parseTitle, SKIP_TITLE } = await import("./remind");
@@ -162,7 +162,19 @@ export async function myUpcoming(name: string, last4: string, sameNameCount: num
           if (!mine || seen.has(e.id)) continue;
           seen.add(e.id);
           const { date, hour, minute } = kstHourMinute(e.start);
-          out.push({ date, hour, minute, branchName: b.short, trainerName: t.name, web: e.fromWeb });
+          const act = e.fromWeb
+            ? {
+                token: makeToken(b.id, t.id, e.id),
+                who: nameToken(e.props?.name ?? ""),
+                kind: e.props?.kind ?? "member",
+                branchId: b.id,
+                trainerId: t.id,
+                changeable: e.props?.kind === "member" ? canMemberChange(e.start, now) : canChange(e.start, now),
+                cancelable: canChange(e.start, now),
+                changedToday: e.props?.kind === "member" && changedToday(e, now),
+              }
+            : undefined;
+          out.push({ date, hour, minute, branchName: b.short, trainerName: t.name, web: e.fromWeb, act });
         }
       })
     )

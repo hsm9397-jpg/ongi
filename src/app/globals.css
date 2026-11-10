@@ -572,3 +572,12 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 /* 로고 인장 버건디 #9e0a0a */
 .mp-upcoming h3{color:#9e0a0a;font-weight:800}
 .mp-upcoming li b{color:#9e0a0a}
+.mp-upcoming li{flex-direction:column;align-items:stretch}
+.mp-upcoming .mb-row{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.mp-upcoming .mb-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.mp-upcoming .mb-btns button{min-height:42px;font-size:15px;font-weight:700;background:var(--surface)}
+.mp-upcoming .mb-btns .danger{color:#9e0a0a;border-color:#e2b9b0}
+.mp-upcoming .mb-hint{font-size:13px;margin-top:4px}
+.mp-upcoming .mychange{margin-top:10px}
+.mp-upcoming .mychange .primary{width:100%;margin-top:10px}
+.danger-fill{background:#9e0a0a !important;border-color:#9e0a0a !important;color:#fff !important}
