@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     const cal = calendarIdOf(pick.trainer)!;
 
     // 일정 제목은 기존 노션 '예약 분석' 집계 규칙과 같게: 체험='이름+뒷4자리 체험', 회원='이름' (회차는 담당자가 붙임)
-    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : memberName;
+    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${memberName}${pick.trainer.memberSuffix ?? ""}`;
     const memo = cleanMemo(body.memo);
     const description = [
       `[홈페이지 예약] ${kind === "trial" ? "첫 방문 체험" : kind === "pt" ? "PT 상담·평가(무료)" : "회원 예약"}`,
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       .filter(Boolean)
       .join("\n");
 
-    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id });
+    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id, colorId: kind === "member" ? pick.trainer.memberColor : undefined });
     await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await notify({
       type: "new",

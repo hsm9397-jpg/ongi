@@ -12,6 +12,10 @@ export type Trainer = {
   week?: Partial<Record<number, [number, number]>>;
   /** 공휴일 휴무 (HOLIDAYS 날짜에는 예약을 받지 않음) */
   holidaysOff?: boolean;
+  /** 회원 예약 일정 제목 뒤에 붙일 말 (예: " 근막" → "김온기 근막") */
+  memberSuffix?: string;
+  /** 회원 예약 일정 색 (구글 캘린더 colorId: 5=노랑(바나나)) */
+  memberColor?: string;
 };
 
 export type Branch = {
@@ -105,6 +109,9 @@ export const BRANCHES: Branch[] = [
         // 평일 7~20시 타임(시작 기준), 토·일·공휴일 휴무 (2026-11-09 대표, 토요일은 사이트 예약 닫음)
         week: { 1: [7, 20], 2: [7, 20], 3: [7, 20], 4: [7, 20], 5: [7, 20] },
         holidaysOff: true,
+        // 회원 예약은 "이름 근막", 노란색(바나나) 일정으로 (2026-11-10 대표)
+        memberSuffix: " 근막",
+        memberColor: "5",
       },
     ],
     memberDbEnv: "NOTION_MEMBER_DB_MAIN",
