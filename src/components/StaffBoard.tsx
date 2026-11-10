@@ -108,6 +108,7 @@ export default function StaffBoard() {
         <div className="stat"><small>베드 가동률</small><b>{cap ? Math.round((timed.length / cap) * 100) : 0}%</b></div>
       </div>
       <Visits v={visits} />
+      <Insight staffKey={key} />
       <Remind staffKey={key} trial={false} />
       <Remind staffKey={key} trial />
       <AfterTrial staffKey={key} />
@@ -336,6 +337,90 @@ function AfterTrial({ staffKey }: { staffKey: string }) {
           ))}
         </ul>
       ) : <p className="vnote">{tmr ? "내일" : "오늘"} 체험 일정이 없어요.</p>)}
+    </div>
+  );
+}
+
+type Ins = {
+  ready: boolean; days?: number; sessions?: number; homeViews?: number;
+  refs?: { name: string; n: number }[];
+  pages?: { path: string; views: number; avgSec: number }[];
+  clicks?: { path: string; label: string; n: number }[];
+  sections?: { id: string; label: string; reach: number; avgSec: number }[];
+};
+const mmss = (s: number) => (s >= 60 ? `${Math.floor(s / 60)}분 ${s % 60}초` : `${s}초`);
+const PAGE_NAME: Record<string, string> = { "/": "홈", "/member": "회원 페이지", "/회원": "회원 페이지", "/price": "서비스 금액", "/금액": "서비스 금액", "/privacy": "개인정보처리방침" };
+function Bars({ rows }: { rows: { label: string; n: number; sub?: string }[] }) {
+  const max = Math.max(1, ...rows.map((r) => r.n));
+  return (
+    <ul className="ins-bars">
+      {rows.map((r, i) => (
+        <li key={i}>
+          <span className="ins-l">{r.label}</span>
+          <span className="ins-b"><i style={{ width: `${Math.max(3, Math.round((r.n / max) * 100))}%` }} /></span>
+          <b>{r.sub ?? r.n}</b>
+        </li>
+      ))}
+    </ul>
+  );
+}
+function Insight({ staffKey }: { staffKey: string }) {
+  const [days, setDays] = useState(7);
+  const [d, setD] = useState<Ins | null>(null);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    setErr("");
+    fetch(`/api/staff/insight?days=${days}`, { headers: { "x-staff-key": staffKey } })
+      .then((r) => r.json())
+      .then((j) => (j.error ? setErr(j.error) : setD(j)))
+      .catch(() => setErr("인사이트를 불러오지 못했어요."));
+  }, [days, staffKey]);
+  if (d && !d.ready) return null;
+  const home = d?.pages?.find((p) => p.path === "/");
+  const homeClicks = (d?.clicks ?? []).filter((c) => c.path === "/");
+  const otherClicks = (d?.clicks ?? []).filter((c) => c.path !== "/");
+  const reachBase = Math.max(1, d?.sessions ?? 0);
+  return (
+    <div className="branch visits">
+      <h3>방문자 인사이트 <small>어디서 왔고, 어디를 오래 봤고, 무엇을 눌렀는지 · 2026-11-10부터 집계</small></h3>
+      <div className="ins-tabs">
+        {[[1, "오늘"], [7, "최근 7일"], [30, "최근 30일"]].map(([n, l]) => (
+          <button key={n} className={days === n ? "" : "ghost"} onClick={() => setDays(n as number)}>{l}</button>
+        ))}
+      </div>
+      {err && <div className="err">{err}</div>}
+      {!d && !err && <p className="vnote">불러오는 중…</p>}
+      {d && (
+        <>
+          <div className="stats">
+            <div className="stat"><small>홈 방문</small><b>{d.sessions ?? 0}</b></div>
+            <div className="stat"><small>홈 평균 머문 시간</small><b>{mmss(home?.avgSec ?? 0)}</b></div>
+            <div className="stat"><small>예약 구간까지 본 비율</small><b>{Math.round(((d.sections?.find((s) => s.id === "book")?.reach ?? 0) / reachBase) * 100)}%</b></div>
+            <div className="stat"><small>클릭 수</small><b>{(d.clicks ?? []).reduce((a, c) => a + c.n, 0)}</b></div>
+          </div>
+
+          <h4 className="ins-h">홈에서 구간별로 머문 시간 <small>평균 · 본 사람 비율</small></h4>
+          {d.sections?.length ? (
+            <Bars rows={d.sections.map((s) => ({ label: s.label, n: s.avgSec, sub: `${mmss(s.avgSec)} · ${Math.round((s.reach / reachBase) * 100)}%` }))} />
+          ) : <p className="vnote">아직 기록이 없어요.</p>}
+
+          <h4 className="ins-h">홈에서 많이 누른 것</h4>
+          {homeClicks.length ? <Bars rows={homeClicks.slice(0, 15).map((c) => ({ label: c.label, n: c.n }))} /> : <p className="vnote">아직 기록이 없어요.</p>}
+
+          {otherClicks.length > 0 && (
+            <>
+              <h4 className="ins-h">다른 페이지에서 누른 것</h4>
+              <Bars rows={otherClicks.slice(0, 10).map((c) => ({ label: `${PAGE_NAME[c.path] ?? c.path} · ${c.label}`, n: c.n }))} />
+            </>
+          )}
+
+          <h4 className="ins-h">어디서 왔는지</h4>
+          {d.refs?.length ? <Bars rows={d.refs.filter((r) => r.name !== "사이트 안 이동").map((r) => ({ label: r.name, n: r.n }))} /> : <p className="vnote">아직 기록이 없어요.</p>}
+
+          <h4 className="ins-h">페이지별 <small>열람 수 · 평균 머문 시간</small></h4>
+          {d.pages?.length ? <Bars rows={d.pages.map((p) => ({ label: PAGE_NAME[p.path] ?? p.path, n: p.views, sub: `${p.views}회 · ${mmss(p.avgSec)}` }))} /> : <p className="vnote">아직 기록이 없어요.</p>}
+        </>
+      )}
     </div>
   );
 }

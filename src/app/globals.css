@@ -582,3 +582,14 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .mp-upcoming .mychange .primary{width:100%;margin-top:10px}
 .danger-fill{background:#9e0a0a !important;border-color:#9e0a0a !important;color:#fff !important}
 .step h3 .h3-note{display:inline-block;margin-left:8px;font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+/* 직원 화면: 방문자 인사이트 */
+.ins-tabs{display:flex;gap:8px;margin:4px 0 12px}
+.ins-tabs button{min-height:36px;padding:6px 14px;font-size:14px}
+.ins-h{margin:18px 0 6px;font-size:15px}
+.ins-h small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.ins-bars{list-style:none;margin:0;padding:0}
+.ins-bars li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:10px;align-items:center;padding:4px 0;font-size:14px}
+.ins-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ins-b{height:10px;background:var(--off);border-radius:6px;overflow:hidden}
+.ins-b i{display:block;height:100%;background:var(--terra);border-radius:6px}
+.ins-bars b{font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}

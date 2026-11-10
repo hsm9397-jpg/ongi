@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import VisitBeacon from "@/components/VisitBeacon";
+import InsightTracker from "@/components/InsightTracker";
 import { GOOGLE_SITE_VERIFICATION, NAVER_SITE_VERIFICATION, SITE_URL } from "@/config/site";
 
 const TITLE = "온기 | Conditioning Studio 온기 근막이완 컨디셔닝";
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 방문자 통계: vercel.com/ongi4/ongi/analytics 에서 대표만 확인 */}
         <Analytics />
         <VisitBeacon />
+        <InsightTracker />
       </body>
     </html>
   );
