@@ -636,3 +636,10 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .mp-me .mp-c-book[aria-pressed=true]{background:#9a4730}
 .mp-me .mp-c-info{background:#a8865a;color:#fff;border:0;box-shadow:0 4px 14px rgba(168,134,90,.22)}
 .mp-me .mp-c-info[aria-expanded=true]{background:#8f7149}
+/* 2026-11-10 대표: 회원 화면 버튼 톤다운(파스텔). 바탕은 연하게, 글씨는 같은 계열 진한 색 */
+.mp-terms,.mp-me .mp-terms{background:#f5e1de;color:#8a1c1c;border:1px solid #e6c3be;box-shadow:none}
+.mp-me .mp-open{background:#eadfd2;color:#4a3020;border:1px solid #d8c6b2;box-shadow:none}
+.mp-me .mp-c-book{background:#f6e6dc;color:#8f4229;border:1px solid #e9c9b6;box-shadow:none}
+.mp-me .mp-c-book[aria-pressed=true]{background:#efd6c7}
+.mp-me .mp-c-info{background:#f2eadb;color:#6f5530;border:1px solid #e0d0b0;box-shadow:none}
+.mp-me .mp-c-info[aria-expanded=true]{background:#e9dcc3}
