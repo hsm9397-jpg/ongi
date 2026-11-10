@@ -25,7 +25,7 @@ export default function StaffBoard() {
   const [authed, setAuthed] = useState(false);
   const [date, setDate] = useState(kstToday());
   const [filter, setFilter] = useState("all");
-  const [tab, setTab] = useState<"main" | "insight">("main");
+  const [tab, setTab] = useState<"main" | "insight" | "voc">("main");
   const [data, setData] = useState<B[] | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,12 +82,15 @@ export default function StaffBoard() {
 
   return (
     <>
-      <div className="brand"><small>Conditioning Studio</small><h1 style={{ lineHeight: 1.25, marginTop: 4 }}>{tab === "insight" ? "방문자 인사이트" : "지점 스케줄"}</h1></div>
+      <div className="brand"><small>Conditioning Studio</small><h1 style={{ lineHeight: 1.25, marginTop: 4 }}>{tab === "insight" ? "방문자 인사이트" : tab === "voc" ? "고객의 소리" : "지점 스케줄"}</h1></div>
       <nav className="staff-tabs" aria-label="직원 화면 메뉴">
         <button aria-pressed={tab === "main"} onClick={() => setTab("main")}>예약 현황 · 알림톡</button>
         <button aria-pressed={tab === "insight"} onClick={() => setTab("insight")}>인사이트</button>
+        <button aria-pressed={tab === "voc"} onClick={() => setTab("voc")}>고객의 소리</button>
       </nav>
-      {tab === "insight" ? (
+      {tab === "voc" ? (
+        <VocBoard staffKey={key} />
+      ) : tab === "insight" ? (
         <>
           <Visits v={visits} />
           <Insight staffKey={key} />
@@ -434,5 +437,101 @@ function Insight({ staffKey }: { staffKey: string }) {
         </>
       )}
     </div>
+  );
+}
+
+type VocItem = { id: string; url: string; title: string; content: string; type: string; branch: string; priority: string; created: string };
+const VOC_BRANCH: Record<string, string> = {
+  "온기PT&근막이완": "잠원동 1호점",
+  "온기 근막이완 더프라이빗": "잠원동 2호점",
+  "신반포스퀘어점": "신반포스퀘어점",
+  "선릉점": "선릉점",
+};
+const vocDate = (iso: string) => {
+  const d = new Date(new Date(iso).getTime() + 9 * 3_600_000);
+  return `${String(d.getUTCFullYear()).slice(2)}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")} (${DOW[d.getUTCDay()]})`;
+};
+function VocBoard({ staffKey }: { staffKey: string }) {
+  const [items, setItems] = useState<VocItem[] | null>(null);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [br, setBr] = useState("all");
+  const [ty, setTy] = useState("all");
+  const load = useCallback((fresh = false) => {
+    setBusy(true); setErr("");
+    fetch(`/api/staff/voc${fresh ? "?fresh=1" : ""}`, { headers: { "x-staff-key": staffKey } })
+      .then((r) => r.json())
+      .then((j) => (j.error ? setErr(j.error) : setItems(j.items)))
+      .catch(() => setErr("고객의 소리를 불러오지 못했어요."))
+      .finally(() => setBusy(false));
+  }, [staffKey]);
+  useEffect(() => { load(); }, [load]);
+  const all = items ?? [];
+  const branches = Object.keys(VOC_BRANCH).filter((b) => all.some((x) => x.branch === b));
+  const list = all.filter((x) => (br === "all" || x.branch === br) && (ty === "all" || x.type === ty));
+  const good = all.filter((x) => x.type === "좋았어요").length;
+  const bad = all.filter((x) => x.type === "아쉬웠어요").length;
+  const month = new Date(Date.now() + 9 * 3_600_000).toISOString().slice(0, 7);
+  const thisMonth = all.filter((x) => new Date(new Date(x.created).getTime() + 9 * 3_600_000).toISOString().startsWith(month)).length;
+  return (
+    <>
+      {err && <div className="err">{err}</div>}
+      {!items && !err && <p className="vnote">불러오는 중…</p>}
+      {items && (
+        <>
+          <div className="stats">
+            <div className="stat"><small>전체</small><b>{all.length}</b></div>
+            <div className="stat"><small>좋았어요</small><b style={{ color: "var(--ok)" }}>{good}</b></div>
+            <div className="stat"><small>아쉬웠어요</small><b style={{ color: "#9e0a0a" }}>{bad}</b></div>
+            <div className="stat"><small>이번 달</small><b>{thisMonth}</b></div>
+          </div>
+          <div className="branch visits">
+            <h3>지점별 <small>좋았어요 · 아쉬웠어요</small></h3>
+            <ul className="voc-br">
+              {branches.map((b) => {
+                const g = all.filter((x) => x.branch === b && x.type === "좋았어요").length;
+                const n = all.filter((x) => x.branch === b && x.type === "아쉬웠어요").length;
+                const t = Math.max(1, g + n);
+                return (
+                  <li key={b}>
+                    <span className="ins-l">{VOC_BRANCH[b] ?? b}</span>
+                    <span className="voc-bar"><i className="g" style={{ width: `${(g / t) * 100}%` }} /><i className="n" style={{ width: `${(n / t) * 100}%` }} /></span>
+                    <b><span style={{ color: "var(--ok)" }}>{g}</span> · <span style={{ color: "#9e0a0a" }}>{n}</span></b>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="voc-filter">
+            <div className="chips">
+              <button className="chip" aria-pressed={br === "all"} onClick={() => setBr("all")}>전 지점</button>
+              {branches.map((b) => <button key={b} className="chip" aria-pressed={br === b} onClick={() => setBr(b)}>{VOC_BRANCH[b] ?? b}</button>)}
+            </div>
+            <div className="chips">
+              {[["all", "전체"], ["좋았어요", "좋았어요"], ["아쉬웠어요", "아쉬웠어요"]].map(([v, l]) => (
+                <button key={v} className="chip" aria-pressed={ty === v} onClick={() => setTy(v)}>{l}</button>
+              ))}
+              <button className="ghost" onClick={() => load(true)} disabled={busy}>{busy ? "불러오는 중…" : "새로고침"}</button>
+            </div>
+          </div>
+          <ul className="voc-list">
+            {list.map((x) => (
+              <li key={x.id} className={x.type === "아쉬웠어요" ? "bad" : "good"}>
+                <div className="voc-meta">
+                  <span className={`voc-type ${x.type === "아쉬웠어요" ? "bad" : "good"}`}>{x.type || "미분류"}</span>
+                  <span>{VOC_BRANCH[x.branch] ?? (x.branch || "지점 미선택")}</span>
+                  <span>{vocDate(x.created)}</span>
+                  {x.priority && <span className={`voc-pri p-${x.priority}`}>{x.priority}</span>}
+                </div>
+                {x.title && <b className="voc-title">{x.title}</b>}
+                <p>{x.content || "(내용 없음)"}</p>
+                <a href={x.url} target="_blank" rel="noopener noreferrer">노션에서 열기 ›</a>
+              </li>
+            ))}
+            {!list.length && <p className="vnote">해당하는 의견이 없어요.</p>}
+          </ul>
+        </>
+      )}
+    </>
   );
 }
