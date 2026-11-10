@@ -144,7 +144,8 @@ export const BRANCHES: Branch[] = [
     womenOnly: true,
     open: true,
     trainers: [
-      { id: "hsr", name: "황사라", calendarEnv: "CAL_HWANGSARA" },
+      // 황사라 (2026-11-10 대표, 시작 기준): 평일 10~21시, 토 8~15시 타임, 일 휴무
+      { id: "hsr", name: "황사라", calendarEnv: "CAL_HWANGSARA", week: { 1: [10, 21], 2: [10, 21], 3: [10, 21], 4: [10, 21], 5: [10, 21], 6: [8, 15] } },
       {
         id: "kny",
         name: "김나영",
