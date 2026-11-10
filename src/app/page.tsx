@@ -25,8 +25,8 @@ const NAV = [
 function Logo({ width }: { width: number }) {
   return (
     <picture>
-      {/* 투명 배경 로고: 배경색과 경계가 생기지 않게 (2026-11-10 대표) */}
-      <img src="/logo.png" alt="온기 (편안할 온 · 몸 기)" width={800} height={589} style={{ width: Math.round(width * 0.92), height: "auto", margin: "14px auto 6px", display: "block" }} />
+      {/* 다크모드 대비로 배경 칠한 로고 유지. 위 이벤트 배너 그림자에 겹치면 네모 경계가 보여 간격을 둠 (2026-11-10) */}
+      <img src="/logo-solid.png" alt="온기 (편안할 온 · 몸 기)" width={880} height={669} style={{ width: Math.round(width * 1.1), height: "auto", borderRadius: 12, marginTop: 28 }} />
     </picture>
   );
 }
