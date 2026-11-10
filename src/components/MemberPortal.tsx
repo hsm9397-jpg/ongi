@@ -60,7 +60,8 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
     // 뒷번호도 이 폰에만 기억해 두고, 예약하기를 누르면 다시 묻지 않는다
     save({ token: f.token, name: f.name, last4: code });
     setMe({ token: f.token, name: f.name, url: f.url, last4: code });
-    window.location.href = f.url;
+    // 처음 확인해도 노션으로 바로 넘어가지 않고 회원 화면(내 예약·약관·내 페이지 열기)을 보여준다 (2026-11-10 대표)
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function find(code: string) {
