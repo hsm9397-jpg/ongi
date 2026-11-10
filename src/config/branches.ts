@@ -131,7 +131,8 @@ export const BRANCHES: Branch[] = [
     short: "온기 근막이완 (잠원동 2호점)",
     beds: 1,
     open: true,
-    trainers: [{ id: "bts", name: "배태성", calendarEnv: "CAL_BAETAESEONG" }],
+    // 배태성 (2026-11-10 대표, 시작 기준): 평일 8~20시, 토 8~17시 타임, 일 휴무
+    trainers: [{ id: "bts", name: "배태성", calendarEnv: "CAL_BAETAESEONG", week: { 1: [8, 20], 2: [8, 20], 3: [8, 20], 4: [8, 20], 5: [8, 20], 6: [8, 17] } }],
     memberDbEnv: "NOTION_MEMBER_DB_PRIV",
     firstHour: 10,
     lastHour: 20,
