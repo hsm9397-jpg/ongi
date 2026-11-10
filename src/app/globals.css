@@ -663,3 +663,35 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .voc-list a{font-size:12.5px;color:var(--muted)}
 @media (prefers-color-scheme: dark){.voc-list li.bad{background:rgba(192,100,90,.12)}}
 .topnav-links a.nav-staff{color:var(--muted);font-size:13px;letter-spacing:.02em}
+/* 직원 화면: 게시판 */
+.bd-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 12px}
+.bd-me{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.bd-me select{padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:14px}
+.bd-form{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.bd-form input,.bd-form textarea,.bd-reply input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:15px}
+.bd-form .chips{display:flex;flex-wrap:wrap;gap:6px}
+.bd-pin{display:flex;align-items:center;gap:6px;font-size:14px}
+.bd-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
+.bd-tabs small{opacity:.6;margin-left:2px}
+.bd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.bd-list>li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.bd-list>li.pinned{border-color:#c9a27e;box-shadow:inset 4px 0 0 #c9a27e}
+.bd-list p{margin:6px 0 4px;white-space:pre-wrap;line-height:1.6;font-size:14.5px}
+.bd-board{font-weight:700;padding:2px 8px;border-radius:999px;background:var(--off);color:var(--fg)}
+.bd-board.b-all{background:#f6e6dc;color:#8f4229}
+.bd-pinmark{color:#8f4229;font-weight:600}
+.bd-acts{display:flex;gap:8px;margin-top:6px}
+.bd-acts.small button{background:none;border:0;padding:2px 0;color:var(--muted);font-size:12.5px;cursor:pointer;text-decoration:underline}
+.bd-comments{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.bd-c{font-size:13.5px;line-height:1.5}
+.bd-c small{color:var(--muted);margin-left:4px}
+.bd-c button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px}
+.bd-reply{display:flex;gap:6px}
+.bd-reply input{padding:8px 10px;font-size:14px}
+.staff-tabs{overflow-x:auto;scrollbar-width:none;gap:0}
+.staff-tabs::-webkit-scrollbar{display:none}
+.staff-tabs button{white-space:nowrap;flex:0 0 auto;padding:10px 10px;font-size:14.5px}
+.bd-me{white-space:nowrap}
+.bd-me select{min-width:110px}
+.bd-top .primary{width:auto;padding:12px 18px;font-size:15px}
+.bd-reply button{white-space:nowrap;flex:0 0 auto;width:auto}

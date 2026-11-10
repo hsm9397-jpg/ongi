@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import StaffPosts from "./StaffPosts";
 
 type Ev = { title: string; allDay: boolean; start: string; end: string; startHour: number; kind: "trial" | "member" | "other"; fromWeb: boolean };
 type T = { id: string; name: string; connected: boolean; events: Ev[] };
@@ -25,7 +26,7 @@ export default function StaffBoard() {
   const [authed, setAuthed] = useState(false);
   const [date, setDate] = useState(kstToday());
   const [filter, setFilter] = useState("all");
-  const [tab, setTab] = useState<"main" | "insight" | "voc">("main");
+  const [tab, setTab] = useState<"main" | "insight" | "voc" | "board">("main");
   const [data, setData] = useState<B[] | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,13 +83,16 @@ export default function StaffBoard() {
 
   return (
     <>
-      <div className="brand"><small>Conditioning Studio</small><h1 style={{ lineHeight: 1.25, marginTop: 4 }}>{tab === "insight" ? "방문자 인사이트" : tab === "voc" ? "고객의 소리" : "지점 스케줄"}</h1></div>
+      <div className="brand"><small>Conditioning Studio</small><h1 style={{ lineHeight: 1.25, marginTop: 4 }}>{tab === "insight" ? "방문자 인사이트" : tab === "voc" ? "고객의 소리" : tab === "board" ? "게시판" : "지점 스케줄"}</h1></div>
       <nav className="staff-tabs" aria-label="직원 화면 메뉴">
         <button aria-pressed={tab === "main"} onClick={() => setTab("main")}>예약 현황 · 알림톡</button>
         <button aria-pressed={tab === "insight"} onClick={() => setTab("insight")}>인사이트</button>
+        <button aria-pressed={tab === "board"} onClick={() => setTab("board")}>게시판</button>
         <button aria-pressed={tab === "voc"} onClick={() => setTab("voc")}>고객의 소리</button>
       </nav>
-      {tab === "voc" ? (
+      {tab === "board" ? (
+        <StaffPosts staffKey={key} />
+      ) : tab === "voc" ? (
         <VocBoard staffKey={key} />
       ) : tab === "insight" ? (
         <>
