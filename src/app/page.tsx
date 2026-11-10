@@ -25,7 +25,8 @@ const NAV = [
 function Logo({ width }: { width: number }) {
   return (
     <picture>
-      <img src="/logo-solid.png" alt="온기 (편안할 온 · 몸 기)" width={880} height={669} style={{ width: Math.round(width * 1.1), height: "auto", borderRadius: 12 }} />
+      {/* 투명 배경 로고: 배경색과 경계가 생기지 않게 (2026-11-10 대표) */}
+      <img src="/logo.png" alt="온기 (편안할 온 · 몸 기)" width={800} height={589} style={{ width: Math.round(width * 0.92), height: "auto", margin: "14px auto 6px", display: "block" }} />
     </picture>
   );
 }
