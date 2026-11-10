@@ -63,6 +63,7 @@ export default function Home() {
           {NAV.map(([id, label]) => (
             <a key={id} href={`#${id}`}>{label}</a>
           ))}
+          <a href="/staff" className="nav-staff" rel="nofollow">Staff</a>
         </div>
       </nav>
 
