@@ -35,6 +35,8 @@ export async function GET(req: NextRequest) {
               id: t.id,
               name: t.name,
               connected,
+              // 왜 연결이 안 됐는지: 캘린더 ID 환경변수가 없음 / 있는데 공유 안 됨
+              why: !cal ? `Vercel 환경변수 ${t.calendarEnv}가 없어요` : connected ? "" : "캘린더가 공유되지 않았어요 (서비스 계정에 '일정 변경' 권한 필요)",
               events: events.map((e) => {
                 const s = kstHourMinute(e.start), en = kstHourMinute(e.end);
                 return {

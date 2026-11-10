@@ -123,7 +123,7 @@ export default function StaffBoard() {
               ))
             )}
             {b.trainers.filter((t) => !t.connected).map((t) => (
-              <div className="dayoff" key={`nc-${t.id}`}>{t.name} 선생님 캘린더가 아직 연결되지 않았어요.</div>
+              <div className="dayoff" key={`nc-${t.id}`}>{t.name} 선생님 캘린더가 아직 연결되지 않았어요.{(t as { why?: string }).why ? ` · ${(t as { why?: string }).why}` : ""}</div>
             ))}
             <div className="gridwrap">
               <table className="grid">
