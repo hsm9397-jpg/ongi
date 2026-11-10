@@ -117,7 +117,7 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
             <MyBookings token={me.token} last4={me.last4} />
             <button className={`mp-terms${land ? " land" : ""}`} onClick={() => setTerms(true)} onAnimationEnd={() => setLand(false)}>📋 이용 약관 (필독)</button>
             <a className="primary mp-open" href={me.url ?? "#"} aria-disabled={!me.url}>
-              {me.url ? "내 페이지 열기" : "불러오는 중…"}
+              {me.url ? "내 컨디셔닝 기록" : "불러오는 중…"}
             </a>
             {booking ? (
               <button
