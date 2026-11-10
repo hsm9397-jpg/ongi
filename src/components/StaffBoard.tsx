@@ -289,6 +289,9 @@ function AlimTest({ staffKey }: { staffKey: string }) {
           <option value="change">예약 변경</option>
           <option value="cancel">예약 취소</option>
           <option value="remind">1일전 리마인드</option>
+          <option value="staff-new">내부용 · 예약 확정</option>
+          <option value="staff-change">내부용 · 예약 변경</option>
+          <option value="staff-cancel">내부용 · 예약 취소</option>
         </select>
         <button className="ghost" onClick={send} disabled={busy || to.replace(/\D/g, "").length < 10}>{busy ? "보내는 중…" : "보내기"}</button>
       </div>

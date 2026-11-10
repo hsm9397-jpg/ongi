@@ -26,6 +26,13 @@ export const ALIMTALK_TEMPLATES = {
   afterTrial: "KA01TP260921130621048h3HqArYcdxs",
 } as const;
 
+/** 내부용(담당 선생님에게 가는) 확정·변경·취소 템플릿 (2026-11-10 대표). 변수는 회원용과 같음 */
+export const STAFF_TEMPLATES: Partial<Record<keyof typeof ALIMTALK_TEMPLATES, string>> = {
+  new: "KA01TP261110025711564wymi58lDVP1",
+  change: "KA01TP261110025841815DDu2xbo43c8",
+  cancel: "KA01TP261110025749751gC338HqnmvU",
+};
+
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 /** 26.11.07 (토) 14:00 */
 export function fmtKakao(d: Date): string {
@@ -98,9 +105,13 @@ export async function alimtalk(a: AlimInput): Promise<void> {
   let to = a.phone.replace(/\D/g, "");
   if (to.length === 4) to = await fullPhoneOf(a.name, to);
   const variables = alimVariables(a);
-  const targets = new Set<string>([to, ...[a.trainer, a.oldTrainer].map((t) => (t && phoneOf(t)) || "")].filter((x) => x.length >= 10));
   if (!to) console.log("alimtalk 예약자 번호 없음", a.type, JSON.stringify(variables));
-  for (const t of targets) {
-    if (!(await sendAlim(t, ALIMTALK_TEMPLATES[a.type], variables))) console.log("alimtalk 실패", a.type, JSON.stringify(variables));
+  // 예약자에게는 회원용, 담당(변경 시 이전 담당 포함) 선생님에게는 내부용 템플릿
+  const staff = new Set([a.trainer, a.oldTrainer].map((t) => (t && phoneOf(t)) || "").filter((x) => x.length >= 10));
+  const sends: [string, string][] = [];
+  if (to.length >= 10 && !staff.has(to)) sends.push([to, ALIMTALK_TEMPLATES[a.type]]);
+  for (const ph of staff) sends.push([ph, STAFF_TEMPLATES[a.type] ?? ALIMTALK_TEMPLATES[a.type]]);
+  for (const [ph, tpl] of sends) {
+    if (!(await sendAlim(ph, tpl, variables))) console.log("alimtalk 실패", a.type, JSON.stringify(variables));
   }
 }
