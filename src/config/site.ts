@@ -129,14 +129,15 @@ export const PRICES = {
 
 /** 지점 카드 (예약용 지점 설정의 id와 맞춤) */
 /** more: 카드의 '사진 더 보기'를 누르면 펼쳐지는 사진들 (public/branches/지점id/). 파일명이 -w로 끝나면 가로 사진이라 한 줄 전체로 보여줌 */
-export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[] }[] = [
+export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: string[]; tags: string[]; points: string[]; badge?: string }[] = [
   {
     id: "main",
     title: "온기 PT&근막이완 (잠원동 1호점)",
     photo: `${IMG}/2026/9/6/2026-9-6-1788738958963.webp`,
     more: ["/branches/main/1-w.webp", "/branches/main/2-w.webp", "/branches/main/3.webp", "/branches/main/4.webp"],
     tags: ["잠원동 1호점", "본점", "1인 공간", "성별 무관"],
-    points: ["PT, 근막이완, 근막이완+PT 결합 프로그램", "대표 및 여성 트레이너가 프로그램 진행"],
+    // 2026-11-10 대표: '대표 진행' 문구 삭제 (신규는 선릉점으로 안내)
+    points: ["PT, 근막이완, 근막이완+PT 결합 프로그램"],
   },
   {
     id: "priv",
@@ -159,6 +160,7 @@ export const BRANCH_CARDS: { id: string; title: string; photo: string; more?: st
     title: "온기 근막이완 선릉점",
     photo: `${IMG}/2026/11/4/2026-11-4-1793753416335.webp`,
     more: ["/branches/sl/1.webp", "/branches/sl/2.webp", "/branches/sl/3.webp", "/branches/sl/4.webp", "/branches/sl/5.webp"],
+    badge: "26.11.02 OPEN",
     tags: ["선릉", "3룸", "동반 진행 가능"],
     points: ["가장 넓은 공간, 3룸 완비로 최대 3인 동시 진행", "남녀 테크니션 모두 상주"],
   },
@@ -168,7 +170,6 @@ export const GUIDE = [
   { q: "여자 선생님을 원해요", a: "신반포스퀘어점 (여성만 신청 가능)" },
   { q: "1인 전용 공간을 원해요", a: "온기 근막이완 (잠원동 2호점)" },
   { q: "여러 명이 함께 받고 싶어요", a: "선릉점 (3룸)" },
-  { q: "대표에게 받고 싶어요", a: "온기 PT&근막이완 (잠원동 1호점, 현재 신규 체험 불가)" },
 ];
 
 export const TEAM: { name: string; role: string; photo: string; link?: string }[] = [

@@ -617,3 +617,12 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .mp-terms.land{animation:tland .7s cubic-bezier(.2,1.4,.4,1)}
 @keyframes tland{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06);opacity:1;box-shadow:0 0 0 10px rgba(158,10,10,.18)}100%{transform:none}}
 .mp-terms-top{margin:0 0 12px}
+/* 지점 카드 오픈 스티커 (선릉점 26.11.02 OPEN) */
+.bphoto{position:relative;line-height:0}
+.bbadge{position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:5px;line-height:1;padding:7px 11px 7px 9px;border-radius:999px;font-size:12.5px;font-weight:800;letter-spacing:.04em;color:#fff;
+  background:linear-gradient(110deg,#9e0a0a 0%,#c8322a 40%,#f3c9a0 50%,#c8322a 60%,#9e0a0a 100%);background-size:250% 100%;
+  box-shadow:0 3px 10px rgba(158,10,10,.35),inset 0 0 0 1px rgba(255,255,255,.35);transform:rotate(-4deg);animation:bshine 2.8s ease-in-out infinite}
+.bbadge i{font-style:normal;color:#ffe7a3;animation:btwinkle 1.4s ease-in-out infinite}
+@keyframes bshine{0%,55%{background-position:100% 0}85%,100%{background-position:-50% 0}}
+@keyframes btwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.7)}}
+@media (prefers-reduced-motion:reduce){.bbadge,.bbadge i{animation:none}}

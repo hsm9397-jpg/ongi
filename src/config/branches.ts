@@ -92,7 +92,7 @@ export const BRANCHES: Branch[] = [
   {
     id: "main",
     waitlist: true,
-    desc: "잠원동 1호점으로 대표가 진행하며 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
+    desc: "잠원동 1호점으로 PT 진행 및 1인용 근막이완 공간이 구비되어 있습니다.",
     trialClosed: true,
     notice: "현재 신규 예약은 불가합니다.",
     address: "서울시 서초구 신반포로33길 62 한신로얄상가 2층",

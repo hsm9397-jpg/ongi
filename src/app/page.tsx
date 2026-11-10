@@ -171,7 +171,10 @@ export default function Home() {
               const b = branchById[c.id];
               return (
                 <article key={c.id} className="bcard">
-                  <img src={c.photo} alt={c.title} loading="lazy" />
+                  <div className="bphoto">
+                    <img src={c.photo} alt={c.title} loading="lazy" />
+                    {c.badge && <span className="bbadge"><i aria-hidden>✦</i>{c.badge}</span>}
+                  </div>
                   {c.more && c.more.length > 0 && (
                     <details className="bmore">
                       <summary>사진 더 보기 <small>{c.more.length}장</small></summary>
