@@ -170,8 +170,8 @@ export const BRANCHES: Branch[] = [
     beds: 3,
     open: true,
     trainers: [
-      // 송효재 (2026-11-10 대표): 월화수금 10~20시, 목 10~12시, 토 10~15시 → 마지막 타임 시작 19·11·14시, 일 휴무
-      { id: "shj", name: "송효재", calendarEnv: "CAL_SONGHYOJAE", week: { 1: [10, 19], 2: [10, 19], 3: [10, 19], 4: [10, 11], 5: [10, 19], 6: [10, 14] } },
+      // 송효재 (2026-11-10 대표, 시작 기준): 월화수금 10~20시, 목 10~12시, 토 10~15시 타임, 일 휴무
+      { id: "shj", name: "송효재", calendarEnv: "CAL_SONGHYOJAE", week: { 1: [10, 20], 2: [10, 20], 3: [10, 20], 4: [10, 12], 5: [10, 20], 6: [10, 15] } },
       { id: "ljm", name: "이정민", calendarEnv: "CAL_LEEJUNGMIN", selfBook: true },
       { id: "hjs", name: "허재성", calendarEnv: "CAL_HEOJAESEONG" },
     ],
