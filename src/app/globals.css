@@ -695,3 +695,4 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .bd-me select{min-width:110px}
 .bd-top .primary{width:auto;padding:12px 18px;font-size:15px}
 .bd-reply button{white-space:nowrap;flex:0 0 auto;width:auto}
+.mb-more{display:block;margin:8px auto 0;background:none;border:0;color:var(--muted);font-size:14px;text-decoration:underline;cursor:pointer;padding:6px}

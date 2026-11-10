@@ -1,5 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+
+/** 처음에 보여줄 예약 수 (스케줄 고정 회원은 일정이 많아서) */
+const SHOW = 3;
 import { KAKAO_CHAT_URL, MonthCalendar, api, type Slot } from "./BookingFlow";
 
 type Act = { token: string; who: string; kind: string; branchId: string; trainerId: string; changeable: boolean; cancelable: boolean; changedToday: boolean };
@@ -17,6 +20,7 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [askCancel, setAskCancel] = useState<Item | null>(null);
   const [contact, setContact] = useState("");
   const [changing, setChanging] = useState<Item | null>(null);
@@ -95,8 +99,9 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
       {err && <p className="err">{err}</p>}
       {!items && !err && <p className="mp-note">불러오는 중…</p>}
       {items && (items.length ? (
+        <>
         <ul>
-          {items.map((i, k) => (
+          {(showAll ? items : items.slice(0, SHOW)).map((i, k) => (
             <li key={k}>
               <div className="mb-row">
                 <b>{when(i)}</b>
@@ -135,6 +140,10 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
             </li>
           ))}
         </ul>
+        {items.length > SHOW && (
+          <button className="mb-more" onClick={() => setShowAll(!showAll)}>{showAll ? "접기" : `예약 ${items.length - SHOW}건 더 보기`}</button>
+        )}
+        </>
       ) : <p className="mp-note">다가오는 예약이 없어요.</p>)}
 
       {askCancel && (
