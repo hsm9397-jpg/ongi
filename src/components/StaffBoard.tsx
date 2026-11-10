@@ -25,6 +25,7 @@ export default function StaffBoard() {
   const [authed, setAuthed] = useState(false);
   const [date, setDate] = useState(kstToday());
   const [filter, setFilter] = useState("all");
+  const [tab, setTab] = useState<"main" | "insight">("main");
   const [data, setData] = useState<B[] | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -81,7 +82,18 @@ export default function StaffBoard() {
 
   return (
     <>
-      <div className="brand"><small>Conditioning Studio</small><h1>지점 스케줄</h1></div>
+      <div className="brand"><small>Conditioning Studio</small><h1 style={{ lineHeight: 1.25, marginTop: 4 }}>{tab === "insight" ? "방문자 인사이트" : "지점 스케줄"}</h1></div>
+      <nav className="staff-tabs" aria-label="직원 화면 메뉴">
+        <button aria-pressed={tab === "main"} onClick={() => setTab("main")}>예약 현황 · 알림톡</button>
+        <button aria-pressed={tab === "insight"} onClick={() => setTab("insight")}>인사이트</button>
+      </nav>
+      {tab === "insight" ? (
+        <>
+          <Visits v={visits} />
+          <Insight staffKey={key} />
+        </>
+      ) : (
+      <>
       <div className="toolbar">
         <div className="left">
           <button className="ghost" onClick={() => setDate(shift(date, -1))} aria-label="전날">‹</button>
@@ -107,8 +119,6 @@ export default function StaffBoard() {
         <div className="stat"><small>회원·기타 일정</small><b>{timed.length - trial}</b></div>
         <div className="stat"><small>베드 가동률</small><b>{cap ? Math.round((timed.length / cap) * 100) : 0}%</b></div>
       </div>
-      <Visits v={visits} />
-      <Insight staffKey={key} />
       <Remind staffKey={key} trial={false} />
       <Remind staffKey={key} trial />
       <AfterTrial staffKey={key} />
@@ -155,6 +165,8 @@ export default function StaffBoard() {
           </div>
         );
       })}
+      </>
+      )}
     </>
   );
 }

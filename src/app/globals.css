@@ -626,3 +626,7 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 @keyframes bshine{0%,55%{background-position:100% 0}85%,100%{background-position:-50% 0}}
 @keyframes btwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.7)}}
 @media (prefers-reduced-motion:reduce){.bbadge,.bbadge i{animation:none}}
+/* 직원 화면 상단 메뉴 */
+.staff-tabs{display:flex;gap:6px;margin:4px 0 14px;border-bottom:1px solid var(--line)}
+.staff-tabs button{background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 14px;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;min-height:44px}
+.staff-tabs button[aria-pressed=true]{color:var(--brown);border-bottom-color:var(--terra)}
