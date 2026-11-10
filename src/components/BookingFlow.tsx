@@ -806,9 +806,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
                 {trainerName ? ` · 담당 ${trainerName} 선생님` : ""}
               </span>
             </div>
-            <button className="ghost" onClick={() => switchKind("member")}>
-              다른 회원
-            </button>
+            {memberOnly ? (
+              <button className="ghost" onClick={() => { try { localStorage.removeItem(MEMBER_KEY); } catch {} window.location.reload(); }}>
+                로그아웃
+              </button>
+            ) : (
+              <button className="ghost" onClick={() => switchKind("member")}>
+                다른 회원
+              </button>
+            )}
           </div>
           {activeInfo && <BranchInfo key={activeInfo.id} b={activeInfo} />}
           {(!trainer || membership.trainers.length > 1) && (
