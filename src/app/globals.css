@@ -559,3 +559,13 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .contact a.c-insta{background:linear-gradient(45deg,#f58529,#dd2a7b 50%,#8134af);border-color:transparent;color:#fff;font-weight:600}
 /* 슬로건 폭을 위 이벤트 배너(420px)에 맞춤 (2026-11-09) */
 .hero .slogan{font-size:clamp(20px,5.4vw,28px);max-width:420px;margin-left:auto;margin-right:auto}
+
+/* 회원 페이지: 내 예약 */
+.mp-upcoming{background:var(--brown-soft,#f3ebe0);border:1px solid #d9c7b0;border-radius:14px;padding:14px 16px;margin:4px 0 12px;text-align:left}
+.mp-upcoming h3{margin:0 0 8px;font-size:16px}
+.mp-upcoming ul{list-style:none;margin:0;padding:0}
+.mp-upcoming li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:7px 0;border-top:1px dashed #d9c7b0}
+.mp-upcoming li:first-child{border-top:0}
+.mp-upcoming li b{font-size:16px}
+.mp-upcoming li span{font-size:14px;opacity:.75}
+.mp-upcoming .mp-note{margin:0;font-size:14px;opacity:.75}

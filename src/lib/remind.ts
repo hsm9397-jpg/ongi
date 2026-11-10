@@ -11,10 +11,10 @@ import { pipeline, visitsReady } from "./visits";
 
 export type RemindItem = { name: string; when: string; branch: string; trainer: string; status: "send" | "sent" | "skip" | "fail"; reason?: string };
 
-const SKIP_TITLE = /체험|상담|오픈|휴무|휴가|점심|회의|교육|블락|block/i;
+export const SKIP_TITLE = /체험|상담|오픈|휴무|휴가|점심|회의|교육|블락|block/i;
 
 /** 제목 "김온기 3/10", "김온기1234 3/10" → 이름, 뒷번호 */
-function parseTitle(t: string): { name: string; last4?: string } | null {
+export function parseTitle(t: string): { name: string; last4?: string } | null {
   // 2:1 회원은 "강혜정/고희영"처럼 이름을 /로 이어 씀 → 통째로 이름으로 본다
   const m = t.trim().match(/^([가-힣]{2,4}(?:\s*\/\s*[가-힣]{2,4})*)(?:\s*(\d{4})(?![\d/]))?/);
   if (!m) return null;

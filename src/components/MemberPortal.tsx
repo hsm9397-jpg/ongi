@@ -1,6 +1,7 @@
 "use client";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import MemberInfo from "./MemberInfo";
+import MyBookings from "./MyBookings";
 
 type Group = { name: string; photo: string };
 type Found = { name: string; url: string; token: string };
@@ -24,7 +25,7 @@ function save(v: Saved | null) {
 
 export default function MemberPortal({ groups, kakao, booking, notices }: { groups: Group[]; kakao: string; booking?: ReactNode; notices?: ReactNode }) {
   const [showBook, setShowBook] = useState(false);
-  const [me, setMe] = useState<{ token: string; name: string; url?: string; remaining?: number | null } | null>(null);
+  const [me, setMe] = useState<{ token: string; name: string; url?: string; remaining?: number | null; last4?: string } | null>(null);
   const [expired, setExpired] = useState(false);
   const [group, setGroup] = useState<string | null>(null);
   const [found, setFound] = useState<Found[] | null>(null);
@@ -55,7 +56,7 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
   function go(f: Found, code = last4) {
     // 뒷번호도 이 폰에만 기억해 두고, 예약하기를 누르면 다시 묻지 않는다
     save({ token: f.token, name: f.name, last4: code });
-    setMe({ token: f.token, name: f.name, url: f.url });
+    setMe({ token: f.token, name: f.name, url: f.url, last4: code });
     window.location.href = f.url;
   }
 
@@ -100,6 +101,7 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
         ) : (
           <>
             <p className="mp-big">{me.name}님, 안녕하세요</p>
+            <MyBookings token={me.token} last4={me.last4} />
             <a className="primary mp-open" href={me.url ?? "#"} aria-disabled={!me.url}>
               {me.url ? "내 페이지 열기" : "불러오는 중…"}
             </a>

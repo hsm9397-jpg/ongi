@@ -133,3 +133,39 @@ export async function loadOwned(token: unknown, name: string, last4: string, act
     return { error: "예약 당일에는 직접 변경·취소할 수 없어요(전날 자정까지 가능). 카카오톡으로 문의해 주세요.", status: 400 } as const;
   return { ...ref, ev } as const;
 }
+
+export type Upcoming = { date: string; hour: number; minute: number; branchName: string; trainerName: string; web: boolean };
+/** 회원 페이지 '내 예약': 홈페이지 예약 + 선생님이 캘린더에 직접 잡은 일정(제목 이름이 같은 것) */
+export async function myUpcoming(name: string, last4: string, sameNameCount: number, now = new Date()): Promise<Upcoming[]> {
+  const { parseTitle, SKIP_TITLE } = await import("./remind");
+  const { normName } = await import("./notion");
+  const me = normName(name);
+  const to = new Date(now.getTime() + 60 * 86_400_000);
+  const out: Upcoming[] = [];
+  const seen = new Set<string>();
+  await Promise.all(
+    BRANCHES.filter((b) => b.open || b.hidden).flatMap((b) =>
+      b.trainers.map(async (t) => {
+        const cal = calendarIdOf(t);
+        if (!cal) return;
+        const events = await listEvents(cal, now, to).catch(() => [] as CalEvent[]);
+        for (const e of events) {
+          if (e.allDay || e.open) continue;
+          let mine = false;
+          if (e.fromWeb) mine = ownedBy(e, name, last4);
+          else if (!SKIP_TITLE.test(e.summary)) {
+            const p = parseTitle(e.summary);
+            // 2:1 "강혜정/고희영"은 한 명씩 비교
+            const names = p ? p.name.split("/") : [];
+            mine = names.includes(me) && (p?.last4 ? p.last4 === last4 : sameNameCount <= 1);
+          }
+          if (!mine || seen.has(e.id)) continue;
+          seen.add(e.id);
+          const { date, hour, minute } = kstHourMinute(e.start);
+          out.push({ date, hour, minute, branchName: b.short, trainerName: t.name, web: e.fromWeb });
+        }
+      })
+    )
+  );
+  return out.sort((a, b) => (a.date + String(a.hour).padStart(2, "0") + String(a.minute).padStart(2, "0")).localeCompare(b.date + String(b.hour).padStart(2, "0") + String(b.minute).padStart(2, "0")));
+}

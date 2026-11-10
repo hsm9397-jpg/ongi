@@ -526,6 +526,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
         ),
       });
       setDone(r.booking);
+      try { window.dispatchEvent(new Event("ongi-booked")); } catch {}
     } catch (e) {
       setErr((e as Error).message);
       setHour(null);
