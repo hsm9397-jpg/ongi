@@ -519,11 +519,10 @@ function VocBoard({ staffKey }: { staffKey: string }) {
               <li key={x.id} className={x.type === "아쉬웠어요" ? "bad" : "good"}>
                 <div className="voc-meta">
                   <span className={`voc-type ${x.type === "아쉬웠어요" ? "bad" : "good"}`}>{x.type || "미분류"}</span>
-                  <span>{VOC_BRANCH[x.branch] ?? (x.branch || "지점 미선택")}</span>
                   <span>{vocDate(x.created)}</span>
                   {x.priority && <span className={`voc-pri p-${x.priority}`}>{x.priority}</span>}
                 </div>
-                {x.title && <b className="voc-title">{x.title}</b>}
+                <b className="voc-title">{VOC_BRANCH[x.branch] ?? (x.branch || "지점 미선택")}</b>
                 <p>{x.content || "(내용 없음)"}</p>
                 <a href={x.url} target="_blank" rel="noopener noreferrer">노션에서 열기 ›</a>
               </li>
