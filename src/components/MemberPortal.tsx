@@ -2,6 +2,7 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import MemberInfo from "./MemberInfo";
 import MyBookings from "./MyBookings";
+import { TermsDialog, TermsPopup } from "./Terms";
 
 type Group = { name: string; photo: string };
 type Found = { name: string; url: string; token: string };
@@ -25,6 +26,8 @@ function save(v: Saved | null) {
 
 export default function MemberPortal({ groups, kakao, booking, notices }: { groups: Group[]; kakao: string; booking?: ReactNode; notices?: ReactNode }) {
   const [showBook, setShowBook] = useState(false);
+  const [terms, setTerms] = useState(false);
+  const [land, setLand] = useState(false);
   const [me, setMe] = useState<{ token: string; name: string; url?: string; remaining?: number | null; last4?: string } | null>(null);
   const [expired, setExpired] = useState(false);
   const [group, setGroup] = useState<string | null>(null);
@@ -88,9 +91,17 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
     setLast4("");
   }
 
+  const termsUi = (
+    <>
+      <TermsPopup onClosed={() => setLand(true)} />
+      {terms && <TermsDialog onClose={() => setTerms(false)} />}
+    </>
+  );
+
   if (me) {
     return (
       <>
+      {termsUi}
       <section className="mp-card mp-me">
         {expired ? (
           <>
@@ -102,6 +113,7 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
           <>
             <p className="mp-big">{me.name}님, 안녕하세요</p>
             <MyBookings token={me.token} last4={me.last4} />
+            <button className={`mp-terms${land ? " land" : ""}`} onClick={() => setTerms(true)} onAnimationEnd={() => setLand(false)}>📋 이용 약관 (필독)</button>
             <a className="primary mp-open" href={me.url ?? "#"} aria-disabled={!me.url}>
               {me.url ? "내 페이지 열기" : "불러오는 중…"}
             </a>
@@ -133,6 +145,10 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
 
   return (
     <section className="mp-card">
+      {termsUi}
+      {!group && (
+        <button className={`mp-terms mp-terms-top${land ? " land" : ""}`} onClick={() => setTerms(true)} onAnimationEnd={() => setLand(false)}>📋 이용 약관 (필독)</button>
+      )}
       {!group && (
         <>
           <h2>담당 선생님을 눌러 주세요</h2>
