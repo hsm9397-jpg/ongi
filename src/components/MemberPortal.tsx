@@ -92,9 +92,10 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
     setLast4("");
   }
 
+  // 약관 팝업은 본인 확인 뒤 회원 화면에서 처음 한 번만 (만료 회원 제외)
   const termsUi = (
     <>
-      <TermsPopup onClosed={() => setLand(true)} />
+      {!expired && <TermsPopup onClosed={() => setLand(true)} />}
       {terms && <TermsDialog onClose={() => setTerms(false)} />}
     </>
   );
@@ -146,10 +147,6 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
 
   return (
     <section className="mp-card">
-      {termsUi}
-      {!group && (
-        <button className={`mp-terms mp-terms-top${land ? " land" : ""}`} onClick={() => setTerms(true)} onAnimationEnd={() => setLand(false)}>📋 이용 약관 (필독)</button>
-      )}
       {!group && (
         <>
           <h2>담당 선생님을 눌러 주세요</h2>
