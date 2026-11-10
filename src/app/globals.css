@@ -581,3 +581,4 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .mp-upcoming .mychange{margin-top:10px}
 .mp-upcoming .mychange .primary{width:100%;margin-top:10px}
 .danger-fill{background:#9e0a0a !important;border-color:#9e0a0a !important;color:#fff !important}
+.step h3 .h3-note{display:inline-block;margin-left:8px;font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}

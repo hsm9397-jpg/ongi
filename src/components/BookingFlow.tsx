@@ -693,7 +693,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
 
       {kind === "trial" && (
         <div className="step">
-          <h3>1 · 지점</h3>
+          <h3>1 · 지점 <small className="h3-note">온기의 모든 지점은 직영으로 운영됩니다.</small></h3>
           <div className="chips trial-chips">
             {branches.filter((b) => !b.hidden).map((b) =>
               b.bookable && !b.trialClosed && b.naverTrial ? (
