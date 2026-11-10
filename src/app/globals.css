@@ -630,3 +630,9 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .staff-tabs{display:flex;gap:6px;margin:4px 0 14px;border-bottom:1px solid var(--line)}
 .staff-tabs button{background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 14px;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;min-height:44px}
 .staff-tabs button[aria-pressed=true]{color:var(--brown);border-bottom-color:var(--terra)}
+/* 회원 화면 버튼 4색: 약관 버건디 · 기록 브라운 · 예약 테라코타 · 잔여 회차 골드 (같은 톤 계열) */
+.mp-me .mp-open{background:#5a3a24;color:#fff;border:0}
+.mp-me .mp-c-book{background:#b5573a;color:#fff;border:0;box-shadow:0 4px 14px rgba(181,87,58,.22)}
+.mp-me .mp-c-book[aria-pressed=true]{background:#9a4730}
+.mp-me .mp-c-info{background:#a8865a;color:#fff;border:0;box-shadow:0 4px 14px rgba(168,134,90,.22)}
+.mp-me .mp-c-info[aria-expanded=true]{background:#8f7149}

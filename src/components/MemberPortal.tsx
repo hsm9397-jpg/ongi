@@ -121,7 +121,7 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
             </a>
             {booking ? (
               <button
-                className="ghost mp-book"
+                className="ghost mp-book mp-c-book"
                 aria-pressed={showBook}
                 onClick={() => {
                   setShowBook((v) => !v);
@@ -131,7 +131,7 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
                 {showBook ? "예약 창 닫기" : "예약하기"}
               </button>
             ) : (
-              <a className="ghost mp-book" href="/#member">예약하기</a>
+              <a className="ghost mp-book mp-c-book" href="/#member">예약하기</a>
             )}
             {showBook && booking && <div id="mp-booking" className="mp-booking">{booking}</div>}
             <MemberInfo token={me.token} />
