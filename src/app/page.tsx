@@ -118,7 +118,6 @@ export default function Home() {
         <section id="process" className="sec journey">
           <h2>{JOURNEY.title}</h2>
           <img className="j-steps4" src="/journey/steps4.webp" width={1076} height={1461} alt="온기 근육 케어 4단계. 1. 몸 상태를 평가합니다. 2. 부드럽게 이완합니다. 3. 약화된 근육을 강화합니다. 4. 현재 상태 피드백 및 사후 관리를 진행합니다." loading="lazy" />
-          <img className="j-photo" src={JOURNEY.photo} alt="온기 근막이완 컨디셔닝 진행 모습" loading="lazy" />
           <p className="j-lead">{JOURNEY.lead}</p>
           <div className="j-why">
             {JOURNEY.why.lines.map((l) => <p key={l}>{l}</p>)}
