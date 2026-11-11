@@ -109,6 +109,12 @@ export default function Home() {
           </div>
         </section>
 
+        {/* 근막이완 왜 하나요 (2026-11-11 대표) */}
+        <section id="why" className="sec">
+          <h2>근막이완, 왜 하는 건가요?</h2>
+          <img className="j-steps4" src="/journey/why4.webp" width={1086} height={1448} alt="근막이완과 움직임을 위한 4단계. 1. 근막은 몸을 잇는 연결망: 근육과 여러 조직을 감싸고 연결하며 힘을 전달하는 역할을 합니다. 2. 오래 같은 자세로 일하면 움직임이 줄고 뻣뻣함과 불편함이 쌓일 수 있어요. 3. 이완으로 움직임을 준비해요: 몸 상태에 맞춘 도구 자극으로 편안한 움직임을 돕습니다. 4. 근막이완 후 스트레칭과 운동을 해요: 필요한 움직임과 근력을 기르고 일상에서도 자주 움직여요." loading="lazy" />
+        </section>
+
         {/* 첫 방문부터 이후까지 */}
         <section id="process" className="sec journey">
           <h2>{JOURNEY.title}</h2>

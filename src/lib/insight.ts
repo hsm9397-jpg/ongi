@@ -2,7 +2,7 @@
 import { pipeline } from "./visits";
 
 export const SECTION_LABEL: Record<string, string> = {
-  top: "첫 화면", about: "소개", method: "근막이완", process: "진행 과정", reviews: "후기", branches: "지점",
+  top: "첫 화면", about: "소개", method: "근막이완", why: "왜 하나요", process: "진행 과정", reviews: "후기", branches: "지점",
   team: "팀", info: "이용·금액", price: "서비스 금액", book: "예약", faq: "FAQ",
 };
 const TTL = 100 * 86_400;
