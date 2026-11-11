@@ -217,6 +217,7 @@ export default function Home() {
         <section id="info" className="sec">
           <h2>이용 안내 · 금액</h2>
           <div className="pricing">
+            <div className="pricing-pair">
             {PRICING.map((p) => (
               <div key={p.title} className="price">
                 <h3>{p.title}</h3>
@@ -224,6 +225,7 @@ export default function Home() {
                 {p.note && <p className="small">{p.note}</p>}
               </div>
             ))}
+            </div>
             {/* 서비스 금액: 버튼을 누르면 금액 페이지(/price)로 (2026-11-11 이용 안내와 합침) */}
             <div className="price" id="price">
               <h3>근막이완 · PT 회원권</h3>
