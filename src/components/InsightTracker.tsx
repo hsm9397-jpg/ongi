@@ -58,6 +58,24 @@ export default function InsightTracker() {
     };
     document.addEventListener("click", onClick, true);
 
+    // 영상: 재생 시작·끝까지 시청을 영상마다 한 번씩 센다 (클릭 목록에 '영상 재생 · 이름'으로 나옴)
+    const VIDEO_NAME: Record<string, string> = { "recheck.mp4": "전체 과정(재확인)", "ongi-method.mp4": "근막이완 소개" };
+    const videoName = (v: HTMLVideoElement) => {
+      const f = (v.currentSrc || v.src || "").split("?")[0].split("/").pop() ?? "";
+      return v.dataset.insight || VIDEO_NAME[f] || f || "영상";
+    };
+    const played = new Set<string>();
+    const onMedia = (e: Event) => {
+      const v = e.target as HTMLVideoElement;
+      if (!(v instanceof HTMLVideoElement)) return;
+      const key = `${e.type}:${videoName(v)}`;
+      if (played.has(key)) return;
+      played.add(key);
+      send([{ t: "click", path: p, label: `${e.type === "ended" ? "영상 끝까지 시청" : "영상 재생"} · ${videoName(v)}` }]);
+    };
+    document.addEventListener("play", onMedia, true);
+    document.addEventListener("ended", onMedia, true);
+
     // 머문 시간: 화면이 보이는 동안만 세고, 구간은 화면 가운데에 걸쳐 있는 것
     let total = 0;
     const secs: Record<string, number> = {};
@@ -101,6 +119,8 @@ export default function InsightTracker() {
       flush();
       clearInterval(iv);
       document.removeEventListener("click", onClick, true);
+      document.removeEventListener("play", onMedia, true);
+      document.removeEventListener("ended", onMedia, true);
       document.removeEventListener("visibilitychange", onHide);
       removeEventListener("pagehide", flush);
     };
