@@ -137,7 +137,10 @@ export default function Home() {
                     </div>
                   )}
                   {"igNote" in s && s.igNote && (
-                    <p className="j-ig">해당 과정은 <a href={LINKS.instagram} target="_blank" rel="noopener noreferrer">인스타그램</a>에서 영상으로 확인할 수 있습니다.</p>
+                    <div className="j-video">
+                      <video src="/journey/recheck.mp4" poster="/journey/recheck-poster.webp" controls playsInline preload="none" width={720} height={1280} />
+                      <p className="j-ig">▶ 평가부터 재확인까지 전체 과정 영상 (1분 12초)</p>
+                    </div>
                   )}
                 </div>
               </li>
