@@ -724,3 +724,4 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .ev-banner .ev-date{animation:evGlow 1.4s ease-in-out .6s 2}
 @keyframes evGlow{50%{box-shadow:0 0 0 4px rgba(233,207,159,.45),0 0 18px rgba(233,207,159,.8)}}
 @media (prefers-reduced-motion:reduce){.ev-banner::after,.ev-banner .ev-date{animation:none;display:none}.ev-banner .ev-date{display:inline-block}}
+.j-steps4{display:block;width:100%;max-width:560px;height:auto;margin:0 auto 16px;border-radius:14px;border:1px solid var(--line)}
