@@ -713,3 +713,4 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 /* 첫 화면 버튼 톤다운 (2026-11-11) */
 .hero-cta .btn-primary{background:#8c6849;color:#fff;box-shadow:0 4px 12px rgba(90,58,36,.12)}
 .hero-cta .btn-member{background:#e9cf9f;color:var(--brown);box-shadow:0 4px 12px rgba(168,134,90,.15)}
+.hero-cta .btn-primary,.hero-cta .btn-member{background:#e9cf9f;color:var(--brown);box-shadow:0 4px 12px rgba(168,134,90,.15)}
