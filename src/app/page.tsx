@@ -11,14 +11,10 @@ import EventNotice from "@/components/EventNotice";
 
 const NAV = [
   ["about", "소개"],
-  ["method", "근막이완"],
   ["process", "진행 과정"],
   ["reviews", "후기"],
   ["branches", "지점"],
-  ["team", "팀"],
-  ["info", "이용 안내"],
-  ["price", "서비스 금액"],
-  ["book", "예약"],
+  ["info", "이용·금액"],
   ["faq", "FAQ"],
 ];
 
@@ -63,7 +59,6 @@ export default function Home() {
           {NAV.map(([id, label]) => (
             <a key={id} href={`#${id}`}>{label}</a>
           ))}
-          <a href="/staff" className="nav-staff" rel="nofollow">Staff</a>
         </div>
       </nav>
 
@@ -104,11 +99,6 @@ export default function Home() {
             <MethodVideo src="/video/ongi-method.mp4" poster="/video/ongi-method.jpg" />
             <div className="method-body">
               <p>{METHOD.intro}</p>
-              <ol className="steps">
-                {METHOD.steps.map((s, i) => (
-                  <li key={s.t}><b><em>{String(i + 1).padStart(2, "0")}</em> {s.t}</b><span>{s.d}</span></li>
-                ))}
-              </ol>
               <p className="note">{METHOD.note}</p>
             </div>
           </div>
@@ -146,18 +136,10 @@ export default function Home() {
               </li>
             ))}
           </ol>
-          <h3 className="j-sub">기대할 수 있는 변화</h3>
-          <div className="j-expect">
-            {JOURNEY.expect.map((e) => (
-              <div key={e.t}><b>{e.t}</b><span>{e.d}</span></div>
-            ))}
-          </div>
-          <p className="j-note">{JOURNEY.expectNote}</p>
           <h3 className="j-sub">이런 분께 추천해요</h3>
           <ul className="j-rec">
             {JOURNEY.recommend.map((r) => <li key={r}>{r}</li>)}
           </ul>
-          <a className="btn-primary j-cta" href="#trial">근막이완 체험 예약하기</a>
         </section>
 
         {/* 고객 후기 */}
@@ -228,7 +210,7 @@ export default function Home() {
 
         {/* 이용 안내 */}
         <section id="info" className="sec">
-          <h2>이용 안내</h2>
+          <h2>이용 안내 · 금액</h2>
           <div className="pricing">
             {PRICING.map((p) => (
               <div key={p.title} className="price">
@@ -238,14 +220,8 @@ export default function Home() {
                 <a className="btn-ghost btn-fill" href={p.cta.href}>{p.cta.label}</a>
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* 서비스 금액: 버튼을 누르면 금액 페이지(/price)로 */}
-        <section id="price" className="sec">
-          <h2>서비스 금액</h2>
-          <div className="pricing">
-            <div className="price">
+            {/* 서비스 금액: 버튼을 누르면 금액 페이지(/price)로 (2026-11-11 이용 안내와 합침) */}
+            <div className="price" id="price">
               <h3>근막이완 · PT 회원권</h3>
               <dl>
                 <div><dt>패키지권</dt><dd>횟수 방식</dd></div>
@@ -292,6 +268,7 @@ export default function Home() {
         <span>{FOOTER.ceo}</span>
         {FOOTER.bizLines.map((l) => <span key={l}>{l}</span>)}
         <a href="/privacy">개인정보처리방침</a>
+        <a href="/staff" className="foot-staff" rel="nofollow">Staff</a>
       </footer>
 
       <div className="dock">

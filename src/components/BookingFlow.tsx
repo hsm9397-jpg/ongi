@@ -391,6 +391,8 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   useEffect(() => {
     const apply = () => {
       const h = decodeURIComponent(window.location.hash.replace("#", ""));
+      // 홈에서는 기존 회원 예약·내 예약을 회원 전용 페이지로 보낸다 (2026-11-11 정리)
+      if (!memberOnly && (h === "my" || h === "member")) { window.location.href = "/member"; return; }
       if (h === "my") setManage(true);
       else if (h === "trial" || h === "member" || h === "pt") switchKind(h);
       else return;
@@ -653,9 +655,6 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             <b>PT<br />상담·평가</b>
           </button>
         )}
-        <button role="tab" aria-pressed={!manage && kind === "member"} aria-selected={!manage && kind === "member"} onClick={() => switchKind("member")}>
-          <b>기존 회원<br />예약</b>
-        </button>
       </div>
       )}
       {memberOnly ? (
@@ -663,15 +662,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
           {manage ? "‹ 예약하기로 돌아가기" : <>내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span></>}
         </button>
       ) : (
-      <button className="my-link" aria-pressed={manage} onClick={() => setManage(true)}>
-        내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
-      </button>
+      <a className="my-link" href="/member">
+        기존 회원 예약 · 내 예약은 온기 회원 전용 페이지에서 <span aria-hidden>›</span>
+      </a>
       )}
 
       {!manage && kind === "trial" && (
-        <div className="contra">
-          <h3>근막이완 금기 대상자 <span className="must">필수 확인</span></h3>
-          <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요.</p>
+        <details className="contra">
+          <summary><h3>근막이완 금기 대상자 <span className="must">필수 확인</span></h3>
+          <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요. <u>눌러서 보기</u></p></summary>
           <h4>절대 금기</h4>
           <ul>
             {CONTRA_ABS.map(([k, v]) => (
@@ -683,7 +682,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             {CONTRA_REL.map((v) => <li key={v}>{v}</li>)}
           </ul>
           <p className="contra-note">※ 정도에 따라 금기되거나 정상적·제한적 적용이 가능해요.</p>
-        </div>
+        </details>
       )}
 
       {manage ? (
