@@ -222,7 +222,6 @@ export default function Home() {
                 <h3>{p.title}</h3>
                 <dl>{p.rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
                 {p.note && <p className="small">{p.note}</p>}
-                <a className="btn-ghost btn-fill" href={p.cta.href}>{p.cta.label}</a>
               </div>
             ))}
             {/* 서비스 금액: 버튼을 누르면 금액 페이지(/price)로 (2026-11-11 이용 안내와 합침) */}
