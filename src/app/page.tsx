@@ -136,6 +136,9 @@ export default function Home() {
                       {s.img.map((src) => <img key={src} src={src} alt="" loading="lazy" />)}
                     </div>
                   )}
+                  {"igNote" in s && s.igNote && (
+                    <p className="j-ig">해당 과정은 <a href={LINKS.instagram} target="_blank" rel="noopener noreferrer">인스타그램</a>에서 영상으로 확인할 수 있습니다.</p>
+                  )}
                 </div>
               </li>
             ))}
