@@ -289,7 +289,7 @@ export default function Home() {
       </footer>
 
       <div className="dock">
-        <a className="dock-book" href="#trial">예약하기</a>
+        <a className="dock-book" href="#trial">신규(체험) 예약하기</a>
         <a className="dock-kakao" href={LINKS.kakao} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
       </div>
     </>
