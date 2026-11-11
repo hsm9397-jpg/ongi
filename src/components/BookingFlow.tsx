@@ -668,9 +668,9 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       )}
 
       {!manage && kind === "trial" && (
-        <details className="contra">
-          <summary><h3>근막이완 금기 대상자 <span className="must">필수 확인</span></h3>
-          <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요. <u>눌러서 보기</u></p></summary>
+        <div className="contra">
+          <h3>근막이완 금기 대상자 <span className="must">필수 확인</span></h3>
+          <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요.</p>
           <h4>절대 금기</h4>
           <ul>
             {CONTRA_ABS.map(([k, v]) => (
@@ -682,7 +682,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             {CONTRA_REL.map((v) => <li key={v}>{v}</li>)}
           </ul>
           <p className="contra-note">※ 정도에 따라 금기되거나 정상적·제한적 적용이 가능해요.</p>
-        </details>
+        </div>
       )}
 
       {manage ? (

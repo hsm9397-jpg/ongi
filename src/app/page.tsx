@@ -99,6 +99,11 @@ export default function Home() {
             <MethodVideo src="/video/ongi-method.mp4" poster="/video/ongi-method.jpg" />
             <div className="method-body">
               <p>{METHOD.intro}</p>
+              <ol className="steps">
+                {METHOD.steps.map((s, i) => (
+                  <li key={s.t}><b><em>{String(i + 1).padStart(2, "0")}</em> {s.t}</b><span>{s.d}</span></li>
+                ))}
+              </ol>
               <p className="note">{METHOD.note}</p>
             </div>
           </div>
