@@ -714,3 +714,13 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .hero-cta .btn-primary{background:#8c6849;color:#fff;box-shadow:0 4px 12px rgba(90,58,36,.12)}
 .hero-cta .btn-member{background:#e9cf9f;color:var(--brown);box-shadow:0 4px 12px rgba(168,134,90,.15)}
 .dock .dock-book{background:#8c6849;color:#fff}
+/* 감사제 배너: 홈 열릴 때 반짝 (2번 지나가고 끝) */
+.ev-banner{position:relative;overflow:hidden}
+.ev-banner>*{position:relative;z-index:1}
+.ev-banner::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-60%;width:45%;z-index:2;pointer-events:none;
+  background:linear-gradient(105deg,transparent 0%,rgba(255,240,205,.0) 20%,rgba(255,240,205,.55) 50%,rgba(255,240,205,0) 80%,transparent 100%);
+  transform:skewX(-18deg);animation:evShine 1.3s ease-in-out .5s 2 both}
+@keyframes evShine{0%{left:-60%}100%{left:130%}}
+.ev-banner .ev-date{animation:evGlow 1.4s ease-in-out .6s 2}
+@keyframes evGlow{50%{box-shadow:0 0 0 4px rgba(233,207,159,.45),0 0 18px rgba(233,207,159,.8)}}
+@media (prefers-reduced-motion:reduce){.ev-banner::after,.ev-banner .ev-date{animation:none;display:none}.ev-banner .ev-date{display:inline-block}}
