@@ -16,6 +16,7 @@ export async function GET(req: Request) {
       refs: [{ name: "네이버", n: 60 }, { name: "인스타그램", n: 40 }, { name: "직접", n: 30 }, { name: "카카오톡", n: 20 }],
       pages: [{ path: "/", views: 150, avgSec: 74 }, { path: "/member", views: 40, avgSec: 52 }, { path: "/price", views: 12, avgSec: 31 }],
       clicks: [{ path: "/", label: "체험 예약하기", n: 45 }, { path: "/", label: "네이버 예약 · 선릉점", n: 22 }, { path: "/", label: "카카오톡 문의", n: 18 }],
+      videos: [{ name: "전체 과정(재확인)", plays: 18, ends: 7 }, { name: "근막이완 소개", plays: 25, ends: 9 }],
       sections: [["top", 120, 12], ["about", 90, 9], ["method", 80, 15], ["reviews", 70, 21], ["branches", 65, 18], ["price", 60, 14], ["book", 55, 25]].map(([id, reach, avgSec]) => ({ id, label: SECTION_LABEL[String(id)] ?? String(id), reach, avgSec, totalSec: 0 })),
     });
   }

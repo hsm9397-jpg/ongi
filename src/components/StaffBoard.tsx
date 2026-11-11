@@ -365,6 +365,7 @@ type Ins = {
   refs?: { name: string; n: number }[];
   pages?: { path: string; views: number; avgSec: number }[];
   clicks?: { path: string; label: string; n: number }[];
+  videos?: { name: string; plays: number; ends: number }[];
   sections?: { id: string; label: string; reach: number; avgSec: number }[];
 };
 const mmss = (s: number) => (s >= 60 ? `${Math.floor(s / 60)}분 ${s % 60}초` : `${s}초`);
@@ -422,6 +423,9 @@ function Insight({ staffKey }: { staffKey: string }) {
           {d.sections?.length ? (
             <Bars rows={d.sections.map((s) => ({ label: s.label, n: s.avgSec, sub: `${mmss(s.avgSec)} · ${Math.round((s.reach / reachBase) * 100)}%` }))} />
           ) : <p className="vnote">아직 기록이 없어요.</p>}
+
+          <h4 className="ins-h">영상 시청 <small>재생 · 끝까지 본 수 (2026-11-11부터)</small></h4>
+          <Bars rows={(d.videos ?? []).map((v) => ({ label: v.name, n: v.plays, sub: `재생 ${v.plays} · 끝까지 ${v.ends}` }))} />
 
           <h4 className="ins-h">홈에서 많이 누른 것</h4>
           {homeClicks.length ? <Bars rows={homeClicks.slice(0, 15).map((c) => ({ label: c.label, n: c.n }))} /> : <p className="vnote">아직 기록이 없어요.</p>}

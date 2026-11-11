@@ -73,5 +73,17 @@ export async function readInsight(dates: string[]) {
       return { path: k.slice(0, i), label: k.slice(i + 1), n };
     }),
     sections,
+    videos: (() => {
+      // 영상별 재생·끝까지 시청 (클릭 상위 30개와 따로, 전부 센다)
+      const v: Record<string, { plays: number; ends: number }> = { "전체 과정(재확인)": { plays: 0, ends: 0 }, "근막이완 소개": { plays: 0, ends: 0 } };
+      for (const [k, n] of Object.entries(agg.click)) {
+        const label = k.slice(k.indexOf("|") + 1);
+        const m = label.match(/^영상 (재생|끝까지 시청) · (.+)$/);
+        if (!m) continue;
+        v[m[2]] ??= { plays: 0, ends: 0 };
+        if (m[1] === "재생") v[m[2]].plays += n; else v[m[2]].ends += n;
+      }
+      return Object.entries(v).map(([name, x]) => ({ name, ...x }));
+    })(),
   };
 }
