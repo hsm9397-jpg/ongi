@@ -178,7 +178,7 @@ export const TEAM: { name: string; role: string; photo: string; link?: string }[
   { name: "황사라", role: "온기 근막이완 스튜디오 디렉터, 신반포스퀘어점 관리실장", photo: `${IMG}/2026/7/10/2026-7-10-1783665387178.webp`, link: "https://tabby-character-dd3.notion.site/39a46121f76580af9154ed74ee4f0ba5" },
   { name: "송효재", role: "온기 근막이완 선릉점 지점장", photo: `${IMG}/2026/8/19/2026-8-19-1787118438111.webp`, link: "https://app.notion.com/p/3c146121f76580488d83e0d43cef1785" },
   { name: "김나영", role: "온기 근막이완 신반포스퀘어점 부실장", photo: `${IMG}/2026/8/19/2026-8-19-1787118501289.webp`, link: "https://app.notion.com/p/3c046121f7658056b871daec32c4011c" },
-  { name: "배태성", role: "온기 근막이완 실장, 청담점 매니저", photo: `${IMG}/2026/10/9/2026-10-9-1791538658157.webp`, link: "https://app.notion.com/p/3f446121f7658006b8ecc6f5f29e9c9e" },
+  { name: "배태성", role: "온기 근막이완 실장", photo: `${IMG}/2026/10/9/2026-10-9-1791538658157.webp`, link: "https://app.notion.com/p/3f446121f7658006b8ecc6f5f29e9c9e" },
   { name: "이정민", role: "온기 근막이완 선릉점 실장", photo: `${IMG}/2026/10/18/2026-10-18-1792333252066.webp`, link: "https://app.notion.com/p/3fd46121f765816b8f74f25ebec93c02" },
   { name: "허재성", role: "온기 근막이완 선릉점 실장", photo: `${IMG}/2026/10/17/2026-10-17-1792279844255.webp`, link: "https://app.notion.com/p/3fc46121f7658117af42deebde360924" },
 ];
