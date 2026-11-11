@@ -724,7 +724,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
               </span>
             ))}
           </div>
-          <p className="kind-desc">지점을 누르면 네이버 예약 화면으로 바로 이동해요.</p>
+          <p className="kind-desc naver-once">최초 1회만 네이버 예약을 이용합니다.</p>
         </div>
       )}
 
