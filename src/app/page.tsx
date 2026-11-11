@@ -78,9 +78,8 @@ export default function Home() {
           <p className="slogan">{HERO.slogan}</p>
           <p className="lead">{HERO.lead}</p>
           <div className="hero-cta">
-            <a className="btn-primary" href="#trial">체험 예약하기</a>
-            <a className="btn-ghost" href="#member">기존 회원 예약</a>
-            <a className="btn-ghost" href="/member">회원 페이지</a>
+            <a className="btn-primary" href="#trial">신규(체험) 예약하기</a>
+            <a className="btn-primary btn-member" href="/member">온기 회원 전용 페이지</a>
           </div>
           <p className="badge">100% 예약제 · 50분 1:1 · 개인 맞춤 컨디셔닝</p>
         </header>

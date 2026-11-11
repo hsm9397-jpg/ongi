@@ -707,3 +707,6 @@ a.primary.pt-book { display: block; text-align: center; margin-top: 14px; text-d
 .mp-c-info.last1,.mp-me .mp-c-info.last1{background:#9e0a0a;color:#fff;border-color:#9e0a0a;box-shadow:0 4px 14px rgba(158,10,10,.25)}
 .mp-c-info.last1.land{animation:tland .7s cubic-bezier(.2,1.4,.4,1)}
 .last1-tag{margin-left:8px;font-size:12px;font-weight:700;background:#fff;color:#9e0a0a;border-radius:999px;padding:2px 8px;vertical-align:middle}
+/* 첫 화면 버튼 두 개 (2026-11-11) */
+.hero-cta .btn-primary{grid-column:1/-1;min-height:52px;font-size:16px}
+.hero-cta .btn-member{background:#7a2620;color:#fff;box-shadow:0 6px 18px rgba(122,38,32,.2)}
