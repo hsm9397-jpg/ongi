@@ -235,7 +235,7 @@ export default function Home() {
                 <h3>{p.title}</h3>
                 <dl>{p.rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
                 {p.note && <p className="small">{p.note}</p>}
-                <a className="btn-ghost" href={p.cta.href}>{p.cta.label}</a>
+                <a className="btn-ghost btn-fill" href={p.cta.href}>{p.cta.label}</a>
               </div>
             ))}
           </div>
@@ -251,7 +251,7 @@ export default function Home() {
                 <div><dt>패키지권</dt><dd>횟수 방식</dd></div>
                 <div><dt>금액권</dt><dd>차감 방식</dd></div>
               </dl>
-              <a className="btn-ghost" href="/price">서비스 금액 보기</a>
+              <a className="btn-ghost btn-fill" href="/price">서비스 금액 보기</a>
             </div>
           </div>
         </section>
