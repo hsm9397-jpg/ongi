@@ -398,11 +398,11 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       else return;
       // 체험은 바로 '1 · 지점' 선택 위치로 (화면이 그려진 뒤에)
       if (h === "trial") {
-        const go = (behavior: ScrollBehavior) => document.getElementById("trial-branch")?.scrollIntoView({ behavior, block: "start" });
+        const go = (behavior: ScrollBehavior) => document.getElementById("trial-contra")?.scrollIntoView({ behavior, block: "start" });
         setTimeout(() => go("smooth"), 60);
         // 위쪽 사진이 늦게 뜨며 자리가 밀리면 한 번 더 맞춘다
         setTimeout(() => {
-          const t = document.getElementById("trial-branch")?.getBoundingClientRect().top ?? 0;
+          const t = document.getElementById("trial-contra")?.getBoundingClientRect().top ?? 0;
           if (Math.abs(t - 84) > 40) go("smooth");
         }, 1200);
       }
@@ -678,7 +678,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       )}
 
       {!manage && kind === "trial" && (
-        <div className="contra">
+        <div className="contra" id="trial-contra">
           <h3>근막이완 금기 대상자 <span className="must">필수 확인</span></h3>
           <p className="contra-sub">해당되시면 예약 전에 카카오톡으로 먼저 문의해 주세요.</p>
           <h4>절대 금기</h4>
