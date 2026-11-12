@@ -396,7 +396,17 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       if (h === "my") setManage(true);
       else if (h === "trial" || h === "member" || h === "pt") switchKind(h);
       else return;
-      document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+      // 체험은 바로 '1 · 지점' 선택 위치로 (화면이 그려진 뒤에)
+      if (h === "trial") {
+        const go = (behavior: ScrollBehavior) => document.getElementById("trial-branch")?.scrollIntoView({ behavior, block: "start" });
+        setTimeout(() => go("smooth"), 60);
+        // 위쪽 사진이 늦게 뜨며 자리가 밀리면 한 번 더 맞춘다
+        setTimeout(() => {
+          const t = document.getElementById("trial-branch")?.getBoundingClientRect().top ?? 0;
+          if (Math.abs(t - 84) > 40) go("smooth");
+        }, 1200);
+      }
+      else document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
       // 기존 회원 예약: 회원 페이지에서 이미 확인한 폰이면 바로 담당 선생님 단계로, 아니면 뒷 4자리 칸에 커서
       if (h === "member" && MEMBER_BOOKING_READY) {
         const saved = rememberedMember();
@@ -691,7 +701,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       <>
 
       {kind === "trial" && (
-        <div className="step">
+        <div className="step" id="trial-branch">
           <h3>1 · 지점 <small className="h3-note">온기의 모든 지점은 직영으로 운영됩니다.</small></h3>
           <div className="chips trial-chips">
             {branches.filter((b) => !b.hidden).map((b) =>
