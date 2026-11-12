@@ -45,7 +45,10 @@ function rememberedMember(): { token: string; last4?: string } | null {
 function rememberLast4(last4: string) {
   try {
     const v = rememberedMember();
-    if (v && !(v as { last4?: string }).last4) localStorage.setItem(MEMBER_KEY, JSON.stringify({ ...v, last4 }));
+    if (v && !(v as { last4?: string }).last4) {
+      localStorage.setItem(MEMBER_KEY, JSON.stringify({ ...v, last4 }));
+      window.dispatchEvent(new CustomEvent("ongi-last4", { detail: last4 }));
+    }
   } catch {}
 }
 
@@ -668,8 +671,9 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       </div>
       )}
       {memberOnly ? (
-        <button className="my-link" aria-pressed={manage} onClick={() => setManage(!manage)}>
-          {manage ? "‹ 예약하기로 돌아가기" : <>내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span></>}
+        // 회원 페이지에선 위 '내 예약'에서 바로 변경·취소 (번호 다시 묻지 않음)
+        <button className="my-link" onClick={() => document.querySelector(".mp-upcoming")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+          내 예약 확인 · 변경 · 취소 <span aria-hidden>›</span>
         </button>
       ) : (
       <a className="my-link" href="/member">

@@ -90,7 +90,7 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
     } finally { setBusy(false); }
   }
 
-  if (!last4) return null;
+  if (!last4) return <AskLast4 token={token} />;
   const slots = pickDay && days ? days[pickDay] ?? [] : [];
   return (
     <div className="mp-upcoming">
@@ -166,6 +166,37 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** 예전에 로그인해 뒷번호가 저장 안 된 폰: 한 번만 입력받아 저장 (이후엔 다시 묻지 않음) */
+function AskLast4({ token }: { token: string }) {
+  const [v, setV] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit() {
+    setBusy(true); setErr("");
+    try {
+      const r = await fetch("/api/members/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, last4: v, check: true }) });
+      const j = await r.json();
+      if (!r.ok || j.error) throw new Error(j.error && j.error !== "invalid" ? j.error : "번호가 맞지 않아요.");
+      try {
+        const saved = JSON.parse(localStorage.getItem("ongi-member") || "null");
+        if (saved) localStorage.setItem("ongi-member", JSON.stringify({ ...saved, last4: v }));
+      } catch {}
+      window.dispatchEvent(new CustomEvent("ongi-last4", { detail: v }));
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  }
+  return (
+    <div className="mp-upcoming">
+      <h3>내 예약</h3>
+      <p className="mp-note">이 폰에서 처음 한 번만 연락처 뒷 4자리를 확인할게요. 이후에는 다시 묻지 않아요.</p>
+      <div className="bd-reply">
+        <input inputMode="numeric" maxLength={4} placeholder="뒷 4자리" value={v} onChange={(e) => setV(e.target.value.replace(/\D/g, "").slice(0, 4))} />
+        <button className="ghost" disabled={busy || v.length !== 4} onClick={submit}>{busy ? "확인 중…" : "확인"}</button>
+      </div>
+      {err && <p className="err">{err}</p>}
     </div>
   );
 }

@@ -52,6 +52,13 @@ export default function MemberPortal({ groups, kakao, booking, notices }: { grou
       .catch(() => {});
   }, []);
 
+  // 다른 곳(내 예약·예약 창)에서 뒷번호를 확인하면 바로 반영
+  useEffect(() => {
+    const on = (e: Event) => setMe((m) => (m ? { ...m, last4: String((e as CustomEvent).detail) } : m));
+    window.addEventListener("ongi-last4", on);
+    return () => window.removeEventListener("ongi-last4", on);
+  }, []);
+
   useEffect(() => {
     if (group) pinRef.current?.focus();
   }, [group]);

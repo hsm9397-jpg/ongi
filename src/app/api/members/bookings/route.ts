@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readMemberToken, validMembers } from "@/lib/members";
+import { phoneMatches, readMemberToken, validMembers } from "@/lib/members";
 import { myUpcoming } from "@/lib/manage";
 import { normName } from "@/lib/notion";
 import { clientIp, digitsOnly, tooMany } from "@/lib/validate";
@@ -17,6 +17,11 @@ export async function POST(req: Request) {
   if (!list) return NextResponse.json({ error: "잠시 후 다시 시도해 주세요." }, { status: 502 });
   const m = list.find((x) => x.id === id);
   if (!m) return NextResponse.json({ expired: true });
+  // 예전에 로그인해 뒷번호가 저장 안 된 폰: 한 번만 번호를 확인한다
+  if (body.check) {
+    const ok = (await phoneMatches(m.name, last4)) || (m.sharers ?? []).some((x) => x.last4 === last4);
+    if (!ok) return NextResponse.json({ error: "번호가 맞지 않아요. 다시 확인해 주세요." }, { status: 400 });
+  }
   try {
     const same = list.filter((x) => normName(x.name) === normName(m.name)).length;
     const items = await myUpcoming(m.name, last4, same);
