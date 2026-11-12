@@ -140,7 +140,7 @@ export default function Home() {
                   {"igNote" in s && s.igNote && (
                     <div className="j-video">
                       <video src="/journey/recheck.mp4" poster="/journey/recheck-poster.webp" controls playsInline preload="none" width={720} height={1280} />
-                      <p className="j-ig">▶ 평가부터 재확인까지 전체 과정 영상 (1분 12초)</p>
+                      <p className="j-ig">▶ 평가부터 재확인까지 전체 과정 영상 (보통 룸 안에서 운동이 이뤄집니다.)</p>
                     </div>
                   )}
                 </div>
