@@ -119,6 +119,26 @@ export async function moveEvent(calendarId: string, eventId: string, start: Date
   });
 }
 
+/** 예약 시간 변경: 같은 캘린더면 지우고 새로 만들지 않고 기존 일정을 그대로 옮긴다 (삼성 캘린더 등 동기화 누락 방지) */
+export async function rescheduleEvent(
+  calendarId: string,
+  eventId: string,
+  input: { start: Date; end: Date; description: string; props: Record<string, string> }
+): Promise<void> {
+  if (demoMode()) return demoMove(eventId, input.start, input.end);
+  const c = getClient();
+  await c.request({
+    url: `${API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+    method: "PATCH",
+    data: {
+      start: { dateTime: toKstIso(input.start), timeZone: "Asia/Seoul" },
+      end: { dateTime: toKstIso(input.end), timeZone: "Asia/Seoul" },
+      description: input.description,
+      extendedProperties: { private: input.props },
+    },
+  });
+}
+
 /** 새 '오픈' 일정 (잘라낸 뒤 남은 뒷부분) */
 export async function createOpenEvent(calendarId: string, start: Date, end: Date): Promise<void> {
   if (demoMode()) {

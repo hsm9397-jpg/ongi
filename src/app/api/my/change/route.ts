@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf } from "@/config/branches";
 import { pickTrainer } from "@/lib/availability";
-import { carveOpen, createEvent, deleteEvent } from "@/lib/google";
+import { carveOpen, createEvent, deleteEvent, rescheduleEvent } from "@/lib/google";
 import { loadOwned } from "@/lib/manage";
 import { readNameToken } from "@/lib/members";
 import { notify } from "@/lib/notify";
@@ -37,21 +37,29 @@ export async function POST(req: Request) {
     if (!pick) return NextResponse.json({ error: "그 시간은 예약이 어려워요. 다른 시간을 골라주세요." }, { status: 409 });
     const cal = calendarIdOf(pick.trainer)!;
     const props = r.ev.props ?? {};
-    await createEvent(cal, {
-      summary: r.ev.summary,
-      start: pick.start,
-      end: pick.end,
-      description: `${r.ev.description ?? ""}\n(홈페이지에서 고객이 시간 변경)`.trim(),
-      kind,
-      phone: props.phone ?? last4,
-      name: props.name ?? name,
-      branch: r.branch.id,
-      // 같은 날 두 번째 변경을 막기 위해 변경한 날짜를 남김
-      extra: kind === "member" ? { chgDate: todayKst() } : undefined,
-      colorId: kind === "member" ? r.ev.colorId ?? pick.trainer.memberColor : undefined,
-    });
-    await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
-    await deleteEvent(r.calendarId, r.eventId);
+    const description = `${(r.ev.description ?? "").replace(/\n?\(홈페이지에서 고객이 시간 변경\)/g, "")}\n(홈페이지에서 고객이 시간 변경)`.trim();
+    // 같은 날 두 번째 변경을 막기 위해 변경한 날짜를 남김
+    const extra = kind === "member" ? { chgDate: todayKst() } : undefined;
+    if (cal === r.calendarId) {
+      // 같은 선생님: 기존 일정을 그대로 옮긴다 (지우고 새로 만들면 삼성 캘린더가 못 따라오는 경우가 있음)
+      await rescheduleEvent(cal, r.eventId, { start: pick.start, end: pick.end, description, props: { ...(props as Record<string, string>), ...(extra ?? {}) } });
+      await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
+    } else {
+      await createEvent(cal, {
+        summary: r.ev.summary,
+        start: pick.start,
+        end: pick.end,
+        description,
+        kind,
+        phone: props.phone ?? last4,
+        name: props.name ?? name,
+        branch: r.branch.id,
+        extra,
+        colorId: kind === "member" ? r.ev.colorId ?? pick.trainer.memberColor : undefined,
+      });
+      await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
+      await deleteEvent(r.calendarId, r.eventId);
+    }
     if (kind === "member") await logMember(props.name ?? name, props.phone ?? last4, { t: "change", when: r.ev.start, toWhen: pick.start, branch: r.branch.short, trainer: pick.trainer.name });
     await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, team: r.branch.trainers, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
     await alimtalk({ type: "change", branch: r.branch, trainer: pick.trainer, oldTrainer: r.trainer, name: props.name ?? name, phone: props.phone ?? last4, when: pick.start, oldWhen: r.ev.start });
