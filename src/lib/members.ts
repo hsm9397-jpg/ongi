@@ -190,7 +190,16 @@ async function findByLast4Once(group: string, last4: string): Promise<ValidMembe
   const shared = inGroup.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name })));
   if (process.env.DEMO_MODE === "1") return [...(last4 === "1234" ? inGroup.slice(0, 1) : []), ...shared];
   const hits = await namesByLast4(last4);
-  return [...inGroup.filter((m) => hits.has(m.name)), ...shared];
+  const mine = [...inGroup.filter((m) => hits.has(m.name)), ...shared];
+  if (mine.length) return mine;
+  // 고른 담당(또는 금액권)에서 못 찾으면 전체 유효 회원에서 같은 이름+뒷번호를 찾는다
+  // (예: 금액권 회원이 담당 선생님 버튼을 누른 경우, 담당이 바뀐 경우)
+  const seen = new Set<string>();
+  const all = [
+    ...list.filter((m) => hits.has(m.name)),
+    ...list.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name }))),
+  ];
+  return all.filter((m) => (seen.has(m.id + m.name) ? false : (seen.add(m.id + m.name), true)));
 }
 
 /** 회원 알림톡용: 이름 + 뒷번호로 누적 회원 DB의 전체 연락처를 찾는다 (없으면 빈 값) */
