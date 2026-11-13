@@ -555,30 +555,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   }
 
   if (done) {
-    return (
-      <div className="book done">
-        <h2>예약이 확정됐어요</h2>
-        <dl className="summary">
-          <dt>구분</dt>
-          <dd>{done.kind === "trial" ? "첫 방문 체험" : done.kind === "pt" ? "PT 상담·평가 (무료)" : "기존 회원 예약"}</dd>
-          <dt>지점</dt>
-          <dd>{done.branchName}</dd>
-          <dt>일시</dt>
-          <dd>
-            {fmtDay(done.date)} {done.hour}:00 ({done.minutes}분)
-          </dd>
-          <dt>담당</dt>
-          <dd>{done.trainerName} 선생님</dd>
-          <dt>예약자</dt>
-          <dd>{done.name}</dd>
-        </dl>
-        <p className="note">예약 전날 안내 메시지를 보내드려요. 변경·취소는 첫 화면의 &quot;내 예약 확인 · 변경 · 취소&quot;에서 예약 전날 자정까지 직접 할 수 있어요.</p>
-        <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
-        <button className="ghost" onClick={() => { setDone(null); switchKind(kind); }}>
-          처음으로
-        </button>
-      </div>
-    );
+    return <DoneView done={done} memberOnly={!!memberOnly} onReset={() => { setDone(null); switchKind(kind); }} />;
   }
 
   const slots = day && days ? days[day] ?? [] : [];
@@ -907,6 +884,58 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       )}
       </>
       )}
+    </div>
+  );
+}
+
+/** 예약 확정 화면. 회원 페이지에서 한 회원 예약이면 지금까지 쓴 기준 잔여 회차·금액도 보여준다 (2026-11-13) */
+function DoneView({ done, memberOnly, onReset }: { done: Done; memberOnly: boolean; onReset: () => void }) {
+  const [left, setLeft] = useState<{ label: string; value: string } | null>(null);
+  useEffect(() => {
+    if (!memberOnly || done.kind !== "member") return;
+    const saved = rememberedMember();
+    if (!saved?.token) return;
+    fetch("/api/members/info", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: saved.token }) })
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.kind === "sessions" && typeof j.remaining === "number") setLeft({ label: "잔여 회차", value: `${j.remaining}회` });
+        else if (j.kind === "wallet" && j.wallets?.length) {
+          const b = j.wallets[0].balance;
+          setLeft({ label: "잔여 금액", value: typeof b === "number" ? `${b.toLocaleString("ko-KR")}원` : String(b ?? "-") });
+        }
+      })
+      .catch(() => {});
+  }, [memberOnly, done.kind]);
+  return (
+    <div className="book done">
+      <h2>예약이 확정됐어요</h2>
+      <dl className="summary">
+        <dt>구분</dt>
+        <dd>{done.kind === "trial" ? "첫 방문 체험" : done.kind === "pt" ? "PT 상담·평가 (무료)" : "기존 회원 예약"}</dd>
+        <dt>지점</dt>
+        <dd>{done.branchName}</dd>
+        <dt>일시</dt>
+        <dd>
+          {fmtDay(done.date)} {done.hour}:00 ({done.minutes}분)
+        </dd>
+        <dt>담당</dt>
+        <dd>{done.trainerName} 선생님</dd>
+        <dt>예약자</dt>
+        <dd>{done.name}</dd>
+        {left && (
+          <>
+            <dt>{left.label}</dt>
+            <dd>{left.value} <small className="left-note">(이번 예약 제외, 지금까지 이용 기준)</small></dd>
+          </>
+        )}
+      </dl>
+      <p className="note">
+        {done.kind === "member"
+          ? "예약 전날 안내 메시지를 보내드려요. 변경·취소는 회원 페이지의 '내 예약'에서 할 수 있어요. 당일 취소는 차감됩니다."
+          : "예약 전날 안내 메시지를 보내드려요. 변경·취소는 카카오톡으로 문의해 주세요."}
+      </p>
+      <a className="kakao" href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer">카카오톡 문의</a>
+      <button className="ghost" onClick={onReset}>처음으로</button>
     </div>
   );
 }

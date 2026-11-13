@@ -765,3 +765,4 @@ details.contra[open] .contra-sub u{display:none}
 .mp-upcoming ul.mb-hist li+li{border-top:1px solid rgba(0,0,0,.05)}
 .mp-upcoming ul.mb-hist li span{color:var(--fg)}
 .mp-upcoming ul.mb-hist b{margin-left:auto;font-size:13px}
+.summary .left-note{color:var(--muted);font-size:12px;font-weight:400}
