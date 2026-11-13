@@ -170,7 +170,7 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
               </li>
             ))}
           </ul>
-        ) : <p className="mp-note">홈페이지에서 한 예약·변경·취소가 여기에 쌓여요. (2026.11.13부터)</p>
+        ) : <p className="mp-note">홈페이지에서 한 예약·변경·취소가 여기에 쌓여요.</p>
       )}
 
       {askCancel && (
