@@ -5,7 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 const SHOW = 3;
 import { KAKAO_CHAT_URL, MonthCalendar, api, type Slot } from "./BookingFlow";
 
-type Act = { token: string; who: string; kind: string; branchId: string; trainerId: string; changeable: boolean; cancelable: boolean; changedToday: boolean };
+type Hist = { t: "book" | "change" | "cancel"; date: string; hour: number; minute: number; to?: { date: string; hour: number; minute: number }; sameDay?: boolean };
+const ymd = (date: string, hour: number, minute: number) => `${date.slice(2).replace(/-/g, ".")} ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+type Act = { token: string; who: string; kind: string; branchId: string; trainerId: string; changeable: boolean; cancelable: boolean; changedToday: boolean; sameDay?: boolean };
 type Item = { date: string; hour: number; minute: number; branchName: string; trainerName: string; web: boolean; act?: Act };
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 const day = (date: string) => {
@@ -27,12 +29,14 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
   const [days, setDays] = useState<Record<string, Slot[]> | null>(null);
   const [pickDay, setPickDay] = useState<string | null>(null);
   const [hour, setHour] = useState<number | null>(null);
+  const [history, setHistory] = useState<Hist[]>([]);
+  const [showHist, setShowHist] = useState(false);
 
   const load = useCallback(() => {
     if (!last4) return;
     fetch("/api/members/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, last4 }) })
       .then((r) => r.json())
-      .then((j) => (j.items ? (setItems(j.items), setErr("")) : setErr(j.error && j.error !== "invalid" ? j.error : "")))
+      .then((j) => (j.items ? (setItems(j.items), setHistory(j.history ?? []), setErr("")) : setErr(j.error && j.error !== "invalid" ? j.error : "")))
       .catch(() => setErr("예약을 불러오지 못했어요."));
   }, [token, last4]);
   useEffect(() => {
@@ -69,6 +73,14 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
     if (i.act.kind === "member") { q.set("trainer", i.act.trainerId); q.set("change", "1"); }
     try {
       const r = await api<{ days: Record<string, Slot[]> }>(`/api/availability?${q}`);
+      // 당일 예약은 오늘 다른 시간으로만 변경 (2026-11-13)
+      const d = i.act.kind === "member" && i.act.sameDay ? Object.fromEntries(Object.entries(r.days).filter(([k]) => k === i.date)) : r.days;
+      if (i.act.kind === "member" && i.act.sameDay && !(d[i.date] ?? []).some((x) => x.available)) {
+        setChanging(null);
+        setContact("당일 예약은 오늘 다른 시간으로만 변경할 수 있어요. 지금은 오늘 변경 가능한 시간이 없어요.");
+        return;
+      }
+      r.days = d;
       setDays(r.days);
       const first = Object.entries(r.days).find(([, s]) => s.some((x) => x.available));
       setPickDay(first ? first[0] : null);
@@ -113,7 +125,7 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
                   <button
                     className="ghost danger"
                     disabled={busy}
-                    onClick={() => (i.act!.cancelable ? setAskCancel(i) : setContact("취소는 예약 전날 자정까지만 직접 할 수 있어요."))}
+                    onClick={() => (i.act!.cancelable ? setAskCancel(i) : setContact(i.act!.kind === "member" ? "이미 시작했거나 지난 예약은 직접 취소할 수 없어요." : "취소는 예약 전날 자정까지만 직접 할 수 있어요."))}
                   >
                     취소
                   </button>
@@ -146,11 +158,27 @@ export default function MyBookings({ token, last4 }: { token: string; last4?: st
         </>
       ) : <p className="mp-note">다가오는 예약이 없어요.</p>)}
 
+      <button className="mb-hist-btn" aria-expanded={showHist} onClick={() => setShowHist(!showHist)}>예약 내역 {showHist ? "▴" : "▾"}</button>
+      {showHist && (
+        history.length ? (
+          <ul className="mb-hist">
+            {history.map((h, k) => (
+              <li key={k}>
+                <span>{ymd(h.date, h.hour, h.minute)}</span>
+                {h.t === "change" && h.to ? <span>→ {ymd(h.to.date, h.to.hour, h.to.minute)}</span> : null}
+                <b className={`h-${h.t}${h.sameDay ? " h-same" : ""}`}>{h.t === "book" ? "예약" : h.t === "change" ? "변경" : h.sameDay ? "당일 취소(차감)" : "취소"}</b>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="mp-note">홈페이지에서 한 예약·변경·취소가 여기에 쌓여요. (2026.11.13부터)</p>
+      )}
+
       {askCancel && (
         <div className="pop-bg" onClick={() => !busy && setAskCancel(null)}>
           <div className="pop wait" role="dialog" aria-modal="true" aria-label="예약 취소" onClick={(e) => e.stopPropagation()}>
             <h3>예약을 취소하시겠습니까?</h3>
             <p>{when(askCancel)} · {askCancel.branchName} {askCancel.trainerName} 선생님</p>
+            {askCancel.act?.sameDay && askCancel.act.kind === "member" && <p className="same-day-warn">당일 취소는 차감됩니다.</p>}
             <button className="primary danger-fill" disabled={busy} onClick={() => cancel(askCancel)}>{busy ? "취소 중…" : "예약 취소"}</button>
             <button className="mp-forget" disabled={busy} onClick={() => setAskCancel(null)}>닫기</button>
           </div>

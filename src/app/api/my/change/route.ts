@@ -6,7 +6,8 @@ import { loadOwned } from "@/lib/manage";
 import { readNameToken } from "@/lib/members";
 import { notify } from "@/lib/notify";
 import { alimtalk } from "@/lib/alimtalk";
-import { isValidDate, todayKst } from "@/lib/time";
+import { isValidDate, kstHourMinute, todayKst } from "@/lib/time";
+import { logMember } from "@/lib/memberLog";
 import { cleanName, clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,9 @@ export async function POST(req: Request) {
     if ("error" in r) return NextResponse.json({ error: r.error, contact: "contact" in r ? r.contact : undefined }, { status: r.status });
     if (r.branch.bookable === false) return NextResponse.json({ error: "이 지점은 현재 온라인 예약을 받지 않아요. 카카오톡으로 문의해 주세요." }, { status: 400 });
     const kind = r.ev.props?.kind === "member" ? "member" : r.ev.props?.kind === "pt" ? "pt" : "trial";
+    // 당일 예약은 같은 날 다른 시간으로만 변경 (2026-11-13)
+    if (kind === "member" && kstHourMinute(r.ev.start).date === todayKst() && date !== todayKst())
+      return NextResponse.json({ error: "당일 예약은 오늘 다른 시간으로만 변경할 수 있어요." }, { status: 400 });
     // 회원은 같은 담당 선생님으로만. 체험은 같은 선생님을 먼저, 안 되면 같은 지점의 비어 있는 선생님
     const pick =
       (await pickTrainer(r.branch, date, hour, r.trainer.id, new Date(), kind === "member" ? BOOKING.memberDaysAhead : BOOKING.daysAhead, kind === "member" ? BOOKING.memberChangeLeadHours : BOOKING.minLeadHours)) ??
@@ -48,6 +52,7 @@ export async function POST(req: Request) {
     });
     await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await deleteEvent(r.calendarId, r.eventId);
+    if (kind === "member") await logMember(props.name ?? name, props.phone ?? last4, { t: "change", when: r.ev.start, toWhen: pick.start, branch: r.branch.short, trainer: pick.trainer.name });
     await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, team: r.branch.trainers, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
     await alimtalk({ type: "change", branch: r.branch, trainer: pick.trainer, oldTrainer: r.trainer, name: props.name ?? name, phone: props.phone ?? last4, when: pick.start, oldWhen: r.ev.start });
     return NextResponse.json({ ok: true, booking: { date, hour, minutes: BOOKING.sessionMinutes, trainerName: pick.trainer.name, branchName: r.branch.name } });

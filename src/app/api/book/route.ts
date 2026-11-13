@@ -4,6 +4,7 @@ import { isValidName, readNameToken } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
+import { logMember } from "@/lib/memberLog";
 import { alimtalk } from "@/lib/alimtalk";
 import { findMember } from "@/lib/notion";
 import { programKindOf } from "@/lib/sessions";
@@ -93,6 +94,7 @@ export async function POST(req: Request) {
       when: pick.start,
     });
     await alimtalk({ type: "new", branch, trainer: pick.trainer, name: memberName, phone, when: pick.start });
+    if (kind === "member") await logMember(memberName, phone, { t: "book", when: pick.start, branch: branch.short, trainer: pick.trainer.name });
 
     return NextResponse.json({
       ok: true,

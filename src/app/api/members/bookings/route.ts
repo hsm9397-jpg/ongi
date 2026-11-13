@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { phoneMatches, readMemberToken, validMembers } from "@/lib/members";
 import { myUpcoming } from "@/lib/manage";
+import { readMemberLog } from "@/lib/memberLog";
 import { normName } from "@/lib/notion";
 import { clientIp, digitsOnly, tooMany } from "@/lib/validate";
 
@@ -24,8 +25,8 @@ export async function POST(req: Request) {
   }
   try {
     const same = list.filter((x) => normName(x.name) === normName(m.name)).length;
-    const items = await myUpcoming(m.name, last4, same);
-    return NextResponse.json({ items }, { headers: { "Cache-Control": "no-store" } });
+    const [items, history] = await Promise.all([myUpcoming(m.name, last4, same), readMemberLog(m.name, last4).catch(() => [])]);
+    return NextResponse.json({ items, history }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("members/bookings", e);
     return NextResponse.json({ error: "예약을 불러오지 못했어요." }, { status: 502 });

@@ -129,12 +129,17 @@ export async function loadOwned(token: unknown, name: string, last4: string, act
     if (changedToday(ev)) return { error: CONTACT_TRAINER, contact: true, status: 409 } as const;
     return { ...ref, ev } as const;
   }
+  // 기존 회원 취소: 예약 시작 전까지 가능 (당일 취소는 차감, 화면에서 먼저 안내) (2026-11-13)
+  if (action === "cancel" && ev.props?.kind === "member") {
+    if (ev.start.getTime() <= Date.now()) return { error: CONTACT_TRAINER, contact: true, status: 409 } as const;
+    return { ...ref, ev } as const;
+  }
   if (!canChange(ev.start))
     return { error: "예약 당일에는 직접 변경·취소할 수 없어요(전날 자정까지 가능). 카카오톡으로 문의해 주세요.", status: 400 } as const;
   return { ...ref, ev } as const;
 }
 
-export type Upcoming = { date: string; hour: number; minute: number; branchName: string; trainerName: string; web: boolean; act?: { token: string; who: string; kind: string; branchId: string; trainerId: string; changeable: boolean; cancelable: boolean; changedToday: boolean } };
+export type Upcoming = { date: string; hour: number; minute: number; branchName: string; trainerName: string; web: boolean; act?: { token: string; who: string; kind: string; branchId: string; trainerId: string; changeable: boolean; cancelable: boolean; changedToday: boolean; sameDay: boolean } };
 /** 회원 페이지 '내 예약': 홈페이지 예약 + 선생님이 캘린더에 직접 잡은 일정(제목 이름이 같은 것) */
 export async function myUpcoming(name: string, last4: string, sameNameCount: number, now = new Date()): Promise<Upcoming[]> {
   const { parseTitle, SKIP_TITLE } = await import("./remind");
@@ -170,8 +175,9 @@ export async function myUpcoming(name: string, last4: string, sameNameCount: num
                 branchId: b.id,
                 trainerId: t.id,
                 changeable: e.props?.kind === "member" ? canMemberChange(e.start, now) : canChange(e.start, now),
-                cancelable: canChange(e.start, now),
+                cancelable: e.props?.kind === "member" ? e.start.getTime() > now.getTime() : canChange(e.start, now),
                 changedToday: e.props?.kind === "member" && changedToday(e, now),
+                sameDay: date === todayKst(now),
               }
             : undefined;
           out.push({ date, hour, minute, branchName: b.short, trainerName: t.name, web: e.fromWeb, act });

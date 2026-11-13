@@ -751,3 +751,17 @@ details.contra[open] .contra-sub u{display:none}
 @media (max-width:700px){.pricing-pair{grid-template-columns:1fr}}
 #trial-branch{scroll-margin-top:84px}
 #trial-contra{scroll-margin-top:84px}
+/* 회원 페이지: 당일 취소 안내, 예약 내역 */
+.same-day-warn{color:#9e0a0a;font-weight:700;margin:0}
+.mb-hist-btn{display:block;margin:10px 0 0 auto;background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 2px}
+.mb-hist{list-style:none;margin:6px 0 0;padding:8px 10px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:4px;font-size:13px;max-height:240px;overflow:auto}
+.mb-hist li{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mb-hist b{font-weight:600;color:var(--brown);margin-left:auto}
+.mb-hist b.h-cancel{color:var(--muted)}
+.mb-hist b.h-same{color:#9e0a0a}
+.pop p.same-day-warn{color:#9e0a0a;font-weight:700}
+.mp-upcoming ul.mb-hist{display:block}
+.mp-upcoming ul.mb-hist li{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border:0;background:none;text-align:left;font-size:13px}
+.mp-upcoming ul.mb-hist li+li{border-top:1px solid rgba(0,0,0,.05)}
+.mp-upcoming ul.mb-hist li span{color:var(--fg)}
+.mp-upcoming ul.mb-hist b{margin-left:auto;font-size:13px}
