@@ -53,7 +53,10 @@ export async function validMembers(): Promise<ValidMember[] | null> {
           const group = sel ? ((sel.select as { name?: string } | null)?.name ?? "") : "금액권";
           const id = p.id.replace(/-/g, "");
           const shareProp = Object.entries(p.properties).find(([k]) => k.includes("공유자"))?.[1];
-          const sharers = shareProp ? parseSharers(plainText(shareProp)) : [];
+          // 횟수권 공유: '메모' 칸에 "공유: 김은수3509, 현재상1209"처럼 '공유' 뒤에 적은 이름+뒷번호 (2026-11-13)
+          const memoProp = Object.entries(p.properties).find(([k]) => k === "메모")?.[1];
+          const memoShare = memoProp ? plainText(memoProp).split(/공유자?\s*[:：]?/).slice(1).join(" ") : "";
+          const sharers = [...(shareProp ? parseSharers(plainText(shareProp)) : []), ...(memoShare ? parseSharers(memoShare) : [])];
           list.push({ id, name, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}) });
         }
         cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
@@ -73,6 +76,12 @@ export async function isValidName(name: string): Promise<boolean> {
   if (!list) return true;
   const n = normName(name);
   return list.some((m) => m.name === n || m.sharers?.some((x) => x.name === n));
+}
+
+/** 공유자로 등록된 뒷번호인지 (회원권 주인 이름 + 공유자 뒷번호) */
+export async function isSharerOf(ownerName: string, last4: string): Promise<boolean> {
+  const n = normName(ownerName);
+  return ((await validMembers()) ?? []).some((m) => m.name === n && (m.sharers ?? []).some((x) => x.last4 === last4));
 }
 
 /** 이 이름 + 뒷번호가 지점 누적 회원 DB에 있는지 */

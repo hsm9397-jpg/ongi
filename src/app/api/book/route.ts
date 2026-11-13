@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
-import { isValidName, readNameToken } from "@/lib/members";
+import { isValidName, readNameToken, isSharerOf } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
@@ -45,7 +45,9 @@ export async function POST(req: Request) {
   } else {
     // 회원 예약은 서버에서 한 번 더 회원 확인
     const last4 = digitsOnly(body.last4);
-    const m = last4.length === 4 ? await findMember(memberDbIdsOf(branch), name, last4) : [];
+    let m = last4.length === 4 ? await findMember(memberDbIdsOf(branch), name, last4) : [];
+    // 공유자: 회원권 주인 이름 + 공유자 뒷번호로 예약 (주인 이름으로 일정이 잡힘)
+    if (!m.length && last4.length === 4 && (await isSharerOf(name, last4))) m = [{ dbId: "", pageId: "", name }];
     if (!m.length) return NextResponse.json({ error: "회원 확인이 필요해요. 처음부터 다시 시도해 주세요." }, { status: 403 });
     memberName = m[0].name;
     if (!(await isValidName(memberName))) {
