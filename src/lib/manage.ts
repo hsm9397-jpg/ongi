@@ -118,12 +118,31 @@ export async function findBookings(name: string, last4: string, now = new Date()
   return out.sort((a, b) => (a.date + String(a.hour).padStart(2, "0")).localeCompare(b.date + String(b.hour).padStart(2, "0")));
 }
 
+/** 선생님이 직접 잡은 일정의 제목('이름 근막', '이름1234', '강혜정/고희영')이 이 회원인지 */
+async function staffOwned(e: CalEvent, name: string, last4: string): Promise<boolean> {
+  const { parseTitle, SKIP_TITLE } = await import("./remind");
+  const { normName } = await import("./notion");
+  if (SKIP_TITLE.test(e.summary)) return false;
+  const p = parseTitle(e.summary);
+  if (!p) return false;
+  const names = p.name.split("/");
+  if (names.length !== 1 || names[0] !== normName(name)) return false;
+  if (p.last4) return p.last4 === last4;
+  // 제목에 뒷번호가 없으면 이 이름+뒷번호가 실제 회원(또는 공유자)인지 노션으로 확인
+  const { phoneMatches, isSharerOf } = await import("./members");
+  return (await phoneMatches(name, last4)) || (await isSharerOf(name, last4));
+}
+
 /** 토큰 + 이름 + 뒷4자리로 실제 일정을 다시 확인 */
 export async function loadOwned(token: unknown, name: string, last4: string, action: "change" | "cancel" = "cancel") {
   const ref = readToken(token);
   if (!ref) return { error: "예약 정보를 다시 조회해 주세요.", status: 400 } as const;
-  const ev = await getEvent(ref.calendarId, ref.eventId);
-  if (!ev || !ownedBy(ev, name, last4)) return { error: "예약을 찾지 못했어요. 이미 변경·취소되었을 수 있어요.", status: 404 } as const;
+  let ev = await getEvent(ref.calendarId, ref.eventId);
+  // 선생님이 캘린더에 직접 잡은 일정: 제목 이름(+뒷번호)이 맞으면 회원 예약으로 본다 (2026-11-15)
+  if (ev && !ev.fromWeb && !ev.allDay && !ev.open && (await staffOwned(ev, name, last4)))
+    ev = { ...ev, props: { ...(ev.props ?? {}), kind: "member", name: ev.props?.name ?? name, last4, phone: ev.props?.phone ?? last4 } };
+  else if (ev && !ownedBy(ev, name, last4)) ev = null;
+  if (!ev) return { error: "예약을 찾지 못했어요. 이미 변경·취소되었을 수 있어요.", status: 404 } as const;
   if (action === "change" && ev.props?.kind === "member") {
     if (!canMemberChange(ev.start)) return { error: CONTACT_TRAINER, contact: true, status: 409 } as const;
     if (changedToday(ev)) return { error: CONTACT_TRAINER, contact: true, status: 409 } as const;
@@ -167,19 +186,19 @@ export async function myUpcoming(name: string, last4: string, sameNameCount: num
           if (!mine || seen.has(e.id)) continue;
           seen.add(e.id);
           const { date, hour, minute } = kstHourMinute(e.start);
-          const act = e.fromWeb
-            ? {
+          // 2:1 일정("강혜정/고희영")은 두 사람이 함께라 회원이 직접 바꾸지 않는다
+          const pair = !e.fromWeb && (parseTitle(e.summary)?.name.split("/").length ?? 1) > 1;
+          const act = pair ? undefined : {
                 token: makeToken(b.id, t.id, e.id),
-                who: nameToken(e.props?.name ?? ""),
-                kind: e.props?.kind ?? "member",
+                who: nameToken(e.fromWeb ? e.props?.name ?? "" : name),
+                kind: e.fromWeb ? e.props?.kind ?? "member" : "member",
                 branchId: b.id,
                 trainerId: t.id,
-                changeable: e.props?.kind === "member" ? canMemberChange(e.start, now) : canChange(e.start, now),
-                cancelable: e.props?.kind === "member" ? e.start.getTime() > now.getTime() : canChange(e.start, now),
-                changedToday: e.props?.kind === "member" && changedToday(e, now),
+                changeable: !e.fromWeb || e.props?.kind === "member" ? canMemberChange(e.start, now) : canChange(e.start, now),
+                cancelable: !e.fromWeb || e.props?.kind === "member" ? e.start.getTime() > now.getTime() : canChange(e.start, now),
+                changedToday: (!e.fromWeb || e.props?.kind === "member") && changedToday(e, now),
                 sameDay: date === todayKst(now),
-              }
-            : undefined;
+              };
           out.push({ date, hour, minute, branchName: b.short, trainerName: t.name, web: e.fromWeb, act });
         }
       })
