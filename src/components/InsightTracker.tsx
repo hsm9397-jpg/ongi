@@ -17,7 +17,14 @@ function source(): string {
   try {
     const u = new URL(location.href).searchParams.get("utm_source");
     const r = u || (document.referrer ? new URL(document.referrer).hostname : "");
+    // 앱 안 브라우저는 출처(referrer)를 안 보내는 경우가 많아 앱 표시(user agent)로도 판별
+    const ua = navigator.userAgent;
+    if (!u && /daangn|karrot/i.test(ua)) return "당근";
+    if (!u && /instagram/i.test(ua)) return "인스타그램";
+    if (!u && /KAKAOTALK/i.test(ua)) return "카카오톡";
+    if (!u && /NAVER\(inapp/i.test(ua)) return "네이버";
     if (!r) return "직접";
+    if (/당근/.test(r)) return "당근";
     if (r === location.hostname) return "";
     if (/naver/i.test(r)) return "네이버";
     if (/instagram|ig\b/i.test(r)) return "인스타그램";
