@@ -1,3 +1,4 @@
+export const metadata = { alternates: { canonical: "/" } };
 import { BOOKING, BRANCHES, publicBranches } from "@/config/branches";
 import TeamGrid from "@/components/TeamGrid";
 import FaqAnswer from "@/components/FaqAnswer";

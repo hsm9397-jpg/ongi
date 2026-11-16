@@ -1,6 +1,6 @@
 import { FOOTER } from "@/config/site";
 
-export const metadata = { title: "개인정보처리방침 | 온기" };
+export const metadata = { title: "개인정보처리방침 | 온기", alternates: { canonical: "/privacy" } };
 
 export default function Privacy() {
   return (

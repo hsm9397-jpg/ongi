@@ -13,7 +13,6 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
   keywords: ["온기", "온기 근막이완", "온기PT", "근막이완", "IASTM", "스포츠 컨디셔닝", "잠원 근막이완", "신반포 근막이완", "선릉 근막이완"],
-  alternates: { canonical: "/" },
   openGraph: { type: "website", locale: "ko_KR", url: "/", siteName: "온기", title: TITLE, description: DESC, images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "온기" }] },
   twitter: { card: "summary_large_image", title: TITLE, description: DESC, images: ["/og.jpg"] },
   verification: {
