@@ -7,12 +7,19 @@ import { findMember, normName, notion, plainText, schemaOf } from "./notion";
 type Prop = { type: string; [k: string]: unknown };
 type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
 
-export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: { name: string; last4: string }[]; sharerOf?: string };
+export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: Sharer[]; sharerOf?: string };
+export type Sharer = { name: string; last4: string; trainer?: string };
 
-/** 금액권 '공유자' 칸: "김은수3509, 현재상1209"처럼 이름+뒷번호 4자리 */
-function parseSharers(text: string): { name: string; last4: string }[] {
-  const out: { name: string; last4: string }[] = [];
-  for (const m of text.matchAll(/([가-힣A-Za-z]{2,})\s*\(?\s*(?:\d{3}-?\d{3,4}-?)?(\d{4})\)?/g)) out.push({ name: normName(m[1]), last4: m[2] });
+/** 금액권 '공유자' 칸: "김은수3509, 현재상1209"처럼 이름+뒷번호 4자리.
+ *  뒤에 담당 선생님 이름을 붙이면 그 선생님 일정으로 예약 (예: "장미림6692 황사라", "정인6349(배태성)") */
+function parseSharers(text: string): Sharer[] {
+  const out: Sharer[] = [];
+  const trainers = [...new Set(BRANCHES.flatMap((b) => b.trainers.map((t) => t.name)))];
+  for (const m of text.matchAll(/([가-힣A-Za-z]{2,})\s*\(?\s*(?:\d{3}-?\d{3,4}-?)?(\d{4})\)?/g)) {
+    const after = text.slice((m.index ?? 0) + m[0].length).replace(/^[\s(:\/-]*(담당)?[\s:]*/, "");
+    const trainer = trainers.find((t) => after.startsWith(t));
+    out.push({ name: normName(m[1]), last4: m[2], ...(trainer ? { trainer } : {}) });
+  }
   return out;
 }
 

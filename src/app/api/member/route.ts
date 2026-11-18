@@ -23,16 +23,17 @@ export async function POST(req: Request) {
     const hits = await namesByLast4(last4);
     const vm = (await validMembers()) ?? [];
     // 후보: 이 번호의 회원 + 이 번호로 등록된 공유자("주인|공유자", 일정은 주인 이름 + 공유자 표시)
-    type Cand = { key: string; name: string; sharer?: string; dbs: Set<string> };
+    type Cand = { key: string; name: string; sharer?: string; trainer?: string; dbs: Set<string> };
     const cands = new Map<string, Cand>();
     for (const [n, dbs] of hits) {
       const owner = vm.some((m) => m.name === n) ? null : vm.find((m) => (m.sharers ?? []).some((x) => x.name === n && x.last4 === last4));
-      const c: Cand = owner ? { key: `${owner.name}|${n}`, name: owner.name, sharer: n, dbs } : { key: n, name: n, dbs };
+      const sh = owner?.sharers?.find((x) => x.name === n && x.last4 === last4);
+      const c: Cand = owner ? { key: `${owner.name}|${n}`, name: owner.name, sharer: n, trainer: sh?.trainer, dbs } : { key: n, name: n, dbs };
       cands.set(c.key, c);
     }
     for (const m of vm) for (const x of m.sharers ?? []) {
       if (x.last4 !== last4 || cands.has(`${m.name}|${x.name}`)) continue;
-      cands.set(`${m.name}|${x.name}`, { key: `${m.name}|${x.name}`, name: m.name, sharer: x.name, dbs: hits.get(m.name) ?? new Set() });
+      cands.set(`${m.name}|${x.name}`, { key: `${m.name}|${x.name}`, name: m.name, sharer: x.name, trainer: x.trainer, dbs: hits.get(m.name) ?? new Set() });
     }
     if (picked) for (const k of [...cands.keys()]) if (k !== picked) cands.delete(k);
     if (!cands.size) {
@@ -53,11 +54,12 @@ export async function POST(req: Request) {
       const labels = maskAll(valid.map((c) => c.sharer ?? c.name));
       return NextResponse.json({ choices: valid.map((c, i) => ({ label: labels[i], who: nameToken(c.key) })) });
     }
-    const { name, key, sharer, dbs } = valid[0];
+    const { name, key, sharer, trainer, dbs } = valid[0];
     const memberships = [];
     // 담당 선생님 기준: '근막이완 회원 리스트(담당자별)'에서 이 회원의 담당 선생님 지점만 연다.
     // (지점을 옮긴 회원이 예전 지점 누적 DB에도 남아 있어도 현재 담당 지점으로 잡히도록 · 2026-11-10 대표)
-    const groups = new Set(vm.filter((m) => m.name === normName(name)).map((m) => m.group));
+    // 공유자 칸에 담당 선생님을 적었으면 그 선생님 기준 (예: 금액권 공유자 "장미림6692 황사라")
+    const groups = new Set(trainer ? [trainer] : vm.filter((m) => m.name === normName(name)).map((m) => m.group));
     for (const b of BRANCHES.filter((b) => b.open)) {
       const t = b.trainers.find((x) => groups.has(x.name));
       if (!t) continue;
