@@ -220,7 +220,11 @@ export async function fullPhoneOf(name: string, last4: string): Promise<string> 
     if (hit) return hit;
     // 방금 등록한 회원은 5분 캐시에 없을 수 있어 한 번 새로 읽는다
     phoneCache = null;
-    return (await phoneBook()).find((e) => e.name === n && e.phone.endsWith(last4))?.phone ?? "";
+    const again = (await phoneBook()).find((e) => e.name === n && e.phone.endsWith(last4))?.phone;
+    if (again) return again;
+    // 공유자가 예약한 경우: 일정은 회원권 주인 이름이지만 번호는 공유자 것 → 공유자 이름+뒷번호로 찾는다
+    const sharer = ((await validMembers()) ?? []).find((m) => m.name === n)?.sharers?.find((x) => x.last4 === last4);
+    return sharer ? (await phoneBook()).find((e) => e.name === sharer.name && e.phone.endsWith(last4))?.phone ?? "" : "";
   } catch {
     return "";
   }
@@ -233,6 +237,11 @@ export async function phonesFor(name: string, last4?: string): Promise<string[]>
   if (!list.length && phoneCache && Date.now() - phoneCache.at > 60_000) {
     phoneCache = null;
     list = (await phoneBook()).filter((e) => e.name === n && (!last4 || e.phone.endsWith(last4)));
+  }
+  if (!list.length && last4) {
+    // 공유자가 홈페이지로 예약한 일정: 주인 이름 + 공유자 뒷번호
+    const sharer = ((await validMembers()) ?? []).find((m) => m.name === n)?.sharers?.find((x) => x.last4 === last4);
+    if (sharer) list = (await phoneBook()).filter((e) => e.name === sharer.name && e.phone.endsWith(last4));
   }
   return [...new Set(list.map((e) => e.phone))];
 }
