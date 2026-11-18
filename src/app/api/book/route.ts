@@ -79,7 +79,7 @@ export async function POST(req: Request) {
       look.color = pt ? pick.trainer.ptColor : pick.trainer.memberColor;
     }
     // 일정 제목은 기존 노션 '예약 분석' 집계 규칙과 같게: 체험='이름+뒷4자리 체험', 회원='이름' (회차는 담당자가 붙임)
-    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${memberName}${look.suffix}${sharer ? ` (${sharer})` : ""}`;
+    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${sharer || memberName}${look.suffix}`; // 공유자가 예약하면 당사자 이름으로 (2026-11-18 대표)
     const memo = cleanMemo(body.memo);
     const description = [
       `[홈페이지 예약] ${kind === "trial" ? "첫 방문 체험" : kind === "pt" ? "PT 상담·평가(무료)" : "회원 예약"}`,
