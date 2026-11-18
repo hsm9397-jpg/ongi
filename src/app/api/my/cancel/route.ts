@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       await logMember(r.ev.props?.name ?? name, r.ev.props?.phone ?? last4, { t: "cancel", when: r.ev.start, sameDay, branch: r.branch.short, trainer: r.trainer.name });
     }
     await notify({ type: "cancel", branchName: r.branch.name, trainer: r.trainer, team: r.branch.trainers, name: r.ev.props?.name ?? name, kind: r.ev.props?.kind ?? "", when: r.ev.start });
-    await alimtalk({ type: "cancel", branch: r.branch, trainer: r.trainer, name: r.ev.props?.name ?? name, phone: r.ev.props?.phone ?? last4, when: r.ev.start });
+    await alimtalk({ type: "cancel", branch: r.branch, trainer: r.trainer, name: r.ev.props?.sharer ?? r.ev.props?.name ?? name, phone: r.ev.props?.phone ?? last4, when: r.ev.start });
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("my/cancel", e);

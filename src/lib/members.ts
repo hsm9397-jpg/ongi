@@ -7,7 +7,7 @@ import { findMember, normName, notion, plainText, schemaOf } from "./notion";
 type Prop = { type: string; [k: string]: unknown };
 type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
 
-export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: { name: string; last4: string }[] };
+export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: { name: string; last4: string }[]; sharerOf?: string };
 
 /** 금액권 '공유자' 칸: "김은수3509, 현재상1209"처럼 이름+뒷번호 4자리 */
 function parseSharers(text: string): { name: string; last4: string }[] {
@@ -111,13 +111,37 @@ export function maskAll(names: string[]): string[] {
 const key = () =>
   crypto.createHash("sha256").update("member|" + (process.env.MANAGE_SECRET || process.env.GOOGLE_SERVICE_ACCOUNT_KEY || "ongi-demo")).digest();
 const sig = (s: string) => crypto.createHmac("sha256", key()).update(s).digest("base64url").slice(0, 22);
-export const memberToken = (id: string) => `${id}.${sig(id)}`;
-export function readMemberToken(t: unknown): string | null {
+// 공유자가 로그인하면 열쇠에 공유자 이름도 함께 담는다 ("페이지id~공유자")
+export const memberToken = (id: string, sharer?: string) => {
+  const raw = sharer ? `${id}~${Buffer.from(sharer, "utf8").toString("base64url")}` : id;
+  return `${raw}.${sig(raw)}`;
+};
+function readRaw(t: unknown): string | null {
   if (typeof t !== "string") return null;
-  const [id, s] = t.split(".");
-  if (!id || !s) return null;
-  const e = sig(id);
-  return s.length === e.length && crypto.timingSafeEqual(Buffer.from(s), Buffer.from(e)) ? id : null;
+  const [raw, s] = t.split(".");
+  if (!raw || !s) return null;
+  const e = sig(raw);
+  return s.length === e.length && crypto.timingSafeEqual(Buffer.from(s), Buffer.from(e)) ? raw : null;
+}
+export function readMemberToken(t: unknown): string | null {
+  return readRaw(t)?.split("~")[0] ?? null;
+}
+/** 공유자로 로그인한 열쇠면 공유자 이름 */
+export function readMemberSharer(t: unknown): string | null {
+  const as = readRaw(t)?.split("~")[1];
+  return as ? Buffer.from(as, "base64url").toString("utf8") : null;
+}
+
+/** who 서명값 안의 "주인|공유자" → 회원권 주인 이름, 공유자 이름 */
+export function splitWho(s: string | null | undefined): { name: string; sharer?: string } {
+  const [name, sharer] = (s ?? "").split("|");
+  return sharer ? { name, sharer } : { name };
+}
+
+/** 공유자 이름 + 뒷번호 → 회원권 주인 이름 (없으면 null) */
+export async function ownerOfSharer(sharer: string, last4: string): Promise<string | null> {
+  const n = normName(sharer);
+  return ((await validMembers()) ?? []).find((m) => (m.sharers ?? []).some((x) => x.name === n && x.last4 === last4))?.name ?? null;
 }
 
 // 이름을 화면에 그대로 보내지 않고 서명값으로 주고받기 위한 토큰
@@ -196,7 +220,7 @@ async function findByLast4Once(group: string, last4: string): Promise<ValidMembe
   const list = (await validMembers()) ?? [];
   const inGroup = list.filter((m) => m.group === group);
   // 금액권 공유자: 공유자 칸에 적힌 뒷번호로 들어오면 결제한 회원의 페이지를 함께 연다 (이름은 공유자 이름으로 표시)
-  const shared = inGroup.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name })));
+  const shared = inGroup.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name, sharerOf: m.name })));
   if (process.env.DEMO_MODE === "1") return [...(last4 === "1234" ? inGroup.slice(0, 1) : []), ...shared];
   const hits = await namesByLast4(last4);
   const mine = [...inGroup.filter((m) => hits.has(m.name)), ...shared];
@@ -206,7 +230,7 @@ async function findByLast4Once(group: string, last4: string): Promise<ValidMembe
   const seen = new Set<string>();
   const all = [
     ...list.filter((m) => hits.has(m.name)),
-    ...list.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name }))),
+    ...list.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name, sharerOf: m.name }))),
   ];
   return all.filter((m) => (seen.has(m.id + m.name) ? false : (seen.add(m.id + m.name), true)));
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { nameToken, readMemberToken, validMembers } from "@/lib/members";
+import { nameToken, readMemberSharer, readMemberToken, validMembers } from "@/lib/members";
 
 export const dynamic = "force-dynamic";
 
@@ -12,5 +12,7 @@ export async function POST(req: Request) {
   if (!list) return NextResponse.json({ error: "잠시 후 다시 시도해 주세요." }, { status: 502 });
   const m = list.find((x) => x.id === id);
   if (!m) return NextResponse.json({ expired: true });
-  return NextResponse.json({ name: m.name, url: m.url, who: nameToken(m.name) });
+  // 공유자로 로그인한 기기면 예약할 때 공유자 이름이 일정에 함께 남도록 "주인|공유자"로 준다
+  const as = readMemberSharer(body.token);
+  return NextResponse.json({ name: m.name, url: m.url, who: nameToken(as ? `${m.name}|${as}` : m.name) });
 }

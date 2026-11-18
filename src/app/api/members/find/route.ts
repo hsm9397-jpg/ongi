@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   try {
     const found = await findByLast4(group, last4);
     const labels = maskAll(found.map((m) => m.name));
-    return NextResponse.json({ items: found.map((m, i) => ({ name: labels[i], url: m.url, token: memberToken(m.id) })) });
+    return NextResponse.json({ items: found.map((m, i) => ({ name: labels[i], url: m.url, token: memberToken(m.id, m.sharerOf ? m.name : undefined) })) });
   } catch (e) {
     console.error("members/find", e);
     return NextResponse.json({ error: "잠시 후 다시 시도해 주세요." }, { status: 502 });

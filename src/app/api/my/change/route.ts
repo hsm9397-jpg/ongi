@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const props = r.ev.props ?? {};
     const description = `${(r.ev.description ?? "").replace(/\n?\(홈페이지에서 고객이 시간 변경\)/g, "")}\n(홈페이지에서 고객이 시간 변경)`.trim();
     // 같은 날 두 번째 변경을 막기 위해 변경한 날짜를 남김
-    const extra = kind === "member" ? { chgDate: todayKst() } : undefined;
+    const extra = kind === "member" ? { chgDate: todayKst(), ...(props.sharer ? { sharer: props.sharer } : {}) } : undefined;
     if (cal === r.calendarId) {
       // 같은 선생님: 기존 일정을 그대로 옮긴다 (지우고 새로 만들면 삼성 캘린더가 못 따라오는 경우가 있음)
       await rescheduleEvent(cal, r.eventId, { start: pick.start, end: pick.end, description, props: { ...(props as Record<string, string>), ...(extra ?? {}) } });
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     }
     if (kind === "member") await logMember(props.name ?? name, props.phone ?? last4, { t: "change", when: r.ev.start, toWhen: pick.start, branch: r.branch.short, trainer: pick.trainer.name });
     await notify({ type: "change", branchName: r.branch.name, trainer: pick.trainer, oldTrainer: r.trainer, team: r.branch.trainers, name: props.name ?? name, kind, when: pick.start, oldWhen: r.ev.start });
-    await alimtalk({ type: "change", branch: r.branch, trainer: pick.trainer, oldTrainer: r.trainer, name: props.name ?? name, phone: props.phone ?? last4, when: pick.start, oldWhen: r.ev.start });
+    await alimtalk({ type: "change", branch: r.branch, trainer: pick.trainer, oldTrainer: r.trainer, name: props.sharer ?? props.name ?? name, phone: props.phone ?? last4, when: pick.start, oldWhen: r.ev.start });
     return NextResponse.json({ ok: true, booking: { date, hour, minutes: BOOKING.sessionMinutes, trainerName: pick.trainer.name, branchName: r.branch.name } });
   } catch (e) {
     console.error("my/change", e);

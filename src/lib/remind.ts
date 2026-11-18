@@ -57,7 +57,11 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
         const name = e.props?.name ? normName(e.props.name) : p.name;
         const last4 = (e.props?.phone ?? "").length === 4 ? e.props!.phone : p.last4;
         const item: RemindItem = { name, when: fmtKakao(e.start), branch: b.short, trainer: t.name, status: "send" };
-        let full = (e.props?.phone ?? "").length >= 10 ? [e.props!.phone] : await phonesFor(name, last4).catch(() => [] as string[]);
+        // 공유자가 홈페이지로 예약한 일정: 공유자 번호로 (못 찾으면 주인 이름 기준으로)
+        const sharer = e.props?.sharer ? normName(e.props.sharer) : "";
+        if (sharer) item.name = sharer;
+        let full = (e.props?.phone ?? "").length >= 10 ? [e.props!.phone] : sharer && last4 ? await phonesFor(sharer, last4).catch(() => [] as string[]) : [];
+        if (!full.length && (e.props?.phone ?? "").length < 10) full = await phonesFor(name, last4).catch(() => [] as string[]);
         // 2:1 회원: 묶음 이름으로 못 찾으면 한 명씩 찾아 첫 번째로 찾은 번호로 보냄
         if (!full.length && name.includes("/")) {
           for (const part of name.split("/")) {
@@ -84,7 +88,7 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
         const prev = byPhone.get(full[0]);
         if (prev && prev.when <= e.start) continue;
         if (prev) items.splice(prev.idx, 1, { ...items[prev.idx], status: "skip", reason: "같은 날 이른 예약에 함께 안내" });
-        byPhone.set(full[0], { name, when: e.start, idx: items.length });
+        byPhone.set(full[0], { name: sharer || name, when: e.start, idx: items.length });
         items.push(item);
       }
     }

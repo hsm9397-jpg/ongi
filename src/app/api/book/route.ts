@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
-import { isValidName, readNameToken, isSharerOf } from "@/lib/members";
+import { isValidName, readNameToken, isSharerOf, ownerOfSharer, splitWho } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
@@ -25,7 +25,10 @@ export async function POST(req: Request) {
   const date = body.date;
   const hour = Number(body.hour);
   // 회원 예약은 이름 대신 /api/member가 준 서명값(who)으로 온다
-  const name = body.kind === "member" && body.who ? cleanName(readNameToken(body.who) ?? "") : cleanName(body.name);
+  // 공유자가 예약하면 who 안에 "주인|공유자"가 들어 있다
+  const who = body.kind === "member" && body.who ? splitWho(readNameToken(body.who)) : null;
+  const name = who ? cleanName(who.name) : cleanName(body.name);
+  const sharer = who?.sharer ? cleanName(who.sharer) : "";
   if (!kind || !branch || !branch.open || branch.bookable === false || (kind === "pt") !== (branch.only === "pt") || !isValidDate(date) || !Number.isInteger(hour) || name.length < 2) {
     return NextResponse.json({ error: "예약 정보가 올바르지 않아요." }, { status: 400 });
   }
@@ -50,6 +53,9 @@ export async function POST(req: Request) {
     if (!m.length && last4.length === 4 && (await isSharerOf(name, last4))) m = [{ dbId: "", pageId: "", name }];
     if (!m.length) return NextResponse.json({ error: "회원 확인이 필요해요. 처음부터 다시 시도해 주세요." }, { status: 403 });
     memberName = m[0].name;
+    if (sharer && (await ownerOfSharer(sharer, last4)) !== memberName) {
+      return NextResponse.json({ error: "회원 확인이 필요해요. 처음부터 다시 시도해 주세요." }, { status: 403 });
+    }
     if (!(await isValidName(memberName))) {
       return NextResponse.json({ error: "회원권이 만료되어 예약할 수 없어요. 재등록은 카카오톡 [온기pt]로 문의해 주세요." }, { status: 403 });
     }
@@ -73,29 +79,30 @@ export async function POST(req: Request) {
       look.color = pt ? pick.trainer.ptColor : pick.trainer.memberColor;
     }
     // 일정 제목은 기존 노션 '예약 분석' 집계 규칙과 같게: 체험='이름+뒷4자리 체험', 회원='이름' (회차는 담당자가 붙임)
-    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${memberName}${look.suffix}`;
+    const summary = kind === "trial" ? `${name}${phone.slice(-4)} 체험` : kind === "pt" ? `${name}${phone.slice(-4)} PT상담` : `${memberName}${look.suffix}${sharer ? ` (${sharer})` : ""}`;
     const memo = cleanMemo(body.memo);
     const description = [
       `[홈페이지 예약] ${kind === "trial" ? "첫 방문 체험" : kind === "pt" ? "PT 상담·평가(무료)" : "회원 예약"}`,
       `지점: ${branch.name}`,
       kind !== "member" ? `연락처: ${fmtPhone(phone)}` : `연락처 뒷자리: ${phone}`,
+      sharer ? `예약한 사람: ${sharer} (공유자)` : "",
       memo ? `요청사항: ${memo}` : "",
     ]
       .filter(Boolean)
       .join("\n");
 
-    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id, colorId: look.color });
+    await createEvent(cal, { summary, start: pick.start, end: pick.end, description, kind, phone, name: memberName, branch: branch.id, colorId: look.color, ...(sharer ? { extra: { sharer } } : {}) });
     await carveOpen(cal, pick.start, pick.end).catch((e) => console.error("carveOpen", e));
     await notify({
       type: "new",
       branchName: branch.name,
       trainer: pick.trainer,
       team: branch.trainers,
-      name: memberName,
+      name: sharer ? `${memberName}(${sharer})` : memberName,
       kind,
       when: pick.start,
     });
-    await alimtalk({ type: "new", branch, trainer: pick.trainer, name: memberName, phone, when: pick.start });
+    await alimtalk({ type: "new", branch, trainer: pick.trainer, name: sharer || memberName, phone, when: pick.start });
     if (kind === "member") await logMember(memberName, phone, { t: "book", when: pick.start, branch: branch.short, trainer: pick.trainer.name });
 
     return NextResponse.json({
