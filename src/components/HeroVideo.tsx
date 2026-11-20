@@ -18,9 +18,6 @@ export default function HeroVideo() {
   return (
     <div className="hero-video">
       <video ref={ref} src="/hero/brand.mp4" poster="/hero/poster.jpg" autoPlay muted loop playsInline preload="auto" aria-label="온기 근막이완 컨디셔닝 영상" />
-      <div className="hero-video-over">
-        <p className="hv-slogan">몸을 편안하게,<br />움직임을 자유롭게.</p>
-      </div>
     </div>
   );
 }
