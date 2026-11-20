@@ -766,3 +766,8 @@ details.contra[open] .contra-sub u{display:none}
 .mp-upcoming ul.mb-hist li span{color:var(--fg)}
 .mp-upcoming ul.mb-hist b{margin-left:auto;font-size:13px}
 .summary .left-note{color:var(--muted);font-size:12px;font-weight:400}
+/* 회원 연속 예약: 확정한 예약 목록 (2026-11-20) */
+.booked-list{border:1px solid #cfe3cf;background:#f1f8f0;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.booked-list b{color:#2f6b35}
+.booked-list ul{margin:0;padding-left:18px}
+.booked-list small{color:var(--muted)}

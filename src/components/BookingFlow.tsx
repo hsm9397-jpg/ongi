@@ -319,6 +319,9 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<Done | null>(null);
+  // 회원 예약: 확정 후 날짜 화면으로 돌아와 연달아 잡을 수 있게, 이번에 잡은 예약을 위에 쌓아 보여줌
+  const [booked, setBooked] = useState<Done[]>([]);
+  const [reload, setReload] = useState(0);
   const [expiredPop, setExpiredPop] = useState(false);
   const [waitPop, setWaitPop] = useState<PubBranch | null>(null);
   const [closedPop, setClosedPop] = useState(false);
@@ -379,7 +382,7 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
     return () => {
       cancelled = true;
     };
-  }, [activeBranch, trainer, needTrainer, selfBook]);
+  }, [activeBranch, trainer, needTrainer, selfBook, reload]);
 
   // 회원 페이지 안에서 열린 예약 창: 이 폰에 기억된 회원이면 바로 확인
   useEffect(() => {
@@ -540,8 +543,15 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
             : { kind, branch: activeBranch, date: day, hour, who, last4, trainer }
         ),
       });
-      setDone(r.booking);
       try { window.dispatchEvent(new Event("ongi-booked")); } catch {}
+      if (kind === "member") {
+        // 확정 → 날짜 선택으로 돌아옴 (회원 확인·선생님 선택은 그대로)
+        setBooked((b) => [...b, r.booking]);
+        setHour(null);
+        setReload((n) => n + 1);
+      } else {
+        setDone(r.booking);
+      }
     } catch (e) {
       setErr((e as Error).message);
       setHour(null);
@@ -825,9 +835,21 @@ export default function BookingFlow(props: { branches: PubBranch[]; trialPrice: 
       {selfBook && <p className="bnotice" style={{ textAlign: "center" }}>{trainerName} 선생님 일정은 담당 선생님께 직접 문의해 주세요.</p>}
       {loading && <p className="loading">예약 가능한 시간을 불러오는 중이에요…</p>}
 
+      {kind === "member" && booked.length > 0 && (
+        <div className="booked-list" role="status">
+          <b>✓ 예약이 확정됐어요</b>
+          <ul>
+            {booked.map((b) => (
+              <li key={`${b.date}-${b.hour}`}>{fmtDay(b.date)} {b.hour}:00 · {b.trainerName} 선생님</li>
+            ))}
+          </ul>
+          <small>이어서 다른 날짜도 바로 잡을 수 있어요. 변경·취소는 &apos;내 예약&apos;에서 할 수 있고, 당일 취소는 차감됩니다.</small>
+        </div>
+      )}
+
       {days && (
         <div className="step" id="bk-date">
-          <h3>2 · 날짜</h3>
+          <h3>2 · 날짜{booked.length > 0 ? " (이어서 예약)" : ""}</h3>
           <MonthCalendar days={days} selected={day} onPick={(d) => { setDay(d); setHour(null); focusOn("bk-time"); }} />
         </div>
       )}
