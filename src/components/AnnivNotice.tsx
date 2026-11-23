@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
-/** 회원 페이지: 1주년 감사제 안내(11/30까지) + 2027 이용금액 조정 사전 안내(12/31까지). 내용은 대표 노션 '온기 1주년 감사제 및 공지 사항 안내'에서 옮김 */
+/** 회원 페이지: 1주년 감사제 안내(12/31까지, 2026-11-23 대표 연장) + 2027 이용금액 조정 사전 안내(12/31까지). 내용은 대표 노션 '온기 1주년 감사제 및 공지 사항 안내'에서 옮김 */
 const KAKAO = "http://pf.kakao.com/_eYctn";
 const past = (d: string) => Date.now() > new Date(`${d}T23:59:59+09:00`).getTime();
 
 export default function AnnivNotice() {
   const [now, setNow] = useState({ event: true, price: true });
-  useEffect(() => setNow({ event: !past("2026-11-30"), price: !past("2026-12-31") }), []);
+  useEffect(() => setNow({ event: !past("2026-12-31"), price: !past("2026-12-31") }), []);
   if (!now.event && !now.price) return null;
   return (
     <div className="an">
@@ -27,7 +27,7 @@ export default function AnnivNotice() {
             <h2>온기 1주년 감사제</h2>
             <dl className="an-dl">
               <div><dt>대상</dt><dd>온기의 ‘모든 회원님’<small>단 한 번이라도 온기를 이용해주셨다면 모두 감사제 대상입니다.</small></dd></div>
-              <div><dt>기간</dt><dd>2026년 11월 1일 ~ 11월 30일</dd></div>
+              <div><dt>기간</dt><dd>2026년 11월 1일 ~ 12월 31일</dd></div>
             </dl>
             <h3>감사 혜택</h3>
             <ol className="an-list">
