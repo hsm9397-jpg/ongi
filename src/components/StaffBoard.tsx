@@ -370,7 +370,9 @@ type Ins = {
 };
 const mmss = (s: number) => (s >= 60 ? `${Math.floor(s / 60)}분 ${s % 60}초` : `${s}초`);
 const PAGE_NAME: Record<string, string> = { "/": "홈", "/member": "회원 페이지", "/회원": "회원 페이지", "/price": "서비스 금액", "/금액": "서비스 금액", "/privacy": "개인정보처리방침" };
-function Bars({ rows }: { rows: { label: string; n: number; sub?: string }[] }) {
+// 많이 본(오래 머문)·많이 누른 순으로 정렬해서 보여줌 (2026-11-23 대표 요청)
+function Bars({ rows: raw }: { rows: { label: string; n: number; sub?: string }[] }) {
+  const rows = [...raw].sort((a, b) => b.n - a.n);
   const max = Math.max(1, ...rows.map((r) => r.n));
   return (
     <ul className="ins-bars">
@@ -397,8 +399,9 @@ function Insight({ staffKey }: { staffKey: string }) {
   }, [days, staffKey]);
   if (d && !d.ready) return null;
   const home = d?.pages?.find((p) => p.path === "/");
-  const homeClicks = (d?.clicks ?? []).filter((c) => c.path === "/");
-  const otherClicks = (d?.clicks ?? []).filter((c) => c.path !== "/");
+  const byN = (a: { n: number }, b: { n: number }) => b.n - a.n;
+  const homeClicks = (d?.clicks ?? []).filter((c) => c.path === "/").sort(byN);
+  const otherClicks = (d?.clicks ?? []).filter((c) => c.path !== "/").sort(byN);
   const reachBase = Math.max(1, d?.sessions ?? 0);
   return (
     <div className="branch visits">
