@@ -7,7 +7,7 @@ import { findMember, normName, notion, plainText, schemaOf } from "./notion";
 type Prop = { type: string; [k: string]: unknown };
 type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
 
-export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: Sharer[]; sharerOf?: string };
+export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: Sharer[]; sharerOf?: string; trainer?: string };
 export type Sharer = { name: string; last4: string; trainer?: string };
 
 /** 금액권 '공유자' 칸: "김은수3509, 현재상1209"처럼 이름+뒷번호 4자리.
@@ -64,9 +64,14 @@ export async function validMembers(): Promise<ValidMember[] | null> {
           const memoProp = Object.entries(p.properties).find(([k]) => k === "메모")?.[1];
           const memoShare = memoProp ? plainText(memoProp).split(/공유자?\s*[:：]?/).slice(1).join(" ") : "";
           const sharers = [...(shareProp ? parseSharers(plainText(shareProp)) : []), ...(memoShare ? parseSharers(memoShare) : [])];
+          // 금액권 회원 담당: '메모' 칸에 "담당 황사라"처럼 적으면 그 선생님 버튼으로 로그인하고 그 선생님 일정이 열림 (2026-11-23)
+          const memoText = memoProp ? plainText(memoProp) : "";
+          const trainerNames = [...new Set(BRANCHES.flatMap((b) => b.trainers.map((t) => t.name)))];
+          const tm = !sel ? memoText.match(/담당\s*(?:선생님)?\s*[:：]?\s*([가-힣]{2,4})/) : null;
+          const trainer = tm && trainerNames.includes(tm[1]) ? tm[1] : undefined;
           // 한 줄에 "김선우/송경아"처럼 여러 명을 적은 회원권(가족 등)은 각자 이름으로 로그인·예약되게 나눔 (2026-11-23)
           for (const one of name.split("/").map((x) => normName(x)).filter(Boolean)) {
-            list.push({ id, name: one, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}) });
+            list.push({ id, name: one, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}), ...(trainer ? { trainer } : {}) });
           }
         }
         cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
@@ -228,7 +233,7 @@ export async function findByLast4(group: string, last4: string): Promise<ValidMe
 
 async function findByLast4Once(group: string, last4: string): Promise<ValidMember[]> {
   const list = (await validMembers()) ?? [];
-  const inGroup = list.filter((m) => m.group === group);
+  const inGroup = list.filter((m) => m.group === group || m.trainer === group);
   // 금액권 공유자: 공유자 칸에 적힌 뒷번호로 들어오면 결제한 회원의 페이지를 함께 연다 (이름은 공유자 이름으로 표시)
   const shared = inGroup.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name, sharerOf: m.name })));
   if (process.env.DEMO_MODE === "1") return [...(last4 === "1234" ? inGroup.slice(0, 1) : []), ...shared];

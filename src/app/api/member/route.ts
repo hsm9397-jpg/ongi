@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     // 담당 선생님 기준: '근막이완 회원 리스트(담당자별)'에서 이 회원의 담당 선생님 지점만 연다.
     // (지점을 옮긴 회원이 예전 지점 누적 DB에도 남아 있어도 현재 담당 지점으로 잡히도록 · 2026-11-10 대표)
     // 공유자 칸에 담당 선생님을 적었으면 그 선생님 기준 (예: 금액권 공유자 "장미림6692 황사라")
-    const groups = new Set(trainer ? [trainer] : vm.filter((m) => m.name === normName(name)).map((m) => m.group));
+    const groups = new Set(trainer ? [trainer] : vm.filter((m) => m.name === normName(name)).map((m) => m.trainer ?? m.group));
     for (const b of BRANCHES.filter((b) => b.open)) {
       const t = b.trainers.find((x) => groups.has(x.name));
       if (!t) continue;
