@@ -39,7 +39,7 @@ export default function HeroVideo() {
   }, []);
   return (
     <div className="hero-video" dangerouslySetInnerHTML={{
-      __html: '<video src="/hero/brand.mp4" poster="/hero/poster.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture aria-label="온기 근막이완 컨디셔닝 영상"></video>',
+      __html: '<video src="/hero/brand-1123.mp4" poster="/hero/poster-1123.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture aria-label="온기 근막이완 컨디셔닝 영상"></video>',
     }} ref={(el) => { (ref as React.MutableRefObject<HTMLVideoElement | null>).current = (el?.querySelector("video") as HTMLVideoElement) ?? null; }} />
   );
 }
