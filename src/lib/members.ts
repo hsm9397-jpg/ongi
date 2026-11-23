@@ -64,7 +64,10 @@ export async function validMembers(): Promise<ValidMember[] | null> {
           const memoProp = Object.entries(p.properties).find(([k]) => k === "메모")?.[1];
           const memoShare = memoProp ? plainText(memoProp).split(/공유자?\s*[:：]?/).slice(1).join(" ") : "";
           const sharers = [...(shareProp ? parseSharers(plainText(shareProp)) : []), ...(memoShare ? parseSharers(memoShare) : [])];
-          list.push({ id, name, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}) });
+          // 한 줄에 "김선우/송경아"처럼 여러 명을 적은 회원권(가족 등)은 각자 이름으로 로그인·예약되게 나눔 (2026-11-23)
+          for (const one of name.split("/").map((x) => normName(x)).filter(Boolean)) {
+            list.push({ id, name: one, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}) });
+          }
         }
         cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
       } while (cursor);
@@ -235,8 +238,9 @@ async function findByLast4Once(group: string, last4: string): Promise<ValidMembe
   // 고른 담당(또는 금액권)에서 못 찾으면 전체 유효 회원에서 같은 이름+뒷번호를 찾는다
   // (예: 금액권 회원이 담당 선생님 버튼을 누른 경우, 담당이 바뀐 경우)
   const seen = new Set<string>();
+  // 다른 선생님 회원은 뒷번호가 같아도 열지 않는다 (뒷번호만 같은 다른 회원 페이지가 열리는 문제, 2026-11-23)
   const all = [
-    ...list.filter((m) => hits.has(m.name)),
+    ...list.filter((m) => m.group === "금액권" && hits.has(m.name)),
     ...list.flatMap((m) => (m.sharers ?? []).filter((x) => x.last4 === last4).map((x) => ({ ...m, name: x.name, sharerOf: m.name }))),
   ];
   return all.filter((m) => (seen.has(m.id + m.name) ? false : (seen.add(m.id + m.name), true)));
