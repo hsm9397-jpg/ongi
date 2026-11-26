@@ -26,9 +26,9 @@ function parseSharers(text: string): Sharer[] {
 // 유효 회원 DB 목록. "DB아이디:담당" 형식이면 담당 칸이 없는 DB의 기본 담당으로 씀
 // (현승민 PT 회원 리스트는 담당 칸이 없어서 기본 담당을 현승민으로, 2026-11-26)
 // 끝에 ":plain"이면 이 DB 회원 예약은 캘린더 제목에 " PT"/" 근막"을 붙이지 않고 이름만 (대표 요청)
+const PT_DB = "30546121f76580d89603e1f561b188a3:현승민:plain";
 const VALID_DBS = () =>
-  (process.env.NOTION_VALID_DBS || "fcb46121f765830ea8d501a3a6eb51ee,32946121f765801a8bf9c58f847716c9,30546121f76580d89603e1f561b188a3:현승민:plain")
-    .split(",")
+  [...new Set([...(process.env.NOTION_VALID_DBS || "fcb46121f765830ea8d501a3a6eb51ee,32946121f765801a8bf9c58f847716c9").split(","), PT_DB])]
     .map((s) => s.trim())
     .filter(Boolean)
     .map((s) => {
