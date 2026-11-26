@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { recordInsight, type InsightEvent } from "@/lib/insight";
+import { recordInsights, type InsightEvent } from "@/lib/insight";
 import { visitsReady } from "@/lib/visits";
 import { todayKst } from "@/lib/time";
 import { clientIp, tooMany } from "@/lib/validate";
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const body = (await req.json().catch(() => null)) as { events?: InsightEvent[] } | InsightEvent | null;
     const list = (body && "events" in body ? body.events : body ? [body as InsightEvent] : []) ?? [];
     const date = todayKst();
-    for (const e of list.slice(0, 20)) if (e && ["view", "click", "dwell"].includes(e.t)) await recordInsight(date, e);
+    await recordInsights(date, list.slice(0, 20).filter((e) => e && ["view", "click", "dwell"].includes(e.t)));
   } catch (e) {
     console.error("insight", e);
   }

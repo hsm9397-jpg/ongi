@@ -1,5 +1,5 @@
 // 방문자 인사이트: 무엇을 눌렀는지, 어느 구간에 얼마나 머물렀는지, 어디서 왔는지 (개인정보 없이 하루 단위 합계만)
-import { pipeline } from "./visits";
+import { hincrMany, pipeline } from "./visits";
 
 export const SECTION_LABEL: Record<string, string> = {
   top: "첫 화면", about: "소개", method: "근막이완", why: "왜 하나요", process: "진행 과정", reviews: "후기", branches: "지점",
@@ -13,32 +13,34 @@ export type InsightEvent =
   | { t: "click"; path: string; label: string }
   | { t: "dwell"; path: string; total: number; sections: Record<string, number>; first?: boolean; fresh?: string[] };
 
-export async function recordInsight(date: string, e: InsightEvent) {
+/** 이벤트들을 해시 더하기 목록으로 바꾼다 (요청 하나 = Redis 명령 1개로 보냄) */
+export function insightOps(date: string, e: InsightEvent): [string, string, number][] {
   const k = (x: string) => `ins:${date}:${x}`;
-  const cmds: (string | number)[][] = [];
+  const ops: [string, string, number][] = [];
   const path = clean(e.path, 60) || "/";
   if (e.t === "view") {
-    cmds.push(["HINCRBY", k("ref"), clean(e.ref, 20) || "직접", 1], ["HINCRBY", k("path"), path, 1]);
+    ops.push([k("ref"), clean(e.ref, 20) || "직접", 1], [k("path"), path, 1]);
   } else if (e.t === "click") {
     const label = clean(e.label);
-    if (!label) return;
-    cmds.push(["HINCRBY", k("click"), `${path}|${label}`, 1]);
+    if (label) ops.push([k("click"), `${path}|${label}`, 1]);
   } else {
     const total = Math.min(1800, Math.max(0, Math.round(Number(e.total) || 0)));
     const fresh = new Set((Array.isArray(e.fresh) ? e.fresh : Object.keys(e.sections ?? {})).map((x) => clean(x, 30)));
-    if (total > 0) cmds.push(["HINCRBY", k("dwell"), path, total]);
-    if (e.first !== false) cmds.push(["HINCRBY", k("dwelln"), path, 1]);
+    if (total > 0) ops.push([k("dwell"), path, total]);
+    if (e.first !== false) ops.push([k("dwelln"), path, 1]);
     for (const [id, sec] of Object.entries(e.sections ?? {}).slice(0, 30)) {
       const s = Math.min(1800, Math.max(0, Math.round(Number(sec) || 0)));
       const sid = clean(id, 30);
       if (s < 1 || !sid) continue;
-      cmds.push(["HINCRBY", k("sec"), `${path}|${sid}`, s]);
-      if (fresh.has(sid)) cmds.push(["HINCRBY", k("secn"), `${path}|${sid}`, 1]);
+      ops.push([k("sec"), `${path}|${sid}`, s]);
+      if (fresh.has(sid)) ops.push([k("secn"), `${path}|${sid}`, 1]);
     }
   }
-  if (!cmds.length) return;
-  for (const x of ["ref", "path", "click", "dwell", "dwelln", "sec", "secn"]) cmds.push(["EXPIRE", k(x), TTL]);
-  await pipeline(cmds);
+  return ops;
+}
+
+export async function recordInsights(date: string, events: InsightEvent[]) {
+  await hincrMany(events.flatMap((e) => insightOps(date, e)), TTL);
 }
 
 type H = Record<string, number>;

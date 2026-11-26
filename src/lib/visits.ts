@@ -25,17 +25,39 @@ export async function pipeline(cmds: (string | number)[][]): Promise<unknown[]> 
   });
   if (!r.ok) throw new Error(`redis ${r.status}`);
   const j = (await r.json()) as { result?: unknown; error?: string }[];
+  const err = j.find((x) => x?.error)?.error;
+  if (err && /max requests limit|limit exceeded/i.test(err)) throw new Error(`redis limit: ${err}`);
   return j.map((x) => x.result);
 }
 
+// 무료 Upstash는 한 달 명령 50만 개 제한: 여러 명령을 스크립트 하나(EVAL)로 묶어 1개로 센다 (2026-11-26 한도 초과 뒤)
+const HINCR_LUA = `local ttl = tonumber(ARGV[1])
+for i = 2, #ARGV, 3 do redis.call('HINCRBY', KEYS[tonumber(ARGV[i])], ARGV[i + 1], tonumber(ARGV[i + 2])) end
+if ttl > 0 then for i = 1, #KEYS do redis.call('EXPIRE', KEYS[i], ttl) end end
+return 1`;
+
+/** 해시 칸 여러 개를 한 번에 더한다: ops = [키, 칸, 더할 수] */
+export async function hincrMany(ops: [string, string, number][], ttl = 0) {
+  if (!ops.length) return;
+  const keys: string[] = [];
+  const argv: (string | number)[] = [ttl];
+  for (const [k, f, n] of ops) {
+    let i = keys.indexOf(k);
+    if (i < 0) i = keys.push(k) - 1;
+    argv.push(i + 1, f, n);
+  }
+  await pipeline([["EVAL", HINCR_LUA, keys.length, ...keys, ...argv]]);
+}
+
+const VISIT_LUA = `redis.call('INCR', KEYS[2]); redis.call('INCR', KEYS[3])
+if redis.call('SET', KEYS[1], '1', 'NX', 'EX', 172800) then
+  redis.call('INCR', KEYS[4]); redis.call('INCR', KEYS[5]); redis.call('SETNX', KEYS[6], ARGV[1])
+end
+return 1`;
+
 export async function recordVisit(date: string, ip: string, ua: string) {
   const who = crypto.createHash("sha256").update(`${date}|${ip}|${ua}`).digest("base64url").slice(0, 16);
-  const [first] = await pipeline([
-    ["SET", `v:seen:${date}:${who}`, "1", "NX", "EX", 172800],
-    ["INCR", `v:pv:${date}`],
-    ["INCR", "v:pv:total"],
-  ]);
-  if (first === "OK") await pipeline([["INCR", `v:day:${date}`], ["INCR", "v:total"], ["SETNX", "v:since", date]]);
+  await pipeline([["EVAL", VISIT_LUA, 6, `v:seen:${date}:${who}`, `v:pv:${date}`, "v:pv:total", `v:day:${date}`, "v:total", "v:since", date]]);
 }
 
 export async function readVisits(dates: string[]) {
@@ -54,14 +76,13 @@ export async function readVisits(dates: string[]) {
   };
 }
 
+const CLICK_LUA = `redis.call('INCR', KEYS[1]); redis.call('INCR', KEYS[2])
+redis.call('HINCRBY', KEYS[3], ARGV[1], 1); redis.call('EXPIRE', KEYS[3], 3456000)
+return 1`;
+
 /** 네이버 예약 버튼 클릭 (체험·PT 상담). kind: trial|pt, branch: 지점 id */
 export async function recordClick(date: string, kind: string, branch: string) {
-  await pipeline([
-    ["INCR", `c:${kind}:${date}`],
-    ["INCR", `c:${kind}:total`],
-    ["HINCRBY", `c:${kind}:br:${date}`, branch, 1],
-    ["EXPIRE", `c:${kind}:br:${date}`, 3456000],
-  ]);
+  await pipeline([["EVAL", CLICK_LUA, 3, `c:${kind}:${date}`, `c:${kind}:total`, `c:${kind}:br:${date}`, branch]]);
 }
 
 export async function readClicks(dates: string[]) {
