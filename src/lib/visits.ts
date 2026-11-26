@@ -26,7 +26,7 @@ export async function pipeline(cmds: (string | number)[][]): Promise<unknown[]> 
   if (!r.ok) throw new Error(`redis ${r.status}`);
   const j = (await r.json()) as { result?: unknown; error?: string }[];
   const err = j.find((x) => x?.error)?.error;
-  if (err && /max requests limit|limit exceeded/i.test(err)) throw new Error(`redis limit: ${err}`);
+  if (err) throw new Error(`redis: ${err}`);
   return j.map((x) => x.result);
 }
 

@@ -99,7 +99,8 @@ export async function runRemind(opts: { dry: boolean; now?: Date }): Promise<{ d
       // 같은 날 두 번 보내지 않도록 기록 (저장소가 있으면)
       if (visitsReady()) {
         const [ok] = await pipeline([["SET", `rm:${date}:${phone}`, "1", "NX", "EX", 259200]]).catch(() => ["OK"]);
-        if (ok !== "OK") { it.status = "sent"; it.reason = "이미 보냄"; continue; }
+        // null = 이미 보낸 기록이 있음. 저장소 오류(undefined 등)면 보낸다 (2026-11-26 한도 초과로 전원 누락됐던 문제)
+        if (ok === null) { it.status = "sent"; it.reason = "이미 보냄"; continue; }
       }
       const sent = await sendAlim(phone, v.tpl ?? ALIMTALK_TEMPLATES.remind, alimVariables({ type: "remind", branch: BRANCHES[0], trainer: BRANCHES[0].trainers[0], name: v.name, phone, when: v.when }));
       it.status = sent ? "sent" : "fail";

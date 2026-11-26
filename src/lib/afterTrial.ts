@@ -39,7 +39,8 @@ export async function runAfterTrial(opts: { send: boolean; now?: Date; windowMin
         if (now.getTime() - e.end.getTime() > win * 60_000) { item.status = "skip"; item.reason = `끝난 지 ${win}분 넘어 보내지 않음`; continue; }
         if (!noRedis) {
           const [ok] = await pipeline([["SET", key, "1", "NX", "EX", 172800]]).catch(() => { noRedis = true; return ["OK"]; });
-          if (ok !== "OK") { item.status = "sent"; continue; }
+          if (ok === null) { item.status = "sent"; continue; }
+          if (ok !== "OK") noRedis = true;
           if (noRedis && now.getTime() - e.end.getTime() > 10 * 60_000) { item.status = "skip"; item.reason = "끝난 지 10분 넘어 보내지 않음"; continue; }
         }
         const r = await sendAlimDetail(who.phone, ALIMTALK_TEMPLATES.afterTrial, { "#{이름}": who.name });
