@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { BOOKING, calendarIdOf, getBranch, memberDbIdsOf } from "@/config/branches";
-import { isValidName, readNameToken, isSharerOf, ownerOfSharer, splitWho } from "@/lib/members";
+import { isValidName, readNameToken, isSharerOf, ownerOfSharer, splitWho, validMembers } from "@/lib/members";
 import { pickTrainer } from "@/lib/availability";
 import { carveOpen, createEvent } from "@/lib/google";
 import { notify } from "@/lib/notify";
@@ -73,7 +73,9 @@ export async function POST(req: Request) {
 
     // 회원: 선생님 설정에 따라 "이름 근막"/"이름 PT"와 일정 색 (매출 현황 최근 등록으로 구분)
     const look = { suffix: "", color: undefined as string | undefined };
-    if (kind === "member" && (pick.trainer.memberSuffix || pick.trainer.memberColor)) {
+    // PT 회원 리스트 회원은 제목에 이름만 (2026-11-26 대표)
+    const plainTitle = kind === "member" && ((await validMembers()) ?? []).some((m) => m.name === memberName && m.plain);
+    if (kind === "member" && !plainTitle && (pick.trainer.memberSuffix || pick.trainer.memberColor)) {
       const pt = pick.trainer.ptSuffix || pick.trainer.ptColor ? (await programKindOf(memberName)) === "pt" : false;
       look.suffix = (pt ? pick.trainer.ptSuffix : pick.trainer.memberSuffix) ?? "";
       look.color = pt ? pick.trainer.ptColor : pick.trainer.memberColor;

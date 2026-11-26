@@ -7,7 +7,7 @@ import { findMember, normName, notion, plainText, schemaOf } from "./notion";
 type Prop = { type: string; [k: string]: unknown };
 type Page = { id: string; url: string; public_url?: string | null; properties: Record<string, Prop> };
 
-export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: Sharer[]; sharerOf?: string; trainer?: string };
+export type ValidMember = { id: string; name: string; group: string; url: string; sharers?: Sharer[]; sharerOf?: string; trainer?: string; plain?: boolean };
 export type Sharer = { name: string; last4: string; trainer?: string };
 
 /** 금액권 '공유자' 칸: "김은수3509, 현재상1209"처럼 이름+뒷번호 4자리.
@@ -23,11 +23,28 @@ function parseSharers(text: string): Sharer[] {
   return out;
 }
 
+// 유효 회원 DB 목록. "DB아이디:담당" 형식이면 담당 칸이 없는 DB의 기본 담당으로 씀
+// (현승민 PT 회원 리스트는 담당 칸이 없어서 기본 담당을 현승민으로, 2026-11-26)
+// 끝에 ":plain"이면 이 DB 회원 예약은 캘린더 제목에 " PT"/" 근막"을 붙이지 않고 이름만 (대표 요청)
 const VALID_DBS = () =>
-  (process.env.NOTION_VALID_DBS || "fcb46121f765830ea8d501a3a6eb51ee,32946121f765801a8bf9c58f847716c9")
+  (process.env.NOTION_VALID_DBS || "fcb46121f765830ea8d501a3a6eb51ee,32946121f765801a8bf9c58f847716c9,30546121f76580d89603e1f561b188a3:현승민:plain")
     .split(",")
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((s) => {
+      const [id, group, flag] = s.split(":");
+      return { id: id.trim(), group: group?.trim() || undefined, plain: flag?.trim() === "plain" };
+    });
+
+/** 한 줄에 여러 명("김선우/송경아", "강혜정 고희영")이면 각자 이름으로 */
+function splitNames(raw: string): string[] {
+  const base = raw.replace(/\(.*?\)/g, "").replace(/(회원님|회원|님)\s*$/, "").trim();
+  const parts = base.split(/[\/,·\s]+/).map((x) => normName(x)).filter(Boolean);
+  if (parts.length > 1 && parts.every((x) => /^[가-힣]{2,4}$/.test(x))) return parts;
+  const one = normName(raw);
+  return one ? [one] : [];
+}
+
 const PUBLIC_SITE = () => process.env.NOTION_PUBLIC_SITE || "https://tabby-character-dd3.notion.site";
 
 const DEMO: ValidMember[] = [
@@ -45,8 +62,11 @@ export async function validMembers(): Promise<ValidMember[] | null> {
   if (cache && Date.now() - cache.at < 5 * 60_000) return cache.list;
   try {
     const list: ValidMember[] = [];
-    for (const db of VALID_DBS()) {
+    let okDbs = 0;
+    for (const { id: db, group: dbGroup, plain } of VALID_DBS()) {
       let cursor: string | undefined;
+      // DB 하나가 연결 안 돼 있어도 나머지는 읽는다
+      try {
       do {
         const r = await notion<{ results: Page[]; has_more: boolean; next_cursor: string | null }>(`/databases/${db}/query`, {
           method: "POST",
@@ -54,10 +74,11 @@ export async function validMembers(): Promise<ValidMember[] | null> {
         });
         for (const p of r.results) {
           const title = Object.values(p.properties).find((x) => x.type === "title");
-          const name = normName(plainText(title));
-          if (!name) continue;
+          const rawTitle = plainText(title);
+          const names = splitNames(rawTitle);
+          if (!names.length || rawTitle.includes("복사용")) continue;
           const sel = Object.entries(p.properties).find(([k, x]) => k.includes("담당") && x.type === "select")?.[1];
-          const group = sel ? ((sel.select as { name?: string } | null)?.name ?? "") : "금액권";
+          const group = sel ? ((sel.select as { name?: string } | null)?.name ?? "") : dbGroup ?? "금액권";
           const id = p.id.replace(/-/g, "");
           const shareProp = Object.entries(p.properties).find(([k]) => k.includes("공유자"))?.[1];
           // 횟수권 공유: '메모' 칸에 "공유: 김은수3509, 현재상1209"처럼 '공유' 뒤에 적은 이름+뒷번호 (2026-11-13)
@@ -70,13 +91,18 @@ export async function validMembers(): Promise<ValidMember[] | null> {
           const tm = !sel ? memoText.match(/담당\s*(?:선생님)?\s*[:：]?\s*([가-힣]{2,4})/) : null;
           const trainer = tm && trainerNames.includes(tm[1]) ? tm[1] : undefined;
           // 한 줄에 "김선우/송경아"처럼 여러 명을 적은 회원권(가족 등)은 각자 이름으로 로그인·예약되게 나눔 (2026-11-23)
-          for (const one of name.split("/").map((x) => normName(x)).filter(Boolean)) {
-            list.push({ id, name: one, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}), ...(trainer ? { trainer } : {}) });
+          for (const one of names) {
+            list.push({ id, name: one, group: group || "미지정", url: p.public_url || `${PUBLIC_SITE()}/${id}`, ...(sharers.length ? { sharers } : {}), ...(trainer ? { trainer } : {}), ...(plain ? { plain } : {}) });
           }
         }
         cursor = r.has_more ? r.next_cursor ?? undefined : undefined;
       } while (cursor);
+      okDbs++;
+      } catch (e) {
+        console.error("validMembers db", db, e);
+      }
     }
+    if (!okDbs) throw new Error("no member db readable");
     cache = { at: Date.now(), list };
     return list;
   } catch (e) {
