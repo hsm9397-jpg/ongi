@@ -188,7 +188,7 @@ export const BRANCHES: Branch[] = [
       // 송효재 (2026-11-10 대표, 시작 기준): 월화수금 10~20시, 목 10~12시, 토 10~15시 타임, 일 휴무
       { id: "shj", name: "송효재", calendarEnv: "CAL_SONGHYOJAE", week: { 1: [10, 20], 2: [10, 20], 3: [10, 20], 4: [10, 12], 5: [10, 20], 6: [10, 15] } },
       { id: "ljm", name: "이정민", calendarEnv: "CAL_LEEJUNGMIN", selfBook: true },
-      { id: "hjs", name: "허재성", calendarEnv: "CAL_HEOJAESEONG" },
+      { id: "hjs", name: "허재성", calendarEnv: "CAL_HEOJAESEONG", week: { 1: [10, 21], 2: [10, 21], 3: [10, 21], 4: [10, 21], 5: [10, 21], 6: [10, 20] } },
     ],
     memberDbEnv: "NOTION_MEMBER_DB_SL",
     firstHour: 10,
